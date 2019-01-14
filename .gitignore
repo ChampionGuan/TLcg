@@ -1,0 +1,9 @@
+TLcg/Library/*
+TLcg/Temp/*
+/*.sln
+/*.csproj
+/.vs
+/*.DS_Store
+/.vscode
+/*.userprefs
+/*.user
