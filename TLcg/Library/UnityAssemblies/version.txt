@@ -1,0 +1,2 @@
+2017.4.12f1:2.8.2.0
+StandaloneWindows64
