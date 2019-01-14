@@ -7,3 +7,6 @@ TLcg/Temp/*
 /.vscode
 /*.userprefs
 /*.user
+TLcg/TLcg.sln
+TLcg/TLcg.csproj
+TLcg/TLcg.Editor.csproj
