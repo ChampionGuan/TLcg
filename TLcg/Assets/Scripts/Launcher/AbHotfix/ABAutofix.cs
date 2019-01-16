@@ -6,7 +6,7 @@ using System;
 
 namespace LCG
 {
-    public class ABAutofix : SingletonMonobehaviour<ABAutofix>
+    public class ABAutofix : Singleton<ABAutofix>
     {
         // 处理进度
         private Action<ABHelper.VersionArgs> onHandleState;
@@ -20,20 +20,20 @@ namespace LCG
         private List<string> versionFileName = null;
         // 下载文件大小
         private long downloadSize = 0;
-        // 是否为重度修复
-        private bool isSevereFix = false;
-        void OnDestroy()
+        // 是否为深度修复
+        private bool isDeepFix = false;
+
+        public void CustomDestroy()
         {
             onHandleState = null;
             ABDownload.Instance.PauseDownload();
         }
-
         // severeFix：重度修复
         // handleState：处理句柄
-        public void Autofix(bool isSevere, Action<ABHelper.VersionArgs> handleState)
+        public void Repair(bool isDeep, Action<ABHelper.VersionArgs> handleState)
         {
             // 保存修复类型
-            isSevereFix = isSevere;
+            isDeepFix = isDeep;
             // 处理状态
             onHandleState = handleState;
             // 客户端版本
@@ -52,7 +52,7 @@ namespace LCG
                     onHandleState(new ABHelper.VersionArgs(ABHelper.EVersionState.Unreachable));
                     return;
                 }
-                StartCoroutine(DownloadVersion());
+                LauncherEngine.Instance.StartCoroutine(DownloadVersion());
             }
         }
         private IEnumerator DownloadVersion()
@@ -74,7 +74,7 @@ namespace LCG
             ABVersion.CurVersionInfo.ParseVersionList();
 
             // 异步读取异常文件
-            StartCoroutine(GetExceptionList());
+            LauncherEngine.Instance.StartCoroutine(GetExceptionList());
         }
         private IEnumerator GetExceptionList()
         {
@@ -257,7 +257,7 @@ namespace LCG
             onHandleState(new ABHelper.VersionArgs(ABHelper.EVersionState.ABInit));
 
             // Debug.Log("修复完成，下面进行ab初始化！！");
-            StartCoroutine(ABLoad.Instance.Init(() =>
+            LauncherEngine.Instance.StartCoroutine(ABLoad.Instance.Init(() =>
             {
                 onHandleState(new ABHelper.VersionArgs(ABHelper.EVersionState.AutofixComplete));
             }));
@@ -268,16 +268,16 @@ namespace LCG
             {
                 deleteFiles = new List<string>();
                 deleteDirectorys = new List<string>();
-                if (!isSevereFix)
+                if (!isDeepFix)
                 {
                     CollectRedundantDirectorys();
-                    StartCoroutine(DeleteRedundantInfo());
+                    LauncherEngine.Instance.StartCoroutine(DeleteRedundantInfo());
                 }
                 else
                 {
                     CollectRedundantDirectorys();
                     CollectRedundantFiles();
-                    StartCoroutine(DeleteRedundantInfo());
+                    LauncherEngine.Instance.StartCoroutine(DeleteRedundantInfo());
                 }
             }
             else

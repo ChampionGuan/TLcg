@@ -1,5 +1,6 @@
 TLcg/Library/*
 TLcg/Temp/*
+TLcg/.vs
 /*.sln
 /*.csproj
 /.vs
@@ -10,3 +11,5 @@ TLcg/Temp/*
 TLcg/TLcg.sln
 TLcg/TLcg.csproj
 TLcg/TLcg.Editor.csproj
+TLcg/Assets/3rdLibs/XLua/Gen/*
+TLcg/Assets/3rdLibs/XLua/Gen.meta

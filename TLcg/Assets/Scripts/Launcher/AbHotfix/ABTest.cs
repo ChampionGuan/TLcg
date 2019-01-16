@@ -12,7 +12,7 @@ namespace LCG
         {
             DontDestroyOnLoad(gameObject);
             Debug.Log(ABHelper.AppTempCachePath);
-            ABCheck.Instance.InitHotter(() =>
+            ABCheck.Instance.Initialize(() =>
             {
                 // 搭建本地http服，使用hfs.exe测试
                 ABCheck.Instance.CheckHotter("0.0.1.3", null, "http://192.168.1.110:100/ab_TAccumulation/", Complete);
@@ -95,7 +95,7 @@ namespace LCG
             // 自动检测
             if (Input.GetKeyDown(KeyCode.P))
             {
-                ABAutofix.Instance.Autofix(true, Complete);
+                ABAutofix.Instance.Repair(true, Complete);
             }
         }
     }

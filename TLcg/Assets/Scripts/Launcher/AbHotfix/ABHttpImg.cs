@@ -6,14 +6,14 @@ using System;
 
 namespace LCG
 {
-    public class ABHttpImg : SingletonMonobehaviour<ABHttpImg>
+    public class ABHttpImg : Singleton<ABHttpImg>
     {
         public static string LocalStorgePath
         {
             get; private set;
         }
 
-        void Awake()
+        public override void OnInstance()
         {
             LocalStorgePath = Application.temporaryCachePath + "/image/";
         }
@@ -27,17 +27,17 @@ namespace LCG
 
             if (!File.Exists(LocalStorgePath + url.GetHashCode()))
             {
-                StartCoroutine(DownloadImage(url, callback));
+                LauncherEngine.Instance.StartCoroutine(DownloadImage(url, callback));
             }
             else
             {
-                StartCoroutine(LoadLocalImage(url, callback));
+                LauncherEngine.Instance.StartCoroutine(LoadLocalImage(url, callback));
             }
         }
 
         public void Clear()
         {
-            StartCoroutine(ClearImage());
+            LauncherEngine.Instance.StartCoroutine(ClearImage());
         }
 
         private IEnumerator LoadLocalImage(string url, Action<string, Texture2D> callback)

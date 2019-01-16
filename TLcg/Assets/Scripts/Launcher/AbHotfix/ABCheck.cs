@@ -6,7 +6,7 @@ using System;
 
 namespace LCG
 {
-    public class ABCheck : SingletonMonobehaviour<ABCheck>
+    public class ABCheck : Singleton<ABCheck>
     {
         // id3rd
         private int id3rd;
@@ -15,7 +15,7 @@ namespace LCG
         // 处理进度
         private Action<ABHelper.VersionArgs> onHandleState;
 
-        void FixedUpdate()
+        public void CustomFixedUpdate()
         {
             for (int i = 0; i < waitInvoke.Count; i++)
             {
@@ -23,7 +23,7 @@ namespace LCG
             }
             waitInvoke.Clear();
         }
-        void OnDestroy()
+        public void CustomDestroy()
         {
             onHandleState = null;
             ABDownload.Instance.PauseDownload();
@@ -35,10 +35,10 @@ namespace LCG
                 waitInvoke.Add(action);
             }
         }
-        public void InitHotter(System.Action callback)
+        public void Initialize(System.Action callback)
         {
             ABVersion.InitABVersion();
-            StartCoroutine(ABLoad.Instance.Init(callback));
+            LauncherEngine.Instance.StartCoroutine(ABLoad.Instance.Init(callback));
         }
         // versionId：资源版号
         // sresNumUrl：如果上值为空，则远端获取资源版号
@@ -50,6 +50,8 @@ namespace LCG
             onHandleState = handleState;
             // 资源远端地址
             ABVersion.RemoteUrlPrefix = resRemoteUrl;
+            // 客户端初始版号
+            onHandleState(new ABHelper.VersionArgs(ABHelper.EVersionState.OriginalVersionId, ABVersion.OriginalVersionId.Id));
             // 客户端版本
             onHandleState(new ABHelper.VersionArgs(ABHelper.EVersionState.ClientVersionId, ABVersion.CurVersionId.Id));
             // 检测本地资源
@@ -57,7 +59,7 @@ namespace LCG
 
             if (!string.IsNullOrEmpty(versionId))
             {
-                StartCoroutine(CheckHotter(versionId));
+                LauncherEngine.Instance.StartCoroutine(CheckHotter(versionId));
             }
             else
             {
@@ -69,11 +71,16 @@ namespace LCG
                 }
 
                 // 请求服务器版号
-                StartCoroutine(HttpReceiver(versionIdUrl, (str) =>
+                LauncherEngine.Instance.StartCoroutine(HttpReceiver(versionIdUrl, (str) =>
                 {
                     onHandleState(new ABHelper.VersionArgs(ABHelper.EVersionState.AckServerVersionId, str, (versionId2) =>
                     {
-                        StartCoroutine(CheckHotter(versionId2));
+                        // 1.1.1.1 https://male7client-1256076575.cos.ap-guangzhou.myqcloud.com/male7ab
+                        string[] res = versionId2.Split(' ');
+                        // 资源远端地址
+                        ABVersion.RemoteUrlPrefix = res[1];
+                        // 检测热更
+                        LauncherEngine.Instance.StartCoroutine(CheckHotter(res[0]));
                     }));
                 }, (str) =>
                 {
@@ -240,7 +247,7 @@ namespace LCG
                 // 客户端最新版本
                 HotterVersionNum();
                 // 开始热更
-                StartCoroutine(ShowDownloadInfo());
+                LauncherEngine.Instance.StartCoroutine(ShowDownloadInfo());
                 yield break;
             }
 
@@ -327,7 +334,7 @@ namespace LCG
             onHandleState(new ABHelper.VersionArgs(ABHelper.EVersionState.ServerVersionId, ABVersion.CurVersionId.Id));
 
             // Debug.Log("热更完成，下面进行ab初始化！！");
-            StartCoroutine(ABLoad.Instance.Init(() =>
+            LauncherEngine.Instance.StartCoroutine(ABLoad.Instance.Init(() =>
             {
                 onHandleState(new ABHelper.VersionArgs(ABHelper.EVersionState.HotfixComplete));
             }));

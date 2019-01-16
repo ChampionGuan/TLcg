@@ -143,7 +143,7 @@ namespace LCG
             }
         }
     }
-    public class ABLoad : SingletonMonobehaviour<ABLoad>
+    public class ABLoad : Singleton<ABLoad>
     {
         public Dictionary<string, List<string>> ABManifest
         {
@@ -169,7 +169,7 @@ namespace LCG
                 ABReferenceMap = new Dictionary<string, ABReference>();
             }
             // 加载清单文件
-            yield return StartCoroutine(LoadManifest());
+            yield return LauncherEngine.Instance.StartCoroutine(LoadManifest());
             // 初始化完成，可进行后续操作
             if (null != finish)
             {
@@ -298,7 +298,7 @@ namespace LCG
             ABReference abRef = ABReferenceMap[task.AbPath];
             if (!task.IsScene)
             {
-                StartCoroutine(AsyncLoadAsset(abRef, task));
+                LauncherEngine.Instance.StartCoroutine(AsyncLoadAsset(abRef, task));
             }
             else { }
         }
@@ -310,7 +310,7 @@ namespace LCG
                 LoadAssetBundle(task.AbPath);
 
                 ABReference abRef = ABReferenceMap[task.AbPath];
-                StartCoroutine(AsyncLoadAsset(abRef, task));
+                LauncherEngine.Instance.StartCoroutine(AsyncLoadAsset(abRef, task));
             }
             else
             {
