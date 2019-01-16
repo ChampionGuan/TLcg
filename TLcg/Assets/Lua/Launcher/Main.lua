@@ -21,6 +21,7 @@ end
 
 -- 结束
 function Over()
+    print("启动器结束！！")
     OnDestroy()
     LuaHandle.Load("Launcher.CSHotfix")
     CSharp.Main.Instance:StartupGame()
@@ -33,9 +34,7 @@ end
 
 -- 固定更新
 function FixedUpdate()
-    if nil ~= m_abHotfix then
-        m_abHotfix.FixedUpdate()
-    end
+    m_abHotfix.FixedUpdate()
 end
 
 -- 焦点
@@ -48,7 +47,5 @@ end
 
 -- 销毁
 function OnDestroy()
-    if nil ~= m_abHotfix then
-        m_abHotfix.Destroy()
-    end
+    m_abHotfix.Destroy()
 end

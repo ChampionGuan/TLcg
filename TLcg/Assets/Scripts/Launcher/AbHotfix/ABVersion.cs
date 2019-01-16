@@ -257,6 +257,7 @@ namespace LCG
         // 初始化AB
         public static void InitABVersion()
         {
+            Debug.Log(ABHelper.AppTempCachePath);
             // 实例化
             LocalVersionList = new Dictionary<int, VersionInfo>();
             // 需要的文件夹

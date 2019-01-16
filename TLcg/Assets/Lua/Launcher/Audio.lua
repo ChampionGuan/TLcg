@@ -552,6 +552,9 @@ function Audio.Update()
 end
 
 function Audio.Destroy()
+    if nil == m_audioRoot then
+        return
+    end
     CSharp.UObject.Destroy(m_audioRoot)
     LuaHandle.Unload("Game.Config.AudioConfig")
     LuaHandle.Unload("Game.Config.AudioGroupConfig")

@@ -1,6 +1,6 @@
 -- 初始化
 function Initialize(type)
-    print("初始化~~")
+    print("开始游戏！！")
 end
 
 -- 更新

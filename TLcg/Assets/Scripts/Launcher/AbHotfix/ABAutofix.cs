@@ -260,6 +260,7 @@ namespace LCG
             LauncherEngine.Instance.StartCoroutine(ABLoad.Instance.Init(() =>
             {
                 onHandleState(new ABHelper.VersionArgs(ABHelper.EVersionState.AutofixComplete));
+                onHandleState = null;
             }));
         }
         private void FixResult(bool result, string error = null)
@@ -285,6 +286,7 @@ namespace LCG
                 // Debug.Log("资源更新异常！！" + error);
                 // todo 异常，弹框再试一次，或者退出app
                 onHandleState(new ABHelper.VersionArgs(ABHelper.EVersionState.UnknowError, error));
+                onHandleState = null;
             }
         }
         private ABHelper.VersionArgs checkFileProcess = new ABHelper.VersionArgs(ABHelper.EVersionState.CheckFileProgress);

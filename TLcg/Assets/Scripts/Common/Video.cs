@@ -99,14 +99,38 @@ namespace LCG
         {
             m_root.SetActive(value);
         }
-        
+
         public void Release()
         {
-            m_videoPlayer.clip = null;
-            // 释放掉RenderImage占用的硬件资源
-            m_videoPlayer.targetTexture.Release();
-            // 释放掉缓存的视频
-            m_videoClips.Clear();
+            if (null != m_videoPlayer)
+            {
+                m_videoPlayer.clip = null;
+                // 释放掉RenderImage占用的硬件资源
+                m_videoPlayer.targetTexture.Release();
+            }
+            if (null != m_videoClips)
+            {
+                // 释放掉缓存的视频
+                m_videoClips.Clear();
+            }
+        }
+
+        public void CustomDestroy()
+        {
+            Release();
+            OverCallback = null;
+            PreparedCallback = null;
+            if (null != m_videoPlayer)
+            {
+                m_videoPlayer.loopPointReached -= LoopPointReached;
+                m_videoPlayer.prepareCompleted -= PrepareCompleted;
+            }
+            if (null != m_root)
+            {
+                GameObject.Destroy(m_root);
+            }
+            m_videoPlayer = null;
+            m_audioSource = null;
         }
 
         private void LoopPointReached(VideoPlayer vp)
@@ -132,18 +156,6 @@ namespace LCG
             {
                 action.Invoke();
             }
-        }
-
-
-        private void OnDestroy()
-        {
-            Release();
-            m_videoPlayer.loopPointReached -= LoopPointReached;
-            m_videoPlayer.prepareCompleted -= PrepareCompleted;
-            m_videoPlayer = null;
-            m_audioSource = null;
-            OverCallback = null;
-            PreparedCallback = null;
         }
     }
 }

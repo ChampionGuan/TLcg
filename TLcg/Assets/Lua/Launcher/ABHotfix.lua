@@ -235,6 +235,7 @@ local function HotfixHandle(value)
         else
             value.callBack(Common.LoginInfo.ResVersion .. " " .. Common.LoginInfo.HotAddr)
         end
+        -- value.callBack( "0.0.1.0" .. " " .. "http://192.168.1.110:100/ab_TAccumulation/" )
         return
     end
 
@@ -341,7 +342,7 @@ local function HotfixHandle(value)
         m_mainUI.Desc.text = Tips.Hotter_2
         -- 如果检测到上次未完成重度修复，则继续
         if PlayerPrefs.GetAutoDeepfix() then
-            ABHotfix.Autofix(true, m_hotfixComplete)
+            ABHotfix.Repair(true, m_hotfixComplete)
         else
             CSharp.Main.Instance:StartCoroutine(
                 XluaUtils.cs_generator(

@@ -2,18 +2,19 @@
 
 namespace LCG
 {
-    public class Main : SingletonMonobehaviour<Main>
+    public class Main : MonoBehaviour
     {
+        public static Main Instance = null;
         public Define.EMode Mode { get; private set; }
 
         void Awake()
         {
-            if (null != _instance)
+            if (null != Instance)
             {
                 Destroy(gameObject);
                 return;
             }
-            _instance = this;
+            Instance = this;
             StartupLauncher(Define.ELauncher.Initialize);
         }
 
