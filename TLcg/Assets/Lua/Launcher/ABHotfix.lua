@@ -14,7 +14,7 @@ local function QuitApp()
     CSharp.Application.Quit()
 end
 
-function InitializeUI()
+local function InitializeUI()
     -- 分辨率
     CSharp.GRoot.inst:SetContentScaleFactor(Common.UIResolution.x, Common.UIResolution.y)
 
@@ -27,7 +27,7 @@ function InitializeUI()
     uiCamera.allowHDR = false
 end
 
-function CreatUI(path, fileName, panelName)
+local function CreatUI(path, fileName, panelName)
     -- 包引入
     CSharp.ABManager.LoadUI(path)
     -- 创建UI
