@@ -2,6 +2,13 @@
 {
     public static class Define
     {
+        public interface IMonoBase
+        {
+            void CustomUpdate();
+            void CustomFixedUpdate();
+            void CustomDestroy();
+            void CustomAppFocus(bool focus);
+        }
         public enum ELauncher
         {
             None = 0,

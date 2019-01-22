@@ -29,7 +29,7 @@ end
 
 local function CreatUI(path, fileName, panelName)
     -- 包引入
-    CSharp.ABManager.LoadUI(path)
+    CSharp.ResourceLoader.LoadUI(path)
     -- 创建UI
     local ui = CSharp.UIPackage.CreateObject(fileName, panelName).asCom
     CSharp.GRoot.inst:AddChild(ui)
@@ -230,12 +230,14 @@ local function HotfixHandle(value)
         Common.LoginInfo.LoginMode = decode.LoginMode
 
         -- 此服需要的版号
-        if not CSharp.ABHelper.VersionNumMatch(Common.LoginInfo.ResVersion) then
-            value.callBack(Common.Version.OriginalResVersion .. " " .. Common.LoginInfo.HotAddr)
-        else
-            value.callBack(Common.LoginInfo.ResVersion .. " " .. Common.LoginInfo.HotAddr)
-        end
-        -- value.callBack( "0.0.1.0" .. " " .. "http://192.168.1.110:100/ab_TAccumulation/" )
+        -- if not CSharp.ABHelper.VersionNumMatch(Common.LoginInfo.ResVersion) then
+        --     value.callBack(Common.Version.OriginalResVersion .. " " .. Common.LoginInfo.HotAddr)
+        -- else
+        --     value.callBack(Common.LoginInfo.ResVersion .. " " .. Common.LoginInfo.HotAddr)
+        -- end
+
+        -- 测试用，搭建本地http服，使用hfs.exe测试
+        value.callBack("0.0.3.0" .. " " .. "http://192.168.1.110:100/ab_TAccumulation/")
         return
     end
 

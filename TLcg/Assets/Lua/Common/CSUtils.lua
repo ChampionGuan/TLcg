@@ -64,10 +64,12 @@ CSharp.Main = CS.LCG.Main
 CSharp.LauncherEngine = CS.LCG.LauncherEngine
 CSharp.GameEngine = CS.LCG.GameEngine
 CSharp.PlayerPrefs = CS.LCG.PlayerPrefs
-CSharp.ABManager = CS.LCG.ABManager
+CSharp.ResourceLoader = CS.LCG.ResourceLoader
 CSharp.ABHelper = CS.LCG.ABHelper
 CSharp.EVersionState = CSharp.ABHelper.EVersionState
 CSharp.Utils = CS.LCG.Utils
 CSharp.Video = CS.LCG.Video
-
-
+CSharp.BlurEffect = CS.LCG.BlurEffect
+CSharp.Network = CS.LCG.Network
+CSharp.Http = CS.LCG.Http
+CSharp.SceneLoader = CS.LCG.SceneLoader

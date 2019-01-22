@@ -1,8 +1,9 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace LCG
 {
-    public class LuaEnv : Singleton<LCG.LuaEnv>
+    public class LuaEnv : Singleton<LCG.LuaEnv>, Define.IMonoBase
     {
         private XLua.LuaEnv m_luaVM;
         private float m_lastGCTime = 0;
@@ -11,15 +12,10 @@ namespace LCG
         public override void OnInstance()
         {
             m_luaVM = new XLua.LuaEnv();
-            m_luaVM.AddLoader(CustomLoader);
+            m_luaVM.AddLoader(ResourceLoader.LoadLua);
 
             m_luaVM.GcPause = 100;
             m_luaVM.GcStepmul = 5000;
-        }
-
-        private byte[] CustomLoader(ref string fileName)
-        {
-            return ABManager.LoadLua(fileName);
         }
 
         public object[] DoString(string str)
@@ -81,6 +77,14 @@ namespace LCG
             }
         }
 
+        public void CustomFixedUpdate()
+        {
+        }
+
+        public void CustomAppFocus(bool focus)
+        {
+        }
+
         public void CustomDestroy()
         {
             if (null == m_luaVM)
@@ -93,5 +97,6 @@ namespace LCG
 
             Debug.Log("~LuaManager was destroyed!");
         }
+
     }
 }

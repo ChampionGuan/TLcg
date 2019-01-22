@@ -6,7 +6,7 @@ namespace LCG
     {
         public static Main Instance = null;
         public Define.EMode Mode { get; private set; }
-
+        public Transform Target { get; private set; }
         void Awake()
         {
             if (null != Instance)
@@ -15,6 +15,8 @@ namespace LCG
                 return;
             }
             Instance = this;
+            Target = transform;
+            DontDestroyOnLoad(gameObject);
             StartupLauncher(Define.ELauncher.Initialize);
         }
 
@@ -33,6 +35,24 @@ namespace LCG
         {
             Main.Instance.Mode = Define.EMode.Game;
             GameEngine.Instance.Initialize();
+        }
+
+        /// <summary>
+        /// 检测是否需要更新
+        /// </summary>
+        /// <param name="versionId"></param>
+        /// <returns></returns>
+        public bool CheckNeedHotfix(string versionId)
+        {
+            if (ABCheck.Instance.IsNeedGoStore(versionId))
+            {
+                return true;
+            }
+            if (ABCheck.Instance.IsNeedHotter(versionId))
+            {
+                return true;
+            }
+            return false;
         }
     }
 }

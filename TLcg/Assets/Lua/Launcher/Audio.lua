@@ -80,7 +80,7 @@ local AudioSourceInfo = function()
                         t.theFollow = nil
                         t.audioSource:Stop()
                         -- 卸载掉资源
-                        CSharp.ABManager.UnloadAb(t.audioPath)
+                        CSharp.ResourceLoader.UnloadObject(t.audioPath)
                     end
                     frame = frame + 1
                     curValue = curValue - interval
@@ -90,7 +90,7 @@ local AudioSourceInfo = function()
                 self.theFollow = nil
                 self.audioSource:Stop()
                 -- 卸载掉资源
-                CSharp.ABManager.UnloadAb(self.audioPath)
+                CSharp.ResourceLoader.UnloadObject(self.audioPath)
             end
             self.nextAuidoGroupId = nil
         end,
@@ -474,7 +474,7 @@ function Audio.PlaySound(id, insId, state, followTarget)
         asData.audioSource.volume = asData.defaultVolume * audioEffectSwitch * m_effectVolume
     end
 
-    CSharp.ABManager.AsyncLoad(
+    CSharp.ResourceLoader.AsyncLoadObject(
         asData.audioPath,
         audioConfig.name,
         typeof(CSharp.AudioClip),
@@ -504,11 +504,11 @@ function Audio.Initialize()
 
     -- 事件监听
     if nil ~= Event then
-        Event.addListener(Event.EXIT_SCENCE, OnSceneExit)
-        Event.addListener(Event.ENTER_SCENCE, OnSceneEnter)
+        Event.AddListener(Event.EXIT_SCENCE, OnSceneExit)
+        Event.AddListener(Event.ENTER_SCENCE, OnSceneEnter)
     end
 
-    m_audioMixer = CSharp.ABManager.Load("Audio/AudioMixer", "AudioMixer", typeof(CSharp.AudioMixer))
+    m_audioMixer = CSharp.ResourceLoader.LoadObject("Audio/AudioMixer", typeof(CSharp.AudioMixer))
     SetAudioListener(nil)
 
     m_audioInsId = 100

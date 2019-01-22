@@ -63,7 +63,7 @@ namespace LCG
             {
                 for (int i = 0; i < 2; i++)
                 {
-                    UnityEngine.Object obj = ABManager.Load("Prefabs/Monster/Cha_Archer_L1", "Cha_Archer_L1", typeof(GameObject));
+                    UnityEngine.Object obj = ResourceLoader.LoadObject("Prefab/TestCube", typeof(GameObject));
                     Debug.Log(obj);
                     GameObject.Instantiate(obj);
                 }
@@ -72,7 +72,7 @@ namespace LCG
             {
                 for (int i = 0; i < 2; i++)
                 {
-                    ABManager.AsyncLoad("Prefabs/Monster/Cha_Archer_L1", "Cha_Archer_L1", typeof(GameObject),
+                    ResourceLoader.AsyncLoadObject("Prefab/TestCube", typeof(GameObject),
                     (obj) =>
                     {
                         Debug.Log(obj);
@@ -83,14 +83,13 @@ namespace LCG
             }
             if (Input.GetKeyDown(KeyCode.D))
             {
-                ABManager.LoadScene("HotterTest");
+                ResourceLoader.LoadScene("HotterTest");
                 UnityEngine.SceneManagement.SceneManager.LoadScene("HotterTest");
             }
             if (Input.GetKeyDown(KeyCode.Space))
             {
-                ABManager.UnloadAll();
+                ResourceLoader.UnloadAll();
             }
-
 
             // 自动检测
             if (Input.GetKeyDown(KeyCode.P))

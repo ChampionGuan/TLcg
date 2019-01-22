@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Video;
-using XLua;
 
 namespace LCG
 {
@@ -68,7 +67,7 @@ namespace LCG
             }
             if (null == clip)
             {
-                clip = ABManager.Load(videoUrl, videoUrl, typeof(VideoClip)) as VideoClip;
+                clip = ResourceLoader.LoadObject(videoUrl, typeof(VideoClip)) as VideoClip;
                 m_videoClips[videoUrl] = clip;
             }
             m_btnSkip.SetActive(isSkip);

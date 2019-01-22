@@ -1,4 +1,4 @@
-local loadedLua = CS.LCG.ABManager.LoadedLua
+local loadedLua = CS.LCG.ResourceLoader.LoadedLua
 
 -- lua白名单（此名单下脚本不卸载，比如一些公共数据存储）
 local blackLuaList = {

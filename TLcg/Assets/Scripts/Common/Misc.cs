@@ -37,6 +37,7 @@ namespace LCG
                     }
                     _instance = parent.AddComponent<T>();
                     _instance.OnInstance();
+                    DontDestroyOnLoad(parent);
                 }
                 return _instance;
             }

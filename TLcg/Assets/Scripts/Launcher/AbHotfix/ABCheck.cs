@@ -6,7 +6,7 @@ using System;
 
 namespace LCG
 {
-    public class ABCheck : Singleton<ABCheck>
+    public class ABCheck : Singleton<ABCheck>, Define.IMonoBase
     {
         // id3rd
         private int id3rd;
@@ -15,6 +15,9 @@ namespace LCG
         // 处理进度
         private Action<ABHelper.VersionArgs> onHandleState;
 
+        public void CustomUpdate()
+        {
+        }
         public void CustomFixedUpdate()
         {
             for (int i = 0; i < waitInvoke.Count; i++)
@@ -22,6 +25,9 @@ namespace LCG
                 waitInvoke[i]();
             }
             waitInvoke.Clear();
+        }
+        public void CustomAppFocus(bool focus)
+        {
         }
         public void CustomDestroy()
         {
@@ -376,5 +382,6 @@ namespace LCG
             unzipProgress.fValue = p;
             onHandleState(unzipProgress);
         }
+
     }
 }

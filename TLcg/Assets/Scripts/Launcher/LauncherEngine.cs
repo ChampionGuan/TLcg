@@ -38,29 +38,12 @@ namespace LCG
             ABAutofix.Instance.Repair(isDeep, handleState);
         }
 
-        /// <summary>
-        /// 检测是否需要更新
-        /// </summary>
-        /// <param name="versionId"></param>
-        /// <returns></returns>
-        public bool ABCheckNeedHotfix(string versionId)
-        {
-            if (ABCheck.Instance.IsNeedGoStore(versionId))
-            {
-                return true;
-            }
-            if (ABCheck.Instance.IsNeedHotter(versionId))
-            {
-                return true;
-            }
-            return false;
-        }
-
         private void Update()
         {
             if (Main.Instance.Mode == Define.EMode.Launcher)
             {
                 CSharpCallLua.Instance.CustomUpdate();
+                Gameobjects.Instance.CustomUpdate();
                 LuaEnv.Instance.CustomUpdate();
             }
         }
@@ -70,7 +53,9 @@ namespace LCG
             if (Main.Instance.Mode == Define.EMode.Launcher)
             {
                 CSharpCallLua.Instance.CustomFixedUpdate();
+                Gameobjects.Instance.CustomFixedUpdate();
                 ABCheck.Instance.CustomFixedUpdate();
+                LuaEnv.Instance.CustomFixedUpdate();
             }
         }
 
@@ -79,9 +64,12 @@ namespace LCG
             if (Main.Instance.Mode == Define.EMode.Launcher)
             {
                 CSharpCallLua.Instance.CustomDestroy();
+                Gameobjects.Instance.CustomDestroy();
                 ABAutofix.Instance.CustomDestroy();
                 ABCheck.Instance.CustomDestroy();
                 LuaEnv.Instance.CustomDestroy();
+                ResourceLoader.UnloadAll();
+                StopAllCoroutines();
             }
         }
 
@@ -89,7 +77,7 @@ namespace LCG
         {
             if (Main.Instance.Mode == Define.EMode.Launcher)
             {
-                CSharpCallLua.Instance.ApplicationFocus(focus);
+                CSharpCallLua.Instance.CustomAppFocus(focus);
             }
         }
     }

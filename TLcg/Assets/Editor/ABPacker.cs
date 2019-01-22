@@ -198,7 +198,7 @@ namespace LCG
 
         private static bool IsNeedFileRes(string fileName)
         {
-            if (fileName.EndsWith(".prefab") || fileName.EndsWith(".mp3") || fileName.EndsWith(".shader") || fileName.EndsWith(".ttf")
+            if (fileName.EndsWith(".fontsettings") || fileName.EndsWith(".anim") || fileName.EndsWith(".renderTexture") || fileName.EndsWith(".flare") || fileName.EndsWith(".shader") || fileName.EndsWith(".mask") || fileName.EndsWith(".playable") || fileName.EndsWith(".controller") || fileName.EndsWith(".mixer") || fileName.EndsWith(".prefab") || fileName.EndsWith(".mp3") || fileName.EndsWith(".mp4") ||fileName.EndsWith(".shader") || fileName.EndsWith(".ttf")
                 || fileName.EndsWith(".bytes") || fileName.EndsWith(".png") || fileName.EndsWith(".jpg") || fileName.EndsWith(".txt"))
             {
                 return true;

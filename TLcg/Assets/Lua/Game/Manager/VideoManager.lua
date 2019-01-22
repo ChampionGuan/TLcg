@@ -1,0 +1,1 @@
+VideoManager = LuaHandle.Load("Game.Manager.IManager")()

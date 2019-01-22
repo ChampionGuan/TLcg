@@ -99,10 +99,13 @@ namespace LCG
                 typeof(LauncherEngine),
                 typeof(GameEngine),
                 typeof(PlayerPrefs),
-                typeof(ABManager),
                 typeof(ABHelper),
                 typeof(ABHelper.EVersionState),
                 typeof(Utils),
+                typeof(Network),
+                typeof(Http),
+                typeof(SceneLoader),
+                typeof(ResourceLoader)
 #endregion
             };
 

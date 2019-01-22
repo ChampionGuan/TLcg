@@ -1,5 +1,5 @@
-require "Common.Common"
 require "Common.LuaHandle"
+LuaHandle.Load("Common.Common")
 
 -- 更新检测
 local m_abHotfix = nil

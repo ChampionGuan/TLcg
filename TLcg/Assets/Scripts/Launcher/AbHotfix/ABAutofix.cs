@@ -6,7 +6,7 @@ using System;
 
 namespace LCG
 {
-    public class ABAutofix : Singleton<ABAutofix>
+    public class ABAutofix : Singleton<ABAutofix>, Define.IMonoBase
     {
         // 处理进度
         private Action<ABHelper.VersionArgs> onHandleState;
@@ -22,7 +22,15 @@ namespace LCG
         private long downloadSize = 0;
         // 是否为深度修复
         private bool isDeepFix = false;
-
+        public void CustomUpdate()
+        {
+        }
+        public void CustomFixedUpdate()
+        {
+        }
+        public void CustomAppFocus(bool focus)
+        {
+        }
         public void CustomDestroy()
         {
             onHandleState = null;

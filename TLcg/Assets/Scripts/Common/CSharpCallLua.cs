@@ -2,7 +2,7 @@
 
 namespace LCG
 {
-    public class CSharpCallLua : Singleton<CSharpCallLua>
+    public class CSharpCallLua : Singleton<CSharpCallLua>, Define.IMonoBase
     {
         private Action<int> m_actionInitialize;
         private Action m_actionUpdate;
@@ -64,7 +64,7 @@ namespace LCG
             m_actionReceiveMsg = null;
         }
 
-        public void ApplicationFocus(bool hasFocus)
+        public void CustomAppFocus(bool hasFocus)
         {
             if (null != m_actionAppliationFocus)
             {
