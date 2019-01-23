@@ -60,7 +60,7 @@ end
 
 -- 收到消息
 function OnReceiveMsg(msg)
-    NetwrokManager.OnReceiveMsg(msg)
+    NetwrokManager.ReceiveMsg(msg)
 end
 
 -- 销毁

@@ -1,5 +1,21 @@
 UIUtils = {}
 
+-- 加载ui资源
+function UIUtils.LoadUI(path)
+    if nil == path then
+        return
+    end
+    CSharp.ResourceLoader.LoadUI(path)
+end
+
+-- 卸载ui资源
+function UIUtils.UnloadUI(path)
+    if nil == path then
+        return
+    end
+    CSharp.ResourceLoader.UnloadUI(path, true)
+end
+
 -- 生成界面
 -- <param name="path" type="string">路径</param>
 -- <param name="fileName" type="string">package文件名</param>
@@ -10,7 +26,7 @@ function UIUtils.SpawnUICom(path, fileName, panelName, isFullScreen)
         return nil
     end
 
-    CSharp.ResourceLoader.LoadUI(path)
+    UIUtils.LoadUI(path)
     local ui = CSharp.UIPackage.CreateObject(fileName, panelName).asCom
     ui = CSharp.GRoot.inst:AddChild(ui)
     ui.visible = false
@@ -30,7 +46,7 @@ function UIUtils.DisposeUICom(path, fileName, target)
     if path == nil or fileName == nil or target == nil then
         return
     end
-    CSharp.ResourceLoader.UnloadUI(path, true)
+    UIUtils.UnloadUI(path)
     CSharp.GRoot.inst:RemoveChild(target, true)
 end
 

@@ -12,17 +12,37 @@ LevelManager.CurLevelConfig = nil
 LevelManager.CurLevelType = nil
 -- 外部传入当前场景数据
 LevelManager.IncomingInfo = nil
+-- 场景加载中
+LevelManager.Loading = false
 
 -- 场景配置
 local levelConfig = nil
 
 local function OnSceneLoadStart()
+    LevelManager.Loading = true
+    if nil ~= LevelManager.CurLevelLogic then
+        LevelManager.CurLevelLogic:ExitScene()
+    end
+    if nil ~= LevelManager.CurLevelConfig and LevelManager.CurLevelConfig.Id ~= LevelManager.TheNextLevelConfig.Id then
+        LevelManager.TheLastLevelConfig = LevelManager.CurLevelConfig
+    end
 end
 
 local function OnSceneLoadUpdate(p)
 end
 
 local function OnSceneLoadComplete()
+    LevelManager.Loading = false
+    LevelManager.CurLevelConfig = LevelManager.NextLevelConfig
+    LevelManager.CurLevelType = LevelManager.CurLevelConfig.Type
+    LevelManager.NextLevelConfig = nil
+
+    if LevelManager.CurLevelConfig.LogicScript ~= nil then
+        LevelManager.CurLevelLogic = LuaHandle.load(LevelManager.CurLevelConfig.LogicScript)
+    end
+    if nil ~= LevelManager.CurLevelLogic then
+        LevelManager.CurLevelLogic:EnterScene()
+    end
 end
 
 -- 初始化
@@ -32,14 +52,25 @@ function LevelManager.Initialize()
     CSharp.SceneLoader.Instance.LoadStart = OnSceneLoadStart
     CSharp.SceneLoader.Instance.LoadUpdate = OnSceneLoadUpdate
     CSharp.SceneLoader.Instance.LoadComplete = OnSceneLoadComplete
+
+    -- 初始时进入启动界面
+    LevelManager.NextLevelConfig = levelConfig[Define.LevelType.Bootup]
+    OnSceneLoadStart()
+    OnSceneLoadComplete()
 end
 
 -- 更新
 function LevelManager.CustomUpdate()
+    if nil ~= LevelManager.CurLevelLogic then
+        LevelManager.CurLevelLogic:Update()
+    end
 end
 
 -- 固定更新
 function LevelManager.CustomFixedUpdate()
+    if nil ~= LevelManager.CurLevelLogic then
+        LevelManager.CurLevelLogic:FixedUpdate()
+    end
 end
 
 -- 销毁
@@ -49,6 +80,30 @@ end
 -- 加载指定场景
 -- <param name="id" type="number">场景id</param>
 -- <param name="info" type="table">外部传入的参数</param>
-function LevelManager.LoadScene(id, info)
-    local nextConfig = levelConfig:getConfigByKey(id)
+function LevelManager.LoadScene(id, ...)
+    if LevelManager.Loading then
+        return
+    end
+    local nextConfig = levelConfig[id]
+    if nil == nextConfig then
+        return
+    end
+
+    LevelManager.IncomingInfo = ...
+    LevelManager.TheNextLevelConfig = nextConfig
+    if nextConfig.Id == LevelManager.CurLevelConfig.Id then
+        OnSceneLoadStart()
+        OnSceneLoadUpdate(100)
+        OnSceneLoadComplete()
+    else
+        CSharp.SceneLoader.Instance:LoadScene(LevelManager.TheNextLevelConfig.SceneName)
+    end
+end
+
+-- 加载上一个场景
+function LevelManager.LoadLastScene(...)
+    if nil == LevelManager.TheLastLevelConfig then
+        return
+    end
+    LevelManager.LoadScene(LevelManager.TheLastLevelConfig.Id, ...)
 end

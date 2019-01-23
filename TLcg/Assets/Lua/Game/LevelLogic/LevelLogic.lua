@@ -9,16 +9,10 @@ local LevelLogic = function()
         self.InsInfo = LevelManager.IncomingInfo
         self:OnEnterScene(callBack)
     end
-    t.SceneReady = function(self)
-        self:OnSceneReady()
-    end
     t.ExitScene = function(self)
         self:OnExitScene()
-    end
-    t.Destroy = function(self)
         self.Config = nil
         self.InsInfo = nil
-        self:OnDestroy()
     end
     t.Update = function(self)
         self:OnUpdate()
@@ -26,8 +20,7 @@ local LevelLogic = function()
     t.FixedUpdate = function(self)
         self:OnFixedUpdate()
     end
-    t.OnSceneReady = function(self)
-    end
+
     t.OnUpdate = function(self)
     end
     t.OnFixedUpdate = function(self)
@@ -35,8 +28,6 @@ local LevelLogic = function()
     t.OnExitScene = function(self)
     end
     t.OnEnterScene = function(self, callBack)
-    end
-    t.OnDestroy = function(self)
     end
 
     return t

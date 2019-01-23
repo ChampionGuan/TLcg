@@ -58,7 +58,7 @@ local function backToLogin()
     -- 在登录界面就不处理了
     if not UIManager.CtrlIsShow(UIConfig.ControllerName.LoginMain) then
         -- 返回登录
-        LevelManager.loadScene(Define.LevelType.Bootup)
+        LevelManager.LoadScene(Define.LevelType.Bootup)
     end
 end
 

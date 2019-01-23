@@ -16,13 +16,13 @@ namespace LCG
         /// <summary>
         /// http错误码
         /// </summary>
-        public enum HttpErrorCode
+        public static class ErrorCode
         {
-            Unknow = 0,
-            Unreachable,
-            ReceiveZero,
-            ReceiveUndone,
-            RequstTimeOut,
+            public static string Unknow = "Unknow";
+            public static string Unreachable = "Unreachable";
+            public static string ReceiveZero = "ReceiveZero";
+            public static string ReceiveUndone = "ReceiveUndone";
+            public static string RequstTimeOut = "RequstTimeOut";
         }
 
         //http方法
@@ -37,7 +37,7 @@ namespace LCG
             // 网络不可达
             if (!Network.Instance.NetAvailable)
             {
-                netErrorCallBack(identification, HttpErrorCode.Unreachable.ToString());
+                netErrorCallBack(identification, ErrorCode.Unreachable);
                 return;
             }
             // 开启线程
@@ -65,7 +65,7 @@ namespace LCG
             // 网络不可达
             if (!Network.Instance.NetAvailable)
             {
-                netErrorCallBack(identification, HttpErrorCode.Unreachable.ToString());
+                netErrorCallBack(identification, ErrorCode.Unreachable);
                 return;
             }
             // 开启线程
@@ -95,7 +95,7 @@ namespace LCG
                     // 连接超时
                     if (e.Message == "The request timed out")
                     {
-                        m_httpActions.Add(() => { netErrorCallBack(identification, HttpErrorCode.RequstTimeOut.ToString()); });
+                        m_httpActions.Add(() => { netErrorCallBack(identification, ErrorCode.RequstTimeOut); });
                     }
                     else
                     {
@@ -139,7 +139,7 @@ namespace LCG
                 int bufferLength = (int)response.ContentLength;
                 if (bufferLength <= 0)
                 {
-                    throw new Exception(HttpErrorCode.ReceiveZero.ToString());
+                    throw new Exception(ErrorCode.ReceiveZero);
                 }
 
                 long totalSize = bufferLength;
@@ -164,7 +164,7 @@ namespace LCG
                 // 更新过程中网络断开，不会抛出异常，需要手动抛出异常
                 if (readPointer != totalSize)
                 {
-                    throw new Exception(HttpErrorCode.ReceiveUndone.ToString());
+                    throw new Exception(ErrorCode.ReceiveUndone);
                 }
             }
             catch (Exception e)
@@ -173,7 +173,7 @@ namespace LCG
                 // 连接超时
                 if (e.Message == "The request timed out")
                 {
-                    m_httpActions.Add(() => { netErrorCallBack(identification, HttpErrorCode.RequstTimeOut.ToString()); });
+                    m_httpActions.Add(() => { netErrorCallBack(identification, ErrorCode.RequstTimeOut); });
                 }
                 else if (e.Message == "receiveZero" || e.Message == "receiveUndone")
                 {
@@ -249,7 +249,7 @@ namespace LCG
         {
             if (!Network.Instance.NetAvailable)
             {
-                otherErrorCallBack(HttpErrorCode.Unreachable.ToString());
+                otherErrorCallBack(ErrorCode.Unreachable);
                 return;
             }
             GameEngine.Instance.StartCoroutine(HttpReceiver(url, succeedCallBack, netErrorCallBack, otherErrorCallBack));
@@ -262,7 +262,7 @@ namespace LCG
         {
             if (!Network.Instance.NetAvailable)
             {
-                otherErrorCallBack(HttpErrorCode.Unreachable.ToString());
+                otherErrorCallBack(ErrorCode.Unreachable);
                 return;
             }
             byte[] form = System.Text.Encoding.ASCII.GetBytes(from);
@@ -305,7 +305,7 @@ namespace LCG
 #endif
                     if (receiver.text == "")
                     {
-                        otherErrorCallBack(HttpErrorCode.ReceiveZero.ToString());
+                        otherErrorCallBack(ErrorCode.ReceiveZero);
                     }
                     else
                     {
@@ -316,7 +316,7 @@ namespace LCG
                 // 500帧延时
                 if (time >= 500)
                 {
-                    otherErrorCallBack(HttpErrorCode.RequstTimeOut.ToString());
+                    otherErrorCallBack(ErrorCode.RequstTimeOut);
                     break;
                 }
 

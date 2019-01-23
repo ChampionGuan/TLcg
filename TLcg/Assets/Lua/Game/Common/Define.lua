@@ -2,9 +2,9 @@ Define = {}
 
 -- 场景类型
 Define.LevelType = {
-    Bootup = "Bootup",
-    MainCity = "MainCity",
-    Battle = "Battle",
+    Bootup = 1,
+    MainCity = 2,
+    Battle = 3,
 }
 
 -- sync类型

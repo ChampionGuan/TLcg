@@ -104,6 +104,7 @@ namespace LCG
                 typeof(Utils),
                 typeof(Network),
                 typeof(Http),
+                typeof(Http.ErrorCode),
                 typeof(SceneLoader),
                 typeof(ResourceLoader)
 #endregion
