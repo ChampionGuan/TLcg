@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component size="1334,750" designImage="ui://cey8mwyyok1g49" designImageAlpha="0" designImageLayer="1" adaptationTest="FitSize">
+  <controller name="Logic_C" pages="0,内网登录,1,内网开始" selected="1">
+    <action type="change_page" fromPage="" toPage="0" objectId="n37_qk7o" controller="State_C" targetPage="0"/>
+    <action type="change_page" fromPage="" toPage="2" objectId="n37_qk7o" controller="State_C" targetPage="2"/>
+    <action type="change_page" fromPage="" toPage="1" objectId="n37_qk7o" controller="State_C" targetPage="1"/>
+    <action type="change_page" fromPage="" toPage="4" objectId="n37_qk7o" controller="State_C" targetPage="4"/>
+    <action type="change_page" fromPage="" toPage="5" objectId="n37_qk7o" controller="State_C" targetPage="5"/>
+    <action type="change_page" fromPage="" toPage="6" objectId="n37_qk7o" controller="State_C" targetPage="6"/>
+    <action type="change_page" fromPage="" toPage="7" objectId="n37_qk7o" controller="State_C" targetPage="7"/>
+  </controller>
+  <displayList>
+    <graph id="n88_cmz8" name="Bg_1" xy="431,242" size="453,76" group="n94_cmz8" type="rect" fillColor="#ff999999"/>
+    <graph id="n89_cmz8" name="Bg_2" xy="431,324" size="453,76" group="n94_cmz8" type="rect" fillColor="#ff999999"/>
+    <text id="n90_cmz8" name="Text_Account" xy="510,259" pivot="0.5,0.5" size="333,50" group="n94_cmz8" input="true" prompt="点击输入账号" fontSize="24" color="#ffffff" vAlign="middle" ubb="true" autoSize="shrink" shadowColor="#000000" shadowOffset="1,1" singleLine="true" text=""/>
+    <text id="n91_cmz8" name="Text_Password" xy="510,342" size="333,50" group="n94_cmz8" input="true" prompt="点击输入密码" password="true" fontSize="24" color="#ffffff" vAlign="middle" ubb="true" autoSize="shrink" shadowColor="#000000" shadowOffset="1,1" singleLine="true" text=""/>
+    <component id="n92_cmz8" name="Button_Register" src="olan3l" fileName="Button/Button_2.xml" xy="343,436" pivot="0.5,0.5" group="n94_cmz8">
+      <Button title="注  册"/>
+    </component>
+    <component id="n93_cmz8" name="Button_Login" src="olan3l" fileName="Button/Button_2.xml" xy="711,436" group="n94_cmz8">
+      <Button title="登  录"/>
+    </component>
+    <group id="n94_cmz8" name="login" xy="343,242" size="642,300" advanced="true">
+      <gearDisplay controller="Logic_C" pages="0"/>
+    </group>
+    <component id="n95_cmz8" name="Button_SwitchServer" src="hqut16" fileName="Button/Button_1.xml" xy="319,299" group="n97_cmz8">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </component>
+    <component id="n29" name="Button_SwitchAccount" src="olan3l" fileName="Button/Button_2.xml" xy="32,41" group="n97_cmz8">
+      <gearDisplay controller="Logic_C" pages="1,5,7"/>
+      <relation target="" sidePair="left-left,top-top"/>
+      <Button title="切换帐号"/>
+    </component>
+    <component id="n84_wqqj" name="Button_Autofix" src="olan3l" fileName="Button/Button_2.xml" xy="32,164" group="n97_cmz8">
+      <gearDisplay controller="Logic_C" pages="1,5,7"/>
+      <relation target="" sidePair="left-left,top-top"/>
+      <Button title="自助修复"/>
+    </component>
+    <component id="n96_cmz8" name="Button_Start" src="olan3l" fileName="Button/Button_2.xml" xy="519,413" pivot="0.5,0.5" group="n97_cmz8">
+      <relation target="n95_cmz8" sidePair="center-center,middle-middle"/>
+      <Button title="进入游戏" sound="ui://s5cy5qnp8vxqrb49o3"/>
+    </component>
+    <group id="n97_cmz8" name="start" xy="32,41" size="978,478" advanced="true">
+      <gearDisplay controller="Logic_C" pages="1"/>
+    </group>
+    <graph id="n80_dnw0" name="Bg_1" xy="0,720" size="1334,30" group="n98_cmz8" alpha="0.5" type="rect" lineSize="0" fillColor="#ff999999">
+      <gearDisplay controller="Logic_C" pages="0,2"/>
+      <relation target="" sidePair="width-width,bottom-bottom"/>
+    </graph>
+    <graph id="n68_rc9y" name="Bg_2" xy="0,0" size="25,25" group="n98_cmz8" type="rect" fillColor="#ff999999">
+      <relation target="n4" sidePair="width-width,middle-middle"/>
+    </graph>
+    <text id="n4" name="Text_Version" xy="2,1" size="10,28" group="n98_cmz8" fontSize="20" color="#d7d7d7" vAlign="middle" ubb="true" shadowColor="#000000" shadowOffset="1,1" text="">
+      <relation target="" sidePair="left-left,top-top"/>
+    </text>
+    <text id="n86_ok1g" name="Text_Tips" xy="187,690" size="1005,26" group="n98_cmz8" fontSize="20" color="#b1b1b1" align="center" vAlign="middle" shadowColor="#000000" shadowOffset="1,1" text="本网络游戏适合年满18周岁以上的用户使用；请您确定已如实进行实名注册；为了您的健康，请合理控制游戏时间">
+      <relation target="" sidePair="center-center,bottom-bottom"/>
+    </text>
+    <text id="n79_7vy4" name="Text_Health" xy="77,721" size="1237,29" group="n98_cmz8" fontSize="22" color="#afb5c0" shadowColor="#000000" shadowOffset="1,1" text="抵制不良游戏，拒绝盗版游戏。注意自我保护，谨防受骗上当。适度游戏益脑，沉迷游戏伤身。合理安排时间，享受健康生活。">
+      <relation target="" sidePair="center-center,bottom-bottom"/>
+    </text>
+    <group id="n98_cmz8" name="other" xy="0,0" size="1334,750" collapsed="true"/>
+  </displayList>
+</component>

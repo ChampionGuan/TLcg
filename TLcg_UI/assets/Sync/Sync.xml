@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component size="1334,750">
+  <displayList>
+    <graph id="n2_ege8" name="Bg_1" xy="0,0" size="1334,750" type="rect" lineColor="#80000000" fillColor="#ff999999">
+      <relation target="" sidePair="width-width,height-height"/>
+    </graph>
+    <graph id="n0_azvw" name="Bg_2" xy="617,325" size="100,100" type="rect" fillColor="#ff999999"/>
+    <text id="n1_ege8" name="n1" xy="634,356" size="65,38" fontSize="30" color="#ffffff" align="center" vAlign="middle" text="菊花">
+      <relation target="n0_azvw" sidePair="center-center,middle-middle"/>
+    </text>
+  </displayList>
+</component>

@@ -46,7 +46,7 @@ end
 -- 固定更新
 function TimerManager.CustomFixedUpdate()
     TimerManager.CurTimestamp = TimerManager.CurTimestamp + TimerManager.fixedDeltaTime
-    timeNormalUpdate(TimerManager.fixedDeltaTime)
+    TimerNormalUpdate(TimerManager.fixedDeltaTime)
 end
 
 -- 销毁

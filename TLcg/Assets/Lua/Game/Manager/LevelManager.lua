@@ -20,6 +20,9 @@ local levelConfig = nil
 
 local function OnSceneLoadStart()
     LevelManager.Loading = true
+    if nil ~= LevelManager.CurLevelConfig then
+        UIManager.OpenController(UIConfig.ControllerName.Loading)
+    end
     if nil ~= LevelManager.CurLevelLogic then
         LevelManager.CurLevelLogic:ExitScene()
     end
@@ -29,6 +32,7 @@ local function OnSceneLoadStart()
 end
 
 local function OnSceneLoadUpdate(p)
+    UIManager.UIManager.DispatchEvent(UIConfig.Event.LOADING_P, p)
 end
 
 local function OnSceneLoadComplete()
@@ -38,10 +42,15 @@ local function OnSceneLoadComplete()
     LevelManager.NextLevelConfig = nil
 
     if LevelManager.CurLevelConfig.LogicScript ~= nil then
-        LevelManager.CurLevelLogic = LuaHandle.load(LevelManager.CurLevelConfig.LogicScript)
+        LevelManager.CurLevelLogic = LuaHandle.Load(LevelManager.CurLevelConfig.LogicScript)
     end
     if nil ~= LevelManager.CurLevelLogic then
-        LevelManager.CurLevelLogic:EnterScene()
+        LevelManager.CurLevelLogic:EnterScene(
+            function()
+                -- 进入成功后，关闭loading
+                UIManager.DispatchEvent(UIConfig.Event.LOADING_OK)
+            end
+        )
     end
 end
 

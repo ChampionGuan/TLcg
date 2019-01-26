@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<packageDescription id="nw1utq4n" jpegQuality="80" compressPNG="true">
+  <resources>
+    <component id="ege80" name="Maincity.xml" path="/" exported="true"/>
+    <component id="ege82" name="Button_1.xml" path="/Button/"/>
+  </resources>
+  <publish name="Maincity" path="E:\2_champion\TLcg\TLcg\Assets\Resources\UI\Maincity"/>
+</packageDescription>

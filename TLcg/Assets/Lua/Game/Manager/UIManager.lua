@@ -60,7 +60,7 @@ end
 -- 界面互斥设置
 local function SetUIMutextes(name)
     -- 互斥面板
-    local config = uiMutextesConfig[name]
+    local config = mutexesConfig[name]
     if nil == config then
         return
     end
@@ -255,9 +255,9 @@ function UIManager.DestroyAllCtrl(deep)
 end
 
 -- 发送广播
-function UIManager.SendNtfMessage(ntfType, ...)
+function UIManager.DispatchEvent(ntfType, ...)
     Event.Dispatch(ntfType, ...)
-    ctrlCenter:SendNtfMessage(ntfType, ...)
+    ctrlCenter:DispatchEvent(ntfType, ...)
 end
 
 -- 消息等待

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<packageDescription id="hde75mkf" jpegQuality="80" compressPNG="true">
+  <resources>
+    <component id="e2dj0" name="ServerList.xml" path="/" exported="true"/>
+    <component id="e2dj1" name="Button_2.xml" path="/Button/"/>
+    <image id="ioch6" name="Image_Status_Blue.png" path="/Image/png/" atlas="2"/>
+    <image id="ioch7" name="Image_Status_Green.png" path="/Image/png/" atlas="2"/>
+    <image id="ioch8" name="Image_Status_Yellow.png" path="/Image/png/" atlas="2"/>
+    <image id="ioch9" name="Image_Status_Red.png" path="/Image/png/" atlas="2"/>
+    <image id="iochb" name="Image_Status_White.png" path="/Image/png/" atlas="2"/>
+    <component id="cmz8c" name="Button_1.xml" path="/Button/"/>
+    <component id="cmz8d" name="Button_3.xml" path="/Button/"/>
+  </resources>
+  <publish name="ServerList" path="E:\2_champion\TLcg\TLcg\Assets\Resources\UI\ServerList" maxAtlasSize="1024" square="true" rotation="true" extractAlpha="true">
+    <atlas name="默认" index="0"/>
+  </publish>
+</packageDescription>

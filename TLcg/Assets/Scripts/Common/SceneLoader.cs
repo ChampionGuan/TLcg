@@ -11,7 +11,7 @@ namespace LCG
         {
             private get; set;
         }
-        public Action<float> LoadUpdate
+        public Action<int> LoadUpdate
         {
             private get; set;
         }
@@ -86,7 +86,7 @@ namespace LCG
                 curPercent++;
                 if (null != LoadUpdate)
                 {
-                    LoadUpdate.Invoke(curPercent * 0.01f);
+                    LoadUpdate.Invoke(curPercent);
                 }
                 yield return null;
             }

@@ -158,6 +158,7 @@ local function UISubController(ctrlName, viewName)
         self.ParentCtrl = nil
         self.IsOpen = false
         self.IsShow = false
+        self.Events = nil
         self.Timers:DisposeAll()
         -- 移除ctrl
         uiCenter:RemoveSubController(self)

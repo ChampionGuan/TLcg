@@ -205,7 +205,7 @@ function UICenter:PopingStack(ctrl)
 
     -- 栈顶面板
     local theLastCtrl = nil
-    theLastCtrl, ctrlNum = UICenter:getTopCtrl()
+    theLastCtrl, ctrlNum = UICenter:GetTopCtrl()
     if nil == theLastCtrl then
         return
     end
@@ -225,10 +225,10 @@ function UICenter:PopingStack(ctrl)
 end
 -- 打开指定界面--
 function UICenter:OpenController(name, data)
-    local ctrl = self:getController(name)
+    local ctrl = self:GetController(name)
     if ctrl == nil then
         LuaHandle.Load(name)
-        ctrl = self:getController(name)
+        ctrl = self:GetController(name)
     end
     -- 存在预处理逻辑，默认都是预处理成功
     if ctrl:PreHandle(data) then
@@ -238,10 +238,10 @@ function UICenter:OpenController(name, data)
     end
 end
 -- 向所有打开界面广播消息--
-function UICenter:SendNtfMessage(ntfType, ...)
+function UICenter:DispatchEvent(ntfType, ...)
     for k, v in pairs(ControllerStack) do
         if v ~= nil and v.IsOpen then
-            v:NtfHandle(ntfType, ...)
+            v:DispatchEvent(ntfType, ...)
         end
     end
 end

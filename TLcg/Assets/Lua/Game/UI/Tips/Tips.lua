@@ -1,0 +1,3 @@
+local Tips = {}
+
+return Tips

@@ -8,3 +8,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Bootup.unity
     guid: dbecfa3e330f6f74dabea079b5291a16
+  - enabled: 1
+    path: Assets/Scenes/Battle.unity
+    guid: 0da6b69491ee0df41986696c035f7e94
+  - enabled: 1
+    path: Assets/Scenes/Maincity.unity
+    guid: 84debfc3a00874b4e99129fc1a6eeec7

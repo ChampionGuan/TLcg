@@ -64,7 +64,9 @@ local function UIController(ctrlName, viewName, isRegister)
     -- 存活时间
     t.AliveTime = 5
     -- 计时器
-    t.Timers = {}
+    t.Timers = nil
+    -- 事件
+    t.Events = nil
     -- 子ctrl
     t.SubCtrl = {}
 
@@ -257,7 +259,7 @@ local function UIController(ctrlName, viewName, isRegister)
             blurEffect.Blur(isBlur, self, self.View.UI.sortingOrder - 1)
         end
     end
-    -- 相机渲染层级 
+    -- 相机渲染层级
     t.Mask = function(self)
         uiCullingMask.Mask(self)
     end
@@ -288,6 +290,7 @@ local function UIController(ctrlName, viewName, isRegister)
         end
 
         self.Timers:DisposeAll()
+        self.Events = nil
         self.IsPreHandle = false
         self.IsOpen = false
         self.IsShow = false
@@ -328,6 +331,7 @@ local function UIController(ctrlName, viewName, isRegister)
             self.View = nil
         end
         self.Timers:DisposeAll()
+        self.Events = nil
     end
     -- 通知界面设置渲染顺序--
     t.SortingOrder = function(self, order)
@@ -342,16 +346,25 @@ local function UIController(ctrlName, viewName, isRegister)
             self:Blur(true)
         end
     end
-    -- 广播消息--
-    t.NtfHandle = function(self, ntfType, ...)
+    -- 添加事件
+    t.AddEvent = function(self, type, event)
+        if nil == self.Events then
+            self.Events = {}
+        end
+        self.Events[type] = event
+    end
+    -- 执行事件--
+    t.DispatchEvent = function(self, type, ...)
         if not self.IsOpen then
             return
         end
         -- 子ctrl广播
         for k, v in pairs(self.SubCtrl) do
-            v:NtfHandle(ntfType, ...)
+            v:DispatchEvent(type, ...)
         end
-        self:OnNtfHandle(ntfType, ...)
+        if nil ~= self.Events and nil ~= self.Events[type] then
+            self.Events[type](...)
+        end
     end
     -- 更新--
     t.Update = function(self)
@@ -400,9 +413,8 @@ local function UIController(ctrlName, viewName, isRegister)
         return sub
     end
     --------当xx方法处理，子类重写----------
-    t.OnNtfHandle = function(self, ntfType, ...)
-    end
-    t.OnPreHandle = function(self) return true
+    t.OnPreHandle = function(self)
+        return true
     end
     t.OnCreat = function(self)
     end

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<packageDescription id="x9tijx8p" jpegQuality="80" compressPNG="true">
+  <resources>
+    <component id="cmz80" name="Launcher.xml" path="/" exported="true"/>
+    <component id="cmz81" name="ProgressBar_1.xml" path="/ProgressBar/"/>
+    <component id="ege88" name="Waring.xml" path="/" exported="true"/>
+    <component id="ege89" name="Button_2.xml" path="/Button/"/>
+  </resources>
+  <publish name="Launcher" path="E:\2_champion\TLcg\TLcg\Assets\Resources\UI\Launcher"/>
+</packageDescription>

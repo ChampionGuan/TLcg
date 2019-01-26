@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component size="1334,750" bgColor="#000000" adaptationTest="FitSize">
+  <displayList>
+    <graph id="n35_ege8" name="Bg_0" xy="0,0" size="1334,750" type="rect" fillColor="#ff999999">
+      <relation target="" sidePair="width-width,height-height"/>
+    </graph>
+    <graph id="n32_ioch" name="Bg_1" xy="159,149" size="1174,467" type="rect" fillColor="#ff999999">
+      <relation target="" sidePair="width-width,height-height"/>
+    </graph>
+    <graph id="n34_cmz8" name="Bg_2" xy="1,121" size="158,594" type="rect" fillColor="#ff999999">
+      <relation target="" sidePair="width-width,height-height"/>
+    </graph>
+    <image id="n29_ioch" name="Image_Base_1" src="ioch9" fileName="Image/png/Image_Status_Red.png" xy="343,95"/>
+    <image id="n31_ioch" name="Image_Base_2" src="ioch8" fileName="Image/png/Image_Status_Yellow.png" xy="514,95"/>
+    <image id="n27_ioch" name="Image_Base_3" src="ioch7" fileName="Image/png/Image_Status_Green.png" xy="689,95"/>
+    <image id="n28_ioch" name="Image_Base_4" src="ioch6" fileName="Image/png/Image_Status_Blue.png" xy="861,95"/>
+    <image id="n30_ioch" name="Image_Base_5" src="iochb" fileName="Image/png/Image_Status_White.png" xy="1034,95"/>
+    <text id="n12" name="Text_Red" xy="384,95" size="63,37" fontSize="28" color="#ffffff" vAlign="middle" letterSpacing="1" text="爆满"/>
+    <text id="n14" name="Text_Yellow" xy="555,95" size="63,37" fontSize="28" color="#ffffff" vAlign="middle" letterSpacing="1" text="繁忙"/>
+    <text id="n16" name="Text_Green" xy="730,95" size="63,37" fontSize="28" color="#ffffff" vAlign="middle" letterSpacing="1" text="流畅"/>
+    <text id="n18" name="Text_Orange" xy="902,95" size="63,37" fontSize="28" color="#ffffff" vAlign="middle" letterSpacing="1" text="推荐"/>
+    <text id="n21_hdxm" name="Text_White" xy="1075,95" size="63,37" fontSize="28" color="#ffffff" vAlign="middle" letterSpacing="1" text="维护"/>
+    <component id="n33_m5u5" name="Button_back" src="cmz8c" fileName="Button/Button_1.xml" xy="0,0" size="151,82">
+      <relation target="" sidePair="center-center,height-height"/>
+      <Button title="返回"/>
+    </component>
+    <list id="n4" name="List_ServerZone" xy="2,124" size="156,588" overflow="scroll" scrollBarFlags="2" lineGap="1" defaultItem="ui://hde75mkfcmz8c" autoItemSize="false" align="right">
+      <relation target="" sidePair="height-height"/>
+      <item url="ui://hde75mkfcmz8d"/>
+    </list>
+    <list id="n8" name="List_ServerList" xy="178,162" size="1153,514" layout="flow_hz" overflow="scroll" lineGap="12" colGap="4" defaultItem="ui://hde75mkfe2dj1" autoItemSize="true">
+      <relation target="" sidePair="center-center,height-height"/>
+      <item/>
+      <item/>
+      <item/>
+      <item/>
+      <item/>
+      <item/>
+    </list>
+  </displayList>
+</component>

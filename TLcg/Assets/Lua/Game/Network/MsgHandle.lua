@@ -114,7 +114,7 @@ function MsgHandle.ReceiveMsg(moduleId, msgId)
         return
     end
     UIManager.WaitSync(Define.SyncType.MsgSync, false)
-    UIManager.SendNtfMessage(Event.ERROR_SYNC_CLOSE, Define.SyncType.MsgSync)
+    UIManager.DispatchEvent(Event.ERROR_SYNC_CLOSE, Define.SyncType.MsgSync)
     syncTimeoutTimer:pause()
 end
 

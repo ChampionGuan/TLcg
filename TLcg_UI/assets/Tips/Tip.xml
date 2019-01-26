@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component size="1334,750" opaque="false" adaptationTest="FitSize">
+  <displayList>
+    <graph id="n5_cmz8" name="Bg_1" xy="165,197" size="1000,61" group="n9_cmz8" type="rect" fillColor="#ff999999"/>
+    <graph id="n6_cmz8" name="Bg_2" xy="165,197" size="1000,2" group="n9_cmz8" type="rect" fillColor="#ff000000"/>
+    <graph id="n7_cmz8" name="Bg_2" xy="165,257" size="1000,2" group="n9_cmz8" type="rect" fillColor="#ff000000"/>
+    <richtext id="n8_cmz8" name="Text_Content" xy="310,212" size="705,39" group="n9_cmz8" fontSize="30" color="#ffffff" align="center" vAlign="middle" ubb="true" autoSize="none" shadowColor="#000000" shadowOffset="1,1" singleLine="true" autoClearText="true" text="...........................................">
+      <relation target="n5_cmz8" sidePair="center-center,middle-middle"/>
+    </richtext>
+    <group id="n9_cmz8" name="Tip" xy="165,197" size="1000,62" advanced="true">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </group>
+  </displayList>
+  <transition name="Effect_T">
+    <item time="0" type="Alpha" target="n9_cmz8" tween="true" startValue="1" endValue="0" duration="36"/>
+  </transition>
+</component>

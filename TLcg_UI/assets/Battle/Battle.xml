@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component size="1334,750">
+  <displayList>
+    <graph id="n2_ege8" name="Bg_0" xy="0,0" size="1334,750" type="rect" fillColor="#ff999999">
+      <relation target="" sidePair="width-width,height-height"/>
+    </graph>
+    <text id="n1_cmz8" name="n1" xy="616,163" size="65,38" fontSize="30" color="#ffffff" align="center" vAlign="middle" text="战斗">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </text>
+    <component id="n3_ege8" name="Button_ToMaincity" src="ege81" fileName="Button/Button_1.xml" xy="571,236" size="156,75">
+      <Button title="返回主城"/>
+    </component>
+  </displayList>
+</component>

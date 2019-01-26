@@ -45,12 +45,12 @@ end
 local function ShowPopupUI(isShow)
     isShow = type(isShow) == "boolean" and isShow or false
     if nil == m_popupUI.UI then
-        local ui = CreatUI("UI/FixUpdate/FixUpdate", "FixUpdate", "FixTipsMain")
+        local ui = CreatUI("UI/Launcher/Launcher", "Launcher", "Waring")
         m_popupUI.UI = ui
-        m_popupUI.Desc = ui:GetChild("title")
-        m_popupUI.BtnState = ui:GetController("State_C")
+        m_popupUI.Desc = ui:GetChild("Text_Content")
+        m_popupUI.BtnState = ui:GetController("Waring_C")
         m_popupUI.BtnConfirm = ui:GetChild("Button_Confirm")
-        m_popupUI.BtnCancel = ui:GetChild("Button_Cancel")
+        m_popupUI.BtnCancel = ui:GetChild("Button_Quit")
         m_popupUI.BtnCancel.onClick:Set(QuitApp)
     end
     m_popupUI.UI.visible = isShow
@@ -74,10 +74,10 @@ end
 local function ShowMainUI(isShow)
     isShow = type(isShow) == "boolean" and isShow or false
     if nil == m_mainUI.UI then
-        m_mainUI.UI = CreatUI("UI/FixUpdate/FixUpdate", "FixUpdate", "FixUpdateMain")
-        m_mainUI.Desc = m_mainUI.UI:GetChild("Text_News")
+        m_mainUI.UI = CreatUI("UI/Launcher/Launcher", "Launcher", "Launcher")
+        m_mainUI.Desc = m_mainUI.UI:GetChild("Text_Desc")
         m_mainUI.Version = m_mainUI.UI:GetChild("Text_Version")
-        m_mainUI.ProgressBar = m_mainUI.UI:GetChild("ProgressBar_Loading")
+        m_mainUI.ProgressBar = m_mainUI.UI:GetChild("ProgressBar")
         m_mainUI.ProgressBar.max = 100
         m_mainUI.ProgressBar.value = 0
     end

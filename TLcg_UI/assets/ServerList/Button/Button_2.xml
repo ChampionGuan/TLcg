@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component size="377,77" extention="Button">
+  <controller name="button" pages="0,up,1,down" selected="0"/>
+  <controller name="State_C" pages="0,爆满,1,繁忙,2,流畅,4,推荐,3,维护" selected="4"/>
+  <displayList>
+    <graph id="n19_s5oj" name="Bg_1" xy="0,0" size="377,78" type="rect" fillColor="#ff666666"/>
+    <loader id="n13_ioch" name="Image_State_0" xy="16,22" size="34,34" url="ui://hde75mkfiochb">
+      <gearIcon controller="State_C" pages="0,1,2,4" values="ui://hde75mkfioch9|ui://hde75mkfioch8|ui://hde75mkfioch7|ui://hde75mkfioch6" default="ui://hde75mkfiochb"/>
+    </loader>
+    <text id="n17_ioch" name="Text_TuiJian" xy="285,24" size="80,33" fontSize="26" color="#999999" align="center" vAlign="middle" letterSpacing="1" autoSize="shrink" shadowColor="#000000" shadowOffset="1,1" singleLine="true" text="[ 维护中]">
+      <gearText controller="State_C" pages="0,1,2,3" values="|||[ 维护中]" default="[推荐]"/>
+    </text>
+    <text id="n4" name="title" xy="58,24" size="218,36" fontSize="26" color="#ffffff" vAlign="middle" autoSize="shrink" shadowColor="#000000" shadowOffset="1,1" singleLine="true" text=""/>
+  </displayList>
+  <Button mode="Radio" downEffect="scale" downEffectValue="0.90"/>
+</component>

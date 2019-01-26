@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component size="691,76" extention="Button">
+  <controller name="State_C" pages="0,爆满,1,繁忙,2,流畅,4,推荐,3,维护" selected="0"/>
+  <displayList>
+    <graph id="n4" name="Image_Background" xy="0,0" size="691,76" alpha="0.8" type="rect" fillColor="#ff999999"/>
+    <graph id="n11_rvje" name="Image_Base" xy="571,-12" pivot="0.5,0.5" size="100,100" aspect="true" scale="0.8,0.8" type="rect" fillColor="#ff999999"/>
+    <loader id="n10_rvje" name="Loader_State" xy="24,23" size="30,30" url="ui://cey8mwyyrvje2j" align="center" vAlign="middle">
+      <gearLook controller="State_C" pages="3" values="1,0,1,1" default="1,0,0,1"/>
+      <gearIcon controller="State_C" pages="0,1,2,4,3" values="ui://cey8mwyyrvje2j|ui://cey8mwyyrvje2i|ui://cey8mwyyrvje2k|ui://cey8mwyyrvje2k|ui://cey8mwyyrvje2k"/>
+      <relation target="n4" sidePair="middle-middle,middle-middle"/>
+    </loader>
+    <text id="n5" name="TextField_Serve" xy="141,24" size="125,31" fontSize="24" color="#c3c4cd" shadowColor="#211c23" shadowOffset="1,1" text="推荐服务器"/>
+    <text id="n6" name="TextFiled_ServerName" xy="297,22" size="10,38" fontSize="28" color="#ffcb7a" shadowColor="#211c23" shadowOffset="1,1" singleLine="true" text=""/>
+    <text id="n7" name="TextField_ChangeServe" xy="595,24" size="53,31" fontSize="24" color="#c3c4cd" shadowColor="#211c23" shadowOffset="1,1" text="换区"/>
+    <text id="n8" name="TextField_Hot" xy="65,22" size="61,37" fontSize="28" color="#ef1111" ubb="true" shadowColor="#211c23" shadowOffset="1,1" text="火爆">
+      <gearColor controller="State_C" pages="0,1,2,4,3" values="#ef1111,#211c23|#ff6633,#000000|#00cc00,#000000|#00cc00,#000000|#dbdbdb,#000000"/>
+      <gearText controller="State_C" pages="1,2,4,3" values="繁忙|流畅|推荐|维护" default="火爆"/>
+    </text>
+  </displayList>
+  <Button/>
+</component>

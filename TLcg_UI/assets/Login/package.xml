@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<packageDescription id="cey8mwyy" jpegQuality="80" compressPNG="true">
+  <resources>
+    <component id="u5jj4" name="LoginMain.xml" path="/" exported="true"/>
+    <component id="hqut16" name="Button_1.xml" path="/Button/"/>
+    <component id="olan3l" name="Button_2.xml" path="/Button/"/>
+    <component id="gk2w4b" name="AutofixMain.xml" path="/" exported="true"/>
+  </resources>
+  <publish name="Login" path="E:\2_champion\TLcg\TLcg\Assets\Resources\UI\Login" maxAtlasSize="1024" square="true" rotation="true" extractAlpha="true">
+    <atlas name="默认" index="0"/>
+  </publish>
+</packageDescription>

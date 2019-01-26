@@ -11,7 +11,7 @@ local function UIView()
     t.ComName = nil
     t.Events = nil
 
-    t.AddCallback = function(self, _key, _callback)
+    t.AddEvent = function(self, _key, _callback)
         if nil == _key or nil == _callback then
             return
         end
@@ -26,7 +26,7 @@ local function UIView()
         self.Events[_key] = _callback
     end
 
-    t.InvokeCallback = function(self, _key, ...)
+    t.DispatchEvent = function(self, _key, ...)
         if nil ~= self.Events and nil ~= self.Events[_key] then
             self.Events[_key](...)
         end
@@ -58,10 +58,9 @@ local function UIView()
     t.Destroy = function(self)
         self.Events = nil
         self:OnDestroy()
-        UIUtils.disposeView(self.PkgPath, self.PkgName, self.UI)
+        UIUtils.DisposeUICom(self.PkgPath, self.PkgName, self.UI)
     end
 
-    -- 是否已析构
     t.IsDispose = function(self)
         if nil == self.UI or nil == self.UI.displayObject or self.UI.displayObject.isDisposed then
             return true

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<packageDescription id="53dvp8rp" jpegQuality="80" compressPNG="true">
+  <resources>
+    <component id="xydy2" name="Tip.xml" path="/" exported="true"/>
+  </resources>
+  <publish name="Tips" path="E:\2_champion\TLcg\TLcg\Assets\Resources\UI\Tips" maxAtlasSize="1024" square="true" rotation="true" extractAlpha="true">
+    <atlas name="默认" index="0"/>
+  </publish>
+</packageDescription>

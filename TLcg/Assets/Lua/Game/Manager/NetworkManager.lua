@@ -4,7 +4,7 @@ local httpHandle = nil
 
 function NetworkManager.Initialize()
     if nil == httpHandle then
-        httpHandle = LuaHandle.load("Game.Network.HttpHandle")
+        httpHandle = LuaHandle.Load("Game.Network.HttpHandle")
     end
     httpHandle.Initialize()
 end
