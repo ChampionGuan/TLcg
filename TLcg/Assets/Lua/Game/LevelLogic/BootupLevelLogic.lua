@@ -11,7 +11,7 @@ function BootupLevelLogic:OnEnterScene(callback)
 end
 
 function BootupLevelLogic:OnExitScene()
-    UIManager.DestroyAllCtrl(true)
+    UIManager.DestroyAllCtrl(false)
 end
 
 return BootupLevelLogic

@@ -1,4 +1,4 @@
-_C = UIManager.Controller(UIConfig.ControllerName.Loading, UIConfig.ViewName.Loading)
+local _C = UIManager.Controller(UIConfig.ControllerName.Loading, UIConfig.ViewName.Loading)
 
 local function LoadingOk()
     _C:Close()
@@ -16,4 +16,7 @@ end
 function _C:OnOpen()
     _C.View.ProgressBar.max = 100
     _C.View.ProgressBar.value = 0
+end
+
+function _C:OnClose()
 end

@@ -134,14 +134,14 @@ function NetConnect.initialize()
 
     -- 登陆结束
     Event.AddListener(
-        Event.LOGIN_OVER,
+        EventType.LOGIN_OVER,
         function()
             loginSuccess = true
         end
     )
     -- 返回登录
     Event.AddListener(
-        Event.BEFORE_LOADING,
+        EventType.BEFORE_LOADING,
         function(type)
             if type == Define.LevelType.Bootup then
                 curStat = SocketStat.None
@@ -314,14 +314,14 @@ local function socketReconnect()
         return
     end
 end
-Event.AddListener(Event.MUST_RECONNECT, socketReconnect)
-Event.AddListener(Event.MUST_RELOGIN, socketReconnect)
+Event.AddListener(EventType.MUST_RECONNECT, socketReconnect)
+Event.AddListener(EventType.MUST_RELOGIN, socketReconnect)
 
 -- socket连接中
 local function socketConnecting()
     curStat = SocketStat.Connecting
 end
-Event.AddListener(Event.CONNECTING, socketConnecting)
+Event.AddListener(EventType.CONNECTING, socketConnecting)
 
 -- socket连接成功
 local function socketConnected()
@@ -343,7 +343,7 @@ local function socketConnected()
     end
     print("socket连接成功")
 end
-Event.AddListener(Event.CONNECTED, socketConnected)
+Event.AddListener(EventType.CONNECTED, socketConnected)
 
 ----------------------------------------------------------------------------------------------
 ----------------------------------------后台切入时的网络处理------------------------------------
@@ -358,7 +358,7 @@ local isWifi = CSharp.NetworkManager.Instance.IsWifi
 local function onAppQuit()
     curStat = SocketStat.None
 end
-Event.AddListener(Event.APP_QUIT, onAppQuit)
+Event.AddListener(EventType.APP_QUIT, onAppQuit)
 
 -- app得焦点
 local function onAppFocus(focus)

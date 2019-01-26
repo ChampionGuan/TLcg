@@ -309,32 +309,6 @@ local function SetAudioVolume(volume, isEffect)
     end
 end
 
--- 当场景退出
-local function OnSceneExit()
-    Audio.PlayGroupSound(m_bgUIGroupName, AudioStat.Stop)
-    Audio.PlayGroupSound(m_sceneGroupName, AudioStat.Stop)
-    SetAudioListener(nil)
-end
-
--- 当场景进入
-local function OnSceneEnter()
-    local target = CSharp.Camera.main
-    if nil ~= target then
-        target = target.gameObject
-    end
-
-    -- 新的音源监听对象
-    if UnityTargetIsNil(target) then
-        SetAudioListener(nil)
-        return
-    end
-    local listener = target:GetComponent(typeof(CSharp.AudioListener))
-    if UnityTargetIsNil(listener) then
-        listener = target:AddComponent(typeof(CSharp.AudioListener))
-    end
-    SetAudioListener(listener)
-end
-
 -- 获取声效开关
 function Audio.GetSwitchAudioEffect()
     return PlayerPrefs.GetAudioEffectSwitch()
@@ -501,13 +475,7 @@ function Audio.Initialize()
     if nil == m_defaultAudioListener then
         m_defaultAudioListener = m_audioRoot:AddComponent(typeof(CSharp.AudioListener))
     end
-
-    -- 事件监听
-    if nil ~= Event then
-        Event.AddListener(Event.EXIT_SCENCE, OnSceneExit)
-        Event.AddListener(Event.ENTER_SCENCE, OnSceneEnter)
-    end
-
+    
     m_audioMixer = CSharp.ResourceLoader.LoadObject("Audio/AudioMixer", typeof(CSharp.AudioMixer))
     SetAudioListener(nil)
 

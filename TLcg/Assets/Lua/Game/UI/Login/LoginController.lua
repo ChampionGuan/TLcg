@@ -1,4 +1,4 @@
-_C = UIManager.Controller(UIConfig.ControllerName.Login, UIConfig.ViewName.Login)
+local _C = UIManager.Controller(UIConfig.ControllerName.Login, UIConfig.ViewName.Login)
 
 local function BtnAutofix()
 end
@@ -19,7 +19,6 @@ local function BtnSwitchAccount()
 end
 
 local function BtnStart()
-    print("-================")
     _C:Close()
     LevelManager.LoadScene(Define.LevelType.MainCity)
 end

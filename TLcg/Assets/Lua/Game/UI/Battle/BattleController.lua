@@ -1,4 +1,4 @@
-_C = UIManager.Controller(UIConfig.ControllerName.Battle, UIConfig.ViewName.Battle)
+local _C = UIManager.Controller(UIConfig.ControllerName.Battle, UIConfig.ViewName.Battle)
 
 local function BtnToMaincity()
     _C:Close()

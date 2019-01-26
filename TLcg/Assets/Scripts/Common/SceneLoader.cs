@@ -48,7 +48,7 @@ namespace LCG
         }
         private IEnumerator LoadAsync(string sceneName)
         {
-            SceneLoader.Instance.LoadScene(sceneName);
+            ResourceLoader.LoadScene(sceneName);
             AsyncOperation operation = SceneManager.LoadSceneAsync(sceneName);
             operation.allowSceneActivation = false;
 

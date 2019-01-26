@@ -65,7 +65,7 @@ local function SetUIMutextes(name)
         return
     end
     for k, v in pairs(config) do
-        local mutexCtrl = UIManager.GetController(v)
+        local mutexCtrl = UIManager.GetCtrl(v)
         -- 如果存在互斥面板，且处于打开状态
         if nil ~= mutexCtrl and mutexCtrl.IsOpen then
             mutexCtrl:Close()
@@ -75,10 +75,17 @@ end
 
 -- 关闭主界面之外面板
 local function SetUICloseloop(name)
-    if name ~= UIConfig.ControllerName.MainCity then
+    if name ~= UIConfig.ControllerName.Maincity then
         return
     end
-    UIManager.CloseTheBelowCtrl(ctrl.ControllerName)
+    UIManager.CloseTheBelowCtrl(name)
+end
+
+local function OnEnterBootup()
+    if LevelManager.CurLevelType ~= Define.LevelType.Bootup then
+        return
+    end
+    -- TODO
 end
 
 local function OnCtrlOpen(ctrl)
@@ -112,6 +119,10 @@ function UIManager.Initialize()
     ctrlCenter.OnCtrlHide = OnCtrlHide
     ctrlCenter.OnCtrlOpen = OnCtrlOpen
     ctrlCenter.OnCtrlClose = OnCtrlClose
+
+    Event.AddListener(EventType.ENTER_SCENCE, OnEnterBootup)
+    Event.AddListener(EventType.EXIT_SCENCE, UIManager.DestroyAllCtrl)
+    Event.AddListener(EventType.LOGIN_COMPLETE, UIManager.RefreshAllCtrl)
 end
 
 -- 更新
@@ -240,7 +251,7 @@ function UIManager.CloseTheBelowCtrl(name)
 end
 
 -- 刷新所有面板
-function UIManager.RefreshAllCtrl(name)
+function UIManager.RefreshAllCtrl()
     ctrlCenter:RefreshAllCtrl()
 end
 
@@ -255,9 +266,8 @@ function UIManager.DestroyAllCtrl(deep)
 end
 
 -- 发送广播
-function UIManager.DispatchEvent(ntfType, ...)
-    Event.Dispatch(ntfType, ...)
-    ctrlCenter:DispatchEvent(ntfType, ...)
+function UIManager.DispatchEvent(type, ...)
+    ctrlCenter:DispatchEvent(type, ...)
 end
 
 -- 消息等待

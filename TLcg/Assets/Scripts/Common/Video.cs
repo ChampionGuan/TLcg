@@ -51,6 +51,7 @@ namespace LCG
 
             m_btnSkip.SetActive(false);
             m_subtitleTarget.SetActive(false);
+            GameObject.DontDestroyOnLoad(m_root);
         }
 
         public bool Play(string videoUrl, bool isLoop, bool isSkip)

@@ -1,4 +1,4 @@
-_C = UIManager.Controller(UIConfig.ControllerName.Popup, UIConfig.ViewName.Popup)
+local _C = UIManager.Controller(UIConfig.ControllerName.Popup, UIConfig.ViewName.Popup)
 
 local function BtnConfirm()
     _C:Close()

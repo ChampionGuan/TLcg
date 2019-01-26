@@ -90,7 +90,7 @@ function VideoManager.Initialize()
     VideoManager.Stop()
 end
 
-function VideoManager.Destroy()
+function VideoManager.CustomDestroy()
     if nil == m_videoRoot then
         return
     end

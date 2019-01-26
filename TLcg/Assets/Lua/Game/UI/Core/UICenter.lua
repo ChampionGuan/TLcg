@@ -95,7 +95,7 @@ local function ShowPreCtrl(id)
         return
     end
     ctrl:Show()
-    ctrl:SortingOrder(id * 10)
+    ctrl:SetSortingOrder(id * 10)
 
     if ctrl.Type == UIDefine.CtrlType.PopupBox then
         id = id - 1
@@ -111,7 +111,7 @@ local function InteractivePreCtrl(id)
     if nil == ctrl then
         return
     end
-    ctrl:Interactive(true)
+    ctrl:SetInteractive(true)
 
     if ctrl.PreCtrlInteractive then
         id = id - 1
@@ -125,7 +125,7 @@ local function BlurPreCtrl(id)
         return
     end
     if ctrl.IsShow then
-        ctrl:Blur(true)
+        ctrl:SetBlur(true)
     end
     BlurPreCtrl(id + 1)
 end
@@ -168,8 +168,8 @@ function UICenter:PushingStack(ctrl)
 
     -- 重置交互性和渲染顺序
     for k, v in pairs(ControllerStack) do
-        v:Interactive(false)
-        v:SortingOrder(k * 10)
+        v:SetInteractive(false)
+        v:SetSortingOrder(k * 10)
     end
     -- 重新设置交互性
     InteractivePreCtrl(ctrlNum)
@@ -189,7 +189,7 @@ end
 function UICenter:PopingStack(ctrl)
     -- 关闭自身
     ctrl:Hide()
-    ctrl:Interactive(false)
+    ctrl:SetInteractive(false)
     OnCtrlHide(ctrl)
 
     -- 判断已无面板
@@ -238,10 +238,10 @@ function UICenter:OpenController(name, data)
     end
 end
 -- 向所有打开界面广播消息--
-function UICenter:DispatchEvent(ntfType, ...)
+function UICenter:DispatchEvent(type, ...)
     for k, v in pairs(ControllerStack) do
         if v ~= nil and v.IsOpen then
-            v:DispatchEvent(ntfType, ...)
+            v:DispatchEvent(type, ...)
         end
     end
 end
@@ -335,10 +335,7 @@ function UICenter:DestroyAllCtrl(deep)
         ControllerStack = {}
     end
     for k, v in pairs(ControllerCenter) do
-        -- 不删除loading
-        if v.ControllerName == UIConfig.ControllerName.Loading then
-            -- do nothing
-        else
+        if not v.IsCannotDestroy then
             v:DestroyByOther(deep)
         end
     end

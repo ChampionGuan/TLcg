@@ -7,9 +7,11 @@ local LevelLogic = function()
     t.EnterScene = function(self, callBack)
         self.Config = LevelManager.CurrLevelConfig
         self.InsInfo = LevelManager.IncomingInfo
+        Event.Dispatch(EventType.ENTER_SCENCE)
         self:OnEnterScene(callBack)
     end
     t.ExitScene = function(self)
+        Event.Dispatch(EventType.EXIT_SCENCE)
         self:OnExitScene()
         self.Config = nil
         self.InsInfo = nil

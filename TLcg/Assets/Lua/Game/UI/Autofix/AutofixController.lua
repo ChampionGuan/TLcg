@@ -1,4 +1,4 @@
-_C = UIManager.Controller(UIConfig.ControllerName.Autofix, UIConfig.ViewName.Autofix)
+local _C = UIManager.Controller(UIConfig.ControllerName.Autofix, UIConfig.ViewName.Autofix)
 
 local function BtnBack()
     _C:Close()

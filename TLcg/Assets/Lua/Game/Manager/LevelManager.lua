@@ -32,14 +32,14 @@ local function OnSceneLoadStart()
 end
 
 local function OnSceneLoadUpdate(p)
-    UIManager.UIManager.DispatchEvent(UIConfig.Event.LOADING_P, p)
+    UIManager.DispatchEvent(UIConfig.Event.LOADING_P, p)
 end
 
 local function OnSceneLoadComplete()
     LevelManager.Loading = false
-    LevelManager.CurLevelConfig = LevelManager.NextLevelConfig
+    LevelManager.CurLevelConfig = LevelManager.TheNextLevelConfig
     LevelManager.CurLevelType = LevelManager.CurLevelConfig.Type
-    LevelManager.NextLevelConfig = nil
+    LevelManager.TheNextLevelConfig = nil
 
     if LevelManager.CurLevelConfig.LogicScript ~= nil then
         LevelManager.CurLevelLogic = LuaHandle.Load(LevelManager.CurLevelConfig.LogicScript)
@@ -63,7 +63,7 @@ function LevelManager.Initialize()
     CSharp.SceneLoader.Instance.LoadComplete = OnSceneLoadComplete
 
     -- 初始时进入启动界面
-    LevelManager.NextLevelConfig = levelConfig[Define.LevelType.Bootup]
+    LevelManager.TheNextLevelConfig = levelConfig[Define.LevelType.Bootup]
     OnSceneLoadStart()
     OnSceneLoadComplete()
 end

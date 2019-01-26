@@ -149,8 +149,8 @@ function MsgHandle.Destroy()
     syncTimeoutTimer:pause()
     UIManager.WaitSync(Define.SyncType.MsgSync, false)
 end
-Event.AddListener(Event.MUST_RECONNECT, MsgHandle.Destroy)
-Event.AddListener(Event.MUST_RELOGIN, MsgHandle.Destroy)
-Event.AddListener(Event.MUST_CLOSE, MsgHandle.Destroy)
+Event.AddListener(EventType.MUST_RECONNECT, MsgHandle.Destroy)
+Event.AddListener(EventType.MUST_RELOGIN, MsgHandle.Destroy)
+Event.AddListener(EventType.MUST_CLOSE, MsgHandle.Destroy)
 
 return MsgHandle

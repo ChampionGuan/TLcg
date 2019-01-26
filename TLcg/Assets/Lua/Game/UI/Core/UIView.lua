@@ -37,11 +37,11 @@ local function UIView()
         self:OnCreat()
     end
 
-    t.Interactive = function(self, isok)
+    t.SetInteractive = function(self, isok)
         self.UI.touchable = isok
     end
 
-    t.SortingOrder = function(self, order)
+    t.SetSortingOrder = function(self, order)
         self.UI.sortingOrder = order
     end
 
@@ -61,13 +61,6 @@ local function UIView()
         UIUtils.DisposeUICom(self.PkgPath, self.PkgName, self.UI)
     end
 
-    t.IsDispose = function(self)
-        if nil == self.UI or nil == self.UI.displayObject or self.UI.displayObject.isDisposed then
-            return true
-        else
-            return false
-        end
-    end
     t.OnCreat = function(self)
     end
     t.OnDestroy = function(self)

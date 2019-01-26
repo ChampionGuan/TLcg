@@ -99,7 +99,12 @@ local function UIController(ctrlName, viewName, isRegister)
         end
 
         -- 初始交互性
-        self:Interactive(self.IsInteractive)
+        self:SetInteractive(self.IsInteractive)
+
+        -- 不允许被销毁
+        if uiDisposeConfig[self.ControllerName] == -1 then
+            self.IsCannotDestroy = true
+        end
     end
     -- 打开界面--
     t.Open = function(self, data, isPushStack)
@@ -148,18 +153,17 @@ local function UIController(ctrlName, viewName, isRegister)
             return false
         end
         -- 相机渲染
-        self:Mask()
+        self:SetMask()
         -- 模糊
-        self:Blur(true)
+        self:SetBlur(true)
 
         if self.IsShow then
             return false
         end
-
         -- 子ctrl显示
         for k, v in pairs(self.SubCtrl) do
             v:Show(self)
-            v:setParent(self.View.UI)
+            v:SetParent(self.View.UI)
         end
 
         if not self.IsDestroyed then
@@ -177,7 +181,7 @@ local function UIController(ctrlName, viewName, isRegister)
             return false
         end
         -- 模糊
-        self:Blur(false)
+        self:SetBlur(false)
 
         -- 子ctrl隐藏
         for k, v in pairs(self.SubCtrl) do
@@ -230,7 +234,7 @@ local function UIController(ctrlName, viewName, isRegister)
         end
     end
     -- 通知界面是否可交互--
-    t.Interactive = function(self, isok)
+    t.SetInteractive = function(self, isok)
         -- 没有交互性
         if not self.Interactive and isok then
             isok = self.Interactive
@@ -238,20 +242,20 @@ local function UIController(ctrlName, viewName, isRegister)
         self.IsInteractive = isok
         -- 子ctrl交互
         for k, v in pairs(self.SubCtrl) do
-            v:Interactive(self, isok)
+            v:SetInteractive(self, isok)
         end
         if not self.IsDestroyed then
-            self.View:Interactive(isok)
+            self.View:SetInteractive(isok)
         end
         self:OnInteractive(isok)
     end
     -- 通知界面是否可交互--
     t.InteractiveBySelf = function(self, isok)
         self.Interactive = isok
-        self:Interactive(isok)
+        self:SetInteractive(isok)
     end
     -- 是否模糊--
-    t.Blur = function(self, isBlur)
+    t.SetBlur = function(self, isBlur)
         if not self.PreCtrlBlur then
             return
         end
@@ -260,8 +264,21 @@ local function UIController(ctrlName, viewName, isRegister)
         end
     end
     -- 相机渲染层级
-    t.Mask = function(self)
+    t.SetMask = function(self)
         uiCullingMask.Mask(self)
+    end
+    -- 通知界面设置渲染顺序--
+    t.SetSortingOrder = function(self, order)
+        -- 如果拥有自己的渲染顺序,则使用自己的渲染值
+        if nil ~= self.SortingOrder then
+            order = self.SortingOrder
+        end
+        if not self.IsDestroyed then
+            self.View:SetSortingOrder(order)
+        end
+        if self.IsShow then
+            self:SetBlur(true)
+        end
     end
     -- 销毁界面--
     t.DestroyBySelf = function(self, deep)
@@ -333,19 +350,6 @@ local function UIController(ctrlName, viewName, isRegister)
         self.Timers:DisposeAll()
         self.Events = nil
     end
-    -- 通知界面设置渲染顺序--
-    t.SortingOrder = function(self, order)
-        -- 如果拥有自己的渲染顺序,则使用自己的渲染值
-        if nil ~= self.SortingOrder then
-            order = self.SortingOrder
-        end
-        if not self.IsDestroyed then
-            self.View:SortingOrder(order)
-        end
-        if self.IsShow then
-            self:Blur(true)
-        end
-    end
     -- 添加事件
     t.AddEvent = function(self, type, event)
         if nil == self.Events then
@@ -378,7 +382,7 @@ local function UIController(ctrlName, viewName, isRegister)
         if self.IsOpen then
             self:OnFixedUpdate()
             self.Timers:FixedUpdate()
-        elseif not self.IsDestroyed and self.AliveTime ~= -1 then
+        elseif not self.IsDestroyed and self.AliveTime ~= -1 and not self.IsCannotDestroy then
             self.AliveTime = self.AliveTime - TimerManager.fixedDeltaTime
             if self.AliveTime < 0 then
                 self:DestroyBySelf()

@@ -2,17 +2,25 @@
 ------------------------------EventListener------------------------------
 -------------------------------------------------------------------------
 
+-- 事件类型
+EventType = {}
+
+-- socket
+EventType.CONNECTING = 1
+EventType.CONNECTED = 2
+EventType.MUST_RELOGIN = 3
+EventType.MUST_RECONNECT = 4
+EventType.MUST_CLOSE = 5
+
+-- 关闭网络异常弹框
+EventType.CLOSE_NET_ERROR_POPUP = "CLOSE_NET_ERROR_POPUP"
+-- 进入场景
+EventType.ENTER_SCENCE = "ENTER_SCENCE"
+-- 退出场景
+EventType.EXIT_SCENCE = "EXIT_SCENCE"
+
+-- 事件分发器
 Event = {}
-
-Event.CONNECTING = 1
-Event.CONNECTED = 2
-Event.MUST_RELOGIN = 3
-Event.MUST_RECONNECT = 4
-Event.MUST_CLOSE = 5
-
--- 网络错误弹框关闭
-Event.ERROR_SYNC_CLOSE = 100
-
 function Event.AddListener(etype, func)
     if etype == nil or func == nil then
         return
