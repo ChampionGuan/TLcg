@@ -6,19 +6,19 @@ function Debug.Format(...)
     for i = 1, #tab do
         output = string.format("%s\t%s", output, tab[i])
     end
-    return output .. "\n" .. debug.traceback()
+    return output
 end
 
 function Debug.Log(...)
-    print("<color=#00FF39>[Log] " .. Debug.Format(...) .. " </color>")
+    print("<color=#00FF39> " .. Debug.Format(...) .. "</color>\n" .. debug.traceback())
 end
 
 function Debug.Waring(...)
-    print("<color=0041FF>[Warning] " .. Debug.Format(...) .. " </color>")
+    print("<color=#FFFF00> " .. Debug.Format(...) .. "</color>\n" .. debug.traceback())
 end
 
 function Debug.Error(...)
-    error("<color=#C700FF>[Error] " .. Debug.Format(...) .. " </color>")
+    error(Debug.Format(...) .. "\n" .. debug.traceback())
 end
 
 Utils = {}
