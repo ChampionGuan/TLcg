@@ -1,3 +1,26 @@
+Debug = {}
+
+function Debug.Format(...)
+    local tab = {...}
+    local output = ""
+    for i = 1, #tab do
+        output = string.format("%s\t%s", output, tab[i])
+    end
+    return output .. "\n" .. debug.traceback()
+end
+
+function Debug.Log(...)
+    print("<color=#00FF39>[Log] " .. Debug.Format(...) .. " </color>")
+end
+
+function Debug.Waring(...)
+    print("<color=0041FF>[Warning] " .. Debug.Format(...) .. " </color>")
+end
+
+function Debug.Error(...)
+    error("<color=#C700FF>[Error] " .. Debug.Format(...) .. " </color>")
+end
+
 Utils = {}
 
 -- 获取y轴向角度--
