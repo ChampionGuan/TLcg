@@ -5,9 +5,10 @@
       <relation target="n4_vyhp" sidePair="width-width,middle-middle"/>
     </graph>
     <component id="n0_cmz8" name="ProgressBar" src="cmz81" fileName="ProgressBar/ProgressBar_1.xml" xy="256,562" size="821,10">
+      <relation target="" sidePair="center-center,middle-middle"/>
       <ProgressBar value="38" max="100"/>
     </component>
-    <text id="n4_vyhp" name="Text_Version" xy="0,0" size="62,26" fontSize="20" color="#d7d7d7" vAlign="middle" ubb="true" shadowColor="#000000" shadowOffset="1,1" text="1.1.1.1">
+    <text id="n4_vyhp" name="Text_Version" xy="0,0" size="60,26" fontSize="20" color="#d7d7d7" vAlign="middle" ubb="true" shadowColor="#000000" shadowOffset="1,1" text="1.1.1.1">
       <relation target="" sidePair="left-left,top-top"/>
     </text>
     <text id="n1_cmz8" name="Text_Desc" xy="607,514" size="119,38" fontSize="30" color="#ffffff" align="center" vAlign="middle" text="更新中...">

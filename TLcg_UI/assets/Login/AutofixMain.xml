@@ -1,23 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <component size="1334,750" designImageAlpha="1" designImageLayer="1" adaptationTest="FitSize">
   <displayList>
-    <graph id="n13_rt3h" name="Bg_1" xy="231,176" size="871,396" type="rect" fillColor="#ff999999"/>
-    <graph id="n14_rt3h" name="Bg_2" xy="261,265" size="809,139" type="rect" fillColor="#ff666666"/>
-    <graph id="n15_rt3h" name="Bg_2" xy="261,405" size="808,139" type="rect" fillColor="#ff666666"/>
-    <graph id="n18_rt3h" name="Bg_3" xy="393,276" size="2,111" type="rect"/>
-    <graph id="n19_rt3h" name="Bg_3" xy="393,413" size="2,118" type="rect"/>
-    <text id="n3_gk2w" name="T_1" xy="272,314" size="109,33" fontSize="26" color="#ffffff" text="轻度修复"/>
-    <text id="n5_gk2w" name="T_2" xy="272,453" size="109,33" fontSize="26" color="#ffffff" text="重度修复"/>
-    <text id="n6_gk2w" name="T_3" xy="405,299" size="369,71" fontSize="24" color="#bba7b9" vAlign="middle" autoSize="none" text="删除少量的本地缓存文件，清除部分冗余数据，请优先尝试此操作"/>
-    <text id="n8_gk2w" name="T_4" xy="405,430" size="369,88" fontSize="24" color="#bba7b9" vAlign="middle" autoSize="none" text="删除无用缓存文件，清除冗余数据，并且会删除本地头像数据"/>
-    <component id="n9_gk2w" name="Button_Fix" src="olan3l" fileName="Button/Button_2.xml" xy="781,282" size="274,106">
-      <Button title="修复"/>
-    </component>
-    <component id="n10_gk2w" name="Button_DeepFix" src="olan3l" fileName="Button/Button_2.xml" xy="779,421">
-      <Button title="修复"/>
-    </component>
+    <graph id="n13_rt3h" name="Bg_1" xy="231,176" size="871,396" type="rect" fillColor="#66999999"/>
     <component id="n20_m0ua" name="Button_Back" src="olan3l" fileName="Button/Button_2.xml" xy="3,3" size="274,106">
       <Button title="返回"/>
     </component>
+    <graph id="n14_rt3h" name="Bg_2" xy="261,265" size="809,139" group="n21_rkze" type="rect" fillColor="#ff666666"/>
+    <graph id="n15_rt3h" name="Bg_2" xy="261,405" size="808,139" group="n21_rkze" type="rect" fillColor="#ff666666"/>
+    <graph id="n18_rt3h" name="Bg_3" xy="393,276" size="2,111" group="n21_rkze" type="rect"/>
+    <graph id="n19_rt3h" name="Bg_3" xy="393,413" size="2,118" group="n21_rkze" type="rect"/>
+    <text id="n3_gk2w" name="T_1" xy="272,314" size="109,33" group="n21_rkze" fontSize="26" color="#ffffff" text="轻度修复"/>
+    <text id="n5_gk2w" name="T_2" xy="272,453" size="109,33" group="n21_rkze" fontSize="26" color="#ffffff" text="重度修复"/>
+    <text id="n6_gk2w" name="T_3" xy="405,299" size="369,71" group="n21_rkze" fontSize="24" color="#bba7b9" vAlign="middle" autoSize="none" text="删除少量的本地缓存文件，清除部分冗余数据，请优先尝试此操作"/>
+    <text id="n8_gk2w" name="T_4" xy="405,430" size="369,88" group="n21_rkze" fontSize="24" color="#bba7b9" vAlign="middle" autoSize="none" text="删除无用缓存文件，清除冗余数据，并且会删除本地头像数据"/>
+    <component id="n9_gk2w" name="Button_Fix" src="olan3l" fileName="Button/Button_2.xml" xy="781,282" size="274,106" group="n21_rkze">
+      <Button title="修复"/>
+    </component>
+    <component id="n10_gk2w" name="Button_DeepFix" src="olan3l" fileName="Button/Button_2.xml" xy="779,421" group="n21_rkze">
+      <Button title="修复"/>
+    </component>
+    <group id="n21_rkze" name="Group" xy="261,265" size="809,279" advanced="true">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </group>
   </displayList>
 </component>

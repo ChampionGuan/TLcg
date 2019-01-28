@@ -5,6 +5,7 @@
       <relation target="" sidePair="width-width,height-height"/>
     </graph>
     <component id="n0_cmz8" name="ProgressBar" src="ege81" fileName="ProgressBar/ProgressBar_1.xml" xy="256,562" size="821,10">
+      <relation target="" sidePair="center-center,middle-middle"/>
       <ProgressBar value="38" max="100"/>
     </component>
     <text id="n1_cmz8" name="n1" xy="608,514" size="119,38" fontSize="30" color="#ffffff" align="center" vAlign="middle" text="加载中...">

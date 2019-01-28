@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <component size="1334,750" designImage="ui://cey8mwyyok1g49" designImageAlpha="0" designImageLayer="1" adaptationTest="FitSize">
-  <controller name="Logic_C" pages="0,内网登录,1,内网开始" selected="1">
+  <controller name="Logic_C" pages="0,内网登录,1,内网开始" selected="0">
     <action type="change_page" fromPage="" toPage="0" objectId="n37_qk7o" controller="State_C" targetPage="0"/>
     <action type="change_page" fromPage="" toPage="2" objectId="n37_qk7o" controller="State_C" targetPage="2"/>
     <action type="change_page" fromPage="" toPage="1" objectId="n37_qk7o" controller="State_C" targetPage="1"/>
@@ -20,8 +20,9 @@
     <component id="n93_cmz8" name="Button_Login" src="olan3l" fileName="Button/Button_2.xml" xy="711,436" group="n94_cmz8">
       <Button title="登  录"/>
     </component>
-    <group id="n94_cmz8" name="login" xy="343,242" size="642,300" advanced="true">
+    <group id="n94_cmz8" name="login" xy="343,242" size="642,300" advanced="true" collapsed="true">
       <gearDisplay controller="Logic_C" pages="0"/>
+      <relation target="" sidePair="center-center,middle-middle"/>
     </group>
     <component id="n95_cmz8" name="Button_SwitchServer" src="hqut16" fileName="Button/Button_1.xml" xy="319,299" group="n97_cmz8">
       <relation target="" sidePair="center-center,middle-middle"/>
@@ -40,8 +41,9 @@
       <relation target="n95_cmz8" sidePair="center-center,middle-middle"/>
       <Button title="进入游戏" sound="ui://s5cy5qnp8vxqrb49o3"/>
     </component>
-    <group id="n97_cmz8" name="start" xy="32,41" size="978,478" advanced="true">
+    <group id="n97_cmz8" name="start" xy="32,41" size="978,478" advanced="true" collapsed="true">
       <gearDisplay controller="Logic_C" pages="1"/>
+      <relation target="" sidePair="center-center,middle-middle"/>
     </group>
     <graph id="n80_dnw0" name="Bg_1" xy="0,720" size="1334,30" group="n98_cmz8" alpha="0.5" type="rect" lineSize="0" fillColor="#ff999999">
       <gearDisplay controller="Logic_C" pages="0,2"/>
@@ -59,6 +61,6 @@
     <text id="n79_7vy4" name="Text_Health" xy="77,721" size="1237,29" group="n98_cmz8" fontSize="22" color="#afb5c0" shadowColor="#000000" shadowOffset="1,1" text="抵制不良游戏，拒绝盗版游戏。注意自我保护，谨防受骗上当。适度游戏益脑，沉迷游戏伤身。合理安排时间，享受健康生活。">
       <relation target="" sidePair="center-center,bottom-bottom"/>
     </text>
-    <group id="n98_cmz8" name="other" xy="0,0" size="1334,750" collapsed="true"/>
+    <group id="n98_cmz8" name="other" xy="0,0" size="1334,750"/>
   </displayList>
 </component>

@@ -4,7 +4,7 @@
     <graph id="n35_ege8" name="Bg_0" xy="0,0" size="1334,750" type="rect" fillColor="#ff999999">
       <relation target="" sidePair="width-width,height-height"/>
     </graph>
-    <graph id="n32_ioch" name="Bg_1" xy="159,149" size="1174,467" type="rect" fillColor="#ff999999">
+    <graph id="n32_ioch" name="Bg_1" xy="159,149" size="1174,542" type="rect" fillColor="#ff999999">
       <relation target="" sidePair="width-width,height-height"/>
     </graph>
     <graph id="n34_cmz8" name="Bg_2" xy="1,121" size="158,594" type="rect" fillColor="#ff999999">
@@ -21,7 +21,6 @@
     <text id="n18" name="Text_Orange" xy="902,95" size="63,37" fontSize="28" color="#ffffff" vAlign="middle" letterSpacing="1" text="推荐"/>
     <text id="n21_hdxm" name="Text_White" xy="1075,95" size="63,37" fontSize="28" color="#ffffff" vAlign="middle" letterSpacing="1" text="维护"/>
     <component id="n33_m5u5" name="Button_back" src="cmz8c" fileName="Button/Button_1.xml" xy="0,0" size="151,82">
-      <relation target="" sidePair="center-center,height-height"/>
       <Button title="返回"/>
     </component>
     <list id="n4" name="List_ServerZone" xy="2,124" size="156,588" overflow="scroll" scrollBarFlags="2" lineGap="1" defaultItem="ui://hde75mkfcmz8c" autoItemSize="false" align="right">
