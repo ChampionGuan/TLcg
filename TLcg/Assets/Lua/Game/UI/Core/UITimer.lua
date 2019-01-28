@@ -51,13 +51,15 @@ local function Timer()
     return t
 end
 
-local function UITimer()
+local function TimerCenter()
     local t = {}
     t.Idle = {}
     t.UsingNormal = {}
     t.UsingIgnore = {}
+    t.CurrRealtime = 0
+    t.LastRealtime = CSharp.Time.realtimeSinceStartup
 
-    function t:NewTimer(cdMax, ignoreTimeScale, funcStart, funcUpdate, funcComplete, host)
+    function t:New(cdMax, ignoreTimescale, funcStart, funcUpdate, funcComplete, host)
         if cdMax == nil or action == nil then
             return
         end
@@ -66,7 +68,7 @@ local function UITimer()
             tab = Timer()
         end
         tab:Init(cdMax, funcStart, funcUpdate, funcComplete, host)
-        if ignoreTimeScale then
+        if ignoreTimescale then
             self.UsingIgnore[tab.InsId] = tab
             self.UsingNormal[tab.InsId] = nil
         else
@@ -110,8 +112,12 @@ local function UITimer()
     end
 
     function t:Update()
+        self.CurrRealtime = CSharp.Time.realtimeSinceStartup
+        local deltaTime = self.CurrRealtime - self.LastRealtime
+        self.LastRealtime = self.CurrRealtime
+
         for _, v in pairs(self.UsingIgnore) do
-            v:Tick(TimerManager.fixedDeltaTime)
+            v:Tick(deltaTime)
             if v.IsIdle then
                 self.UsingIgnore[v.InsId] = nil
                 table.insert(self.Idle, v)
@@ -132,4 +138,4 @@ local function UITimer()
     return t
 end
 
-return UITimer
+return TimerCenter

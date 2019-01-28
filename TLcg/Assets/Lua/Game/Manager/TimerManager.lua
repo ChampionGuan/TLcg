@@ -1,12 +1,6 @@
 TimerManager = LuaHandle.Load("Game.Manager.IManager")()
 
--- 当前帧时间
-local theCurrRealtime = 0
--- 上一帧时间
-local theLastRealtime = 0
-
 TimerManager.deltaTime = 0
-TimerManager.ignoreDeltaTime = 0
 TimerManager.fixedDeltaTime = 0
 
 -- 当前时间戳(服务器给)
@@ -16,41 +10,63 @@ TimerManager.CurTimeZone = 0
 -- 客户端与服务器时区差
 TimerManager.TimeZoneDiff = 0
 
--- 正常计时--
-local function TimerNormalUpdate()
-end
-
--- 忽略timeScaler计时--
-local function TimerIgnoreUpdate(f)
-end
+-- 计时器中心
+local TimerCenter = nil
 
 -- 初始化
 function TimerManager.Initialize()
+    if nil == TimerCenter then
+        TimerCenter = LuaHandle.Load("Game.Timer.Timer")()
+    end
+
     local ostime = os.time()
     TimerManager.CurTimestamp = ostime
     TimerManager.CurTimeZone = os.difftime(ostime, os.time(os.date("!*t", ostime))) -- “!*t” 得到的是一个 UTC 时间
     TimerManager.TimeZoneDiff = 0
-    TimerManager.fixedDeltaTime = CSharp.Time.fixedDeltaTime
-    theLastRealtime = CSharp.Time.realtimeSinceStartup
 end
 
 -- 更新
 function TimerManager.CustomUpdate()
     TimerManager.deltaTime = CSharp.Time.deltaTime
-    theCurrRealtime = CSharp.Time.realtimeSinceStartup
-    TimerManager.ignoreDeltaTime = theCurrRealtime - theLastRealtime
-    theLastRealtime = theCurrRealtime
-    TimerIgnoreUpdate(TimerManager.ignoreDeltaTime)
+    TimerCenter:Update()
 end
 
 -- 固定更新
 function TimerManager.CustomFixedUpdate()
     TimerManager.CurTimestamp = TimerManager.CurTimestamp + TimerManager.fixedDeltaTime
-    TimerNormalUpdate(TimerManager.fixedDeltaTime)
+    TimerCenter:FixedUpdate()
 end
 
 -- 销毁
 function TimerManager.CustomDestroy()
+    TimerManager:DisposeAllTimer()
+end
+
+-- 新计时器
+-- cdMax:计时值
+-- ignoreTimescale:忽略timescale
+-- isCycle:循环使用，到时重置
+-- funcStart:计时开始回调
+-- funcUpdate:计时进行回调
+-- funcComplete:计时结束回调
+-- host:计时器宿主
+function TimerManager:NewTimer(cdMax, ignoreTimescale, isCycle, funcStart, funcUpdate, funcComplete, host)
+    return TimerCenter:New(cdMax, ignoreTimescale, isCycle, funcStart, funcUpdate, funcComplete, host)
+end
+
+-- 计时器加时
+function TimerManager:AddCd(insId, cdAdd)
+    return TimerCenter:AddCd(insId, cdAdd)
+end
+
+-- 计时器销毁
+function TimerManager:DisposeTimer(insId)
+    return TimerCenter:DisposeTimer(insId)
+end
+
+-- 销毁所有计时器
+function TimerManager:DisposeAllTimer()
+    return TimerCenter:DisposeAll()
 end
 
 -- 获取客户端显示，时间戳转换(时:分)
