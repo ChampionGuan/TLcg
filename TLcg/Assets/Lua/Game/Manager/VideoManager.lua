@@ -79,9 +79,8 @@ function VideoManager.Initialize()
     end
     VideoConfig = LuaHandle.Load("Game.Config.VideoConfig")
 
-    m_videoRoot = CSharp.ResourceLoader.LoadObject("Prefabs/Misc/VideoPlayer", typeof(CSharp.GameObject))
-    m_videoRoot = CSharp.UObject.Instantiate(m_videoRoot)
-    m_videoRoot.name = "VideoPlayer"
+    m_videoRoot = CSharp.Gameobjects.Instance:Spawner("Prefabs/Misc/VideoPlayer", false)
+    m_videoRoot:SetActive(true)
 
     VideoCtrl = m_videoRoot:GetComponent(typeof(CSharp.Video))
     VideoCtrl.PreparedCallback = VideoPrepared
@@ -96,6 +95,6 @@ function VideoManager.CustomDestroy()
     end
     VideoCtrl:CustomDestroy()
     LuaHandle.Unload("Game.Config.VideoConfig")
-    CSharp.ResourceLoader.UnloadObject("Prefabs/Misc/VideoPlayer")
+    CSharp.Gameobjects.Instance:Destroy("Prefabs/Misc/VideoPlayer")
     m_videoRoot = nil
 end

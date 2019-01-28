@@ -491,9 +491,8 @@ function AudioManager.Initialize()
     AudioConfig = LuaHandle.Load("Game.Config.AudioConfig")
     AudioGroupConfig = LuaHandle.Load("Game.Config.AudioGroupConfig")
 
-    m_audioRoot = CSharp.ResourceLoader.LoadObject("Prefabs/Misc/AudioPlayer", typeof(CSharp.GameObject))
-    m_audioRoot = CSharp.UObject.Instantiate(m_audioRoot)
-    m_audioRoot.name = "AudioPlayer"
+    m_audioRoot = CSharp.Gameobjects.Instance:Spawner("Prefabs/Misc/AudioPlayer", false)
+    m_audioRoot:SetActive(true)
 
     -- 当前用的音源监听对象
     m_curAudioListerner = CSharp.GameObject.FindObjectOfType(typeof(CSharp.AudioListener))
@@ -554,7 +553,7 @@ function AudioManager.CustomDestroy()
     if nil == m_audioRoot then
         return
     end
-    CSharp.ResourceLoader.UnloadObject("Prefabs/Misc/AudioPlayer")
+    CSharp.Gameobjects.Instance:Destroy("Prefabs/Misc/AudioPlayer")
     LuaHandle.Unload("Game.Config.AudioConfig")
     LuaHandle.Unload("Game.Config.AudioGroupConfig")
     m_audioRoot = nil

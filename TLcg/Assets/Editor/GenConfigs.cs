@@ -107,7 +107,8 @@ namespace LCG
                 typeof(Http.ErrorCode),
                 typeof(SceneLoader),
                 typeof(ResourceLoader),
-                typeof(Define.EBootup)
+                typeof(Define.EBootup),
+                typeof(Gameobjects)
 #endregion
             };
 
