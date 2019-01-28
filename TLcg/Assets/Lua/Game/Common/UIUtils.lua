@@ -40,10 +40,9 @@ end
 
 -- 销毁界面
 -- <param name="path" type="string">路径</param>
--- <param name="fileName" type="string">package文件名</param>
 -- <param name="target" type="Object">对象</param>
-function UIUtils.DisposeUICom(path, fileName, target)
-    if path == nil or fileName == nil or target == nil then
+function UIUtils.DisposeUICom(path, target)
+    if path == nil or target == nil then
         return
     end
     UIUtils.UnloadUI(path)

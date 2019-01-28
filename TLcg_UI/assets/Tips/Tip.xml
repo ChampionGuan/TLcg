@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <component size="1334,750" opaque="false" adaptationTest="FitSize">
+  <controller name="Type_C" pages="0,,1," selected="0"/>
   <displayList>
     <graph id="n5_cmz8" name="Bg_1" xy="165,197" size="1000,61" group="n9_cmz8" type="rect" fillColor="#ff999999"/>
     <graph id="n6_cmz8" name="Bg_2" xy="165,197" size="1000,2" group="n9_cmz8" type="rect" fillColor="#ff000000"/>
@@ -11,7 +12,7 @@
       <relation target="" sidePair="center-center,middle-middle"/>
     </group>
   </displayList>
-  <transition name="Effect_T">
-    <item time="0" type="Alpha" target="n9_cmz8" tween="true" startValue="1" endValue="0" duration="36"/>
+  <transition name="T_0">
+    <item time="0" type="Alpha" target="n9_cmz8" tween="true" startValue="1" endValue="0" duration="36" ease="Linear"/>
   </transition>
 </component>

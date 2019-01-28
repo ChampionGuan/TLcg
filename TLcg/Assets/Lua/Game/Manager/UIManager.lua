@@ -6,14 +6,20 @@ UIManager.RootScaleFactor = 1
 -- UIRoot size
 UIManager.RootSize = {x = 0, y = 0}
 
+-- view--
+local view = nil
 -- ctrl--
 local ctrl = nil
 -- subCtrl--
 local subCtrl = nil
--- view--
-local view = nil
 -- ctrlCenter
 local ctrlCenter = nil
+-- 返回
+local back = nil
+-- 菊花
+local sync = nil
+-- 飘字
+local tips = nil
 -- 多点触摸
 local multiTouchConfig = nil
 -- 面板互斥
@@ -85,7 +91,8 @@ local function OnEnterBootup()
     if LevelManager.CurLevelType ~= Define.LevelType.Bootup then
         return
     end
-    -- TODO
+    tips.Clear()
+    sync.Clear()
 end
 
 local function OnCtrlOpen(ctrl)
@@ -113,12 +120,17 @@ function UIManager.Initialize()
     ctrl = LuaHandle.Load("Game.UI.Core.UIController")
     subCtrl = LuaHandle.Load("Game.UI.Core.UISubController")
     view = LuaHandle.Load("Game.UI.Core.UIView")
-    InitFairyGui()
-    SetResolution()
+    back = LuaHandle.Load("Game.UI.Common.UIBack")
+    sync = LuaHandle.Load("Game.UI.Common.UISync")
+    tips = LuaHandle.Load("Game.UI.Common.UITips")
     ctrlCenter.OnCtrlShow = OnCtrlShow
     ctrlCenter.OnCtrlHide = OnCtrlHide
     ctrlCenter.OnCtrlOpen = OnCtrlOpen
     ctrlCenter.OnCtrlClose = OnCtrlClose
+    sync.Initialize()
+    tips.Initialize()
+    InitFairyGui()
+    SetResolution()
 
     Event.AddListener(EventType.ENTER_SCENCE, OnEnterBootup)
     Event.AddListener(EventType.EXIT_SCENCE, UIManager.DestroyAllCtrl)
@@ -127,17 +139,22 @@ end
 
 -- 更新
 function UIManager.CustomUpdate()
-    ctrlCenter:CustomUpdate()
+    ctrlCenter.CustomUpdate()
+    back.CustomUpdate()
+    tips.CustomUpdate()
+    sync.CustomUpdate()
 end
 
 -- 固定更新
 function UIManager.CustomFixedUpdate()
-    ctrlCenter:CustomFixedUpdate()
+    ctrlCenter.CustomFixedUpdate()
 end
 
 -- 销毁
 function UIManager.CustomDestroy()
     UIManager.DestroyAllCtrl(true)
+    tips.CustomDestroy()
+    sync.CustomDestroy()
     CSharp.Stage.inst:RemoveEventListeners()
 end
 
@@ -147,7 +164,7 @@ end
 
 -- uiCtrl
 function UIManager.Controller(ctrlName, viewName)
-    local value = ctrlCenter:GetController(ctrlName)
+    local value = ctrlCenter.GetController(ctrlName)
     if nil ~= value then
         return value
     else
@@ -157,7 +174,7 @@ end
 
 -- uiSubCtrl
 function UIManager.SubController(ctrlName, viewName)
-    local value = ctrlCenter:GetSubController(ctrlName)
+    local value = ctrlCenter.GetSubController(ctrlName)
     if nil ~= value then
         return value
     else
@@ -182,7 +199,7 @@ function UIManager.OpenController(name, data)
     end
 
     opening = true
-    ctrlCenter:OpenController(name, data)
+    ctrlCenter.OpenController(name, data)
     opening = false
 
     -- 打开在等待的队列
@@ -194,27 +211,27 @@ end
 
 -- 获取面板
 function UIManager.GetCtrl(name)
-    return ctrlCenter:GetController(name)
+    return ctrlCenter.GetController(name)
 end
 
 -- 获取顶部面板
 function UIManager.GetTopCtrl()
-    return ctrlCenter:GetTopCtrl()
+    return ctrlCenter.GetTopCtrl()
 end
 
 -- 获取顶部的非弹框面板
 function UIManager.GetTopCtrl2NotPopup()
-    return ctrlCenter:GetTopCtrl2NotPopup()
+    return ctrlCenter.GetTopCtrl2NotPopup()
 end
 
 -- 获取顶部的全屏面板
 function UIManager.GetTopFullScreenCtrl()
-    return ctrlCenter:GetTopFullScreenCtrl()
+    return ctrlCenter.GetTopFullScreenCtrl()
 end
 
 -- 界面是否打开
 function UIManager.CtrlIsOpen(name)
-    local ctrl = ctrlCenter:GetController(name)
+    local ctrl = ctrlCenter.GetController(name)
     if nil == ctrl then
         return false
     else
@@ -224,7 +241,7 @@ end
 
 -- 界面是否为显示状态
 function UIManager.CtrlIsShow(name)
-    local ctrl = ctrlCenter:GetController(name)
+    local ctrl = ctrlCenter.GetController(name)
     if nil == ctrl then
         return false
     else
@@ -234,7 +251,7 @@ end
 
 -- 关闭此界面之上的所有面板
 function UIManager.CloseTheAboveCtrl(name)
-    local ctrl = ctrlCenter:getTopCtrl()
+    local ctrl = ctrlCenter.GetTopCtrl()
     if nil ~= ctrl and ctrl.ControllerName ~= name then
         ctrl:Close()
         UIManager.CloseTheAboveCtrl(name)
@@ -243,7 +260,7 @@ end
 
 -- 关闭此界面之下的所有面板
 function UIManager.CloseTheBelowCtrl(name)
-    local ctrl = ctrlCenter:GetBottomCtrl()
+    local ctrl = ctrlCenter.GetBottomCtrl()
     if nil ~= ctrl and ctrl.ControllerName ~= name then
         ctrl:Close()
         UIManager.CloseTheBelowCtrl(name)
@@ -252,28 +269,35 @@ end
 
 -- 刷新所有面板
 function UIManager.RefreshAllCtrl()
-    ctrlCenter:RefreshAllCtrl()
+    ctrlCenter.RefreshAllCtrl()
 end
 
 -- 销毁指定面板
 function UIManager.DestroyCtrl(name)
-    ctrlCenter:DestroyCtrl(name)
+    ctrlCenter.DestroyCtrl(name)
 end
 
 -- 销毁所有面板
 function UIManager.DestroyAllCtrl(deep)
-    ctrlCenter:DestroyAllCtrl(deep)
+    ctrlCenter.DestroyAllCtrl(deep)
 end
 
 -- 发送广播
 function UIManager.DispatchEvent(type, ...)
-    ctrlCenter:DispatchEvent(type, ...)
+    ctrlCenter.DispatchEvent(type, ...)
+end
+
+-- 飘字
+function UIManager.ShowTip(content, type)
+    tips.Show(content, type)
 end
 
 -- 消息等待
 function UIManager.WaitSync(type, value)
+    sync.Show(type, value)
 end
 
 -- 消息等待中
 function UIManager.WaitSyncing()
+    return sync.Showing()
 end

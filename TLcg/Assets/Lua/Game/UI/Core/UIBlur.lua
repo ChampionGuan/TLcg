@@ -53,7 +53,7 @@ end
 
 BlurEffect.Blur = function(isBlur, ctrl, sortingOrder)
     if isBlur and Utils.uITargetIsNil(UIRoot.Root) then
-        UIRoot.Root = UIUtils.creatView("UI/BlurEffect/BlurEffect", "BlurEffect", "BlurMain")
+        UIRoot.Root = UIUtils.SpawnUICom("UI/BlurEffect/BlurEffect", "BlurEffect", "BlurMain")
         UIRoot.Icon = UIRoot.Root:GetChild("icon")
         UIRoot.Root.touchable = false
     end

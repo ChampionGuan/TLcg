@@ -2,6 +2,31 @@
 local function Timer()
     local t = {}
 
+    function t:InvokeStart()
+        if nil == self.Start then
+            return
+        end
+        self.Start(self.Host)
+    end
+
+    function t:InvokeUpdate()
+        if nil == self.Update then
+            return
+        end
+        if nil == self.Host then
+            self.Update(self.CurCd, self.MaxCd)
+        else
+            self.Update(self.Host, self.CurCd, self.MaxCd)
+        end
+    end
+
+    function t:InvokeComplete()
+        if nil == self.Complete then
+            return
+        end
+        self.Complete(self.Host)
+    end
+
     function t:Init(cdMax, isCycle, funcStart, funcUpdate, funcComplete, host)
         index = index + 1
         self.InsId = index
@@ -14,9 +39,7 @@ local function Timer()
         self.Host = host
         self.IsIdle = false
 
-        if nil ~= self.Start then
-            self.Start(self.Host)
-        end
+        self:InvokeStart()
     end
 
     function t:AddCd(cdAdd)
@@ -28,15 +51,10 @@ local function Timer()
         self.CurCd = self.CurCd - value
 
         if self.CurCd >= 0 then
-            if nil ~= self.Update then
-                self.Update(self.Host, self.CurCd, self.MaxCd)
-            end
+            self:InvokeUpdate()
             return
         end
-
-        if nil ~= self.Complete then
-            self.Complete(self.Host)
-        end
+        self:InvokeComplete()
 
         if not self.IsCycle then
             self:Dispose()

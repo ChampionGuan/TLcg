@@ -39,7 +39,7 @@ end
 
 -- 销毁
 function TimerManager.CustomDestroy()
-    TimerManager:DisposeAllTimer()
+    TimerManager.DisposeAllTimer()
 end
 
 -- 新计时器
@@ -50,22 +50,22 @@ end
 -- funcUpdate:计时进行回调
 -- funcComplete:计时结束回调
 -- host:计时器宿主
-function TimerManager:NewTimer(cdMax, ignoreTimescale, isCycle, funcStart, funcUpdate, funcComplete, host)
+function TimerManager.NewTimer(cdMax, ignoreTimescale, isCycle, funcStart, funcUpdate, funcComplete, host)
     return TimerCenter:New(cdMax, ignoreTimescale, isCycle, funcStart, funcUpdate, funcComplete, host)
 end
 
 -- 计时器加时
-function TimerManager:AddCd(insId, cdAdd)
+function TimerManager.AddCd(insId, cdAdd)
     return TimerCenter:AddCd(insId, cdAdd)
 end
 
 -- 计时器销毁
-function TimerManager:DisposeTimer(insId)
+function TimerManager.DisposeTimer(insId)
     return TimerCenter:DisposeTimer(insId)
 end
 
 -- 销毁所有计时器
-function TimerManager:DisposeAllTimer()
+function TimerManager.DisposeAllTimer()
     return TimerCenter:DisposeAll()
 end
 

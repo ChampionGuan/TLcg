@@ -2,6 +2,7 @@
 <packageDescription id="xc286lha" jpegQuality="80" compressPNG="true">
   <resources>
     <component id="azvw0" name="Sync.xml" path="/" exported="true"/>
+    <image id="m9sh1" name="菊花.png" path="/Image/"/>
   </resources>
   <publish name="Sync" path="E:\2_champion\TLcg\TLcg\Assets\Resources\UI\Sync"/>
 </packageDescription>

@@ -60,3 +60,58 @@ end
 
 function _C:OnClose()
 end
+
+function _C:OnUpdate()
+    if CSharp.Input.GetKeyUp(CSharp.KeyCode.A) then
+        UIManager.WaitSync(1, true)
+    end
+    if CSharp.Input.GetKeyUp(CSharp.KeyCode.S) then
+        UIManager.WaitSync(2, true)
+    end
+    if CSharp.Input.GetKeyUp(CSharp.KeyCode.D) then
+        UIManager.WaitSync(4, true)
+    end
+
+    if CSharp.Input.GetKeyUp(CSharp.KeyCode.Z) then
+        UIManager.WaitSync(1, false)
+    end
+    if CSharp.Input.GetKeyUp(CSharp.KeyCode.X) then
+        UIManager.WaitSync(2, false)
+    end
+    if CSharp.Input.GetKeyUp(CSharp.KeyCode.C) then
+        UIManager.WaitSync(4, false)
+    end
+
+    if CSharp.Input.GetKeyUp(CSharp.KeyCode.J) then
+        TimerManager.NewTimer(
+            1,
+            false,
+            false,
+            function()
+                Debug.Log("开始")
+            end,
+            function(p1, p2)
+                Debug.Log(p1, p2)
+            end,
+            function()
+                Debug.Log("结束")
+            end
+        )
+    end
+    if CSharp.Input.GetKeyUp(CSharp.KeyCode.K) then
+        self.Timers:New(
+            1,
+            false,
+            false,
+            function()
+                Debug.Log("开始")
+            end,
+            function(p1, p2)
+                Debug.Log(p1, p2)
+            end,
+            function()
+                Debug.Log("结束")
+            end
+        )
+    end
+end

@@ -152,7 +152,7 @@ local function GetOpenCtrl(id, add)
     end
 end
 -- 将界面压栈--
-function UICenter:PushingStack(ctrl)
+function UICenter.PushingStack(ctrl)
     -- 隐藏之前面板
     local ctrlNum = #ControllerStack
     if ctrl.Type ~= UIDefine.CtrlType.PopupBox then
@@ -186,7 +186,7 @@ function UICenter:PushingStack(ctrl)
     end
 end
 -- 将界面出栈--
-function UICenter:PopingStack(ctrl)
+function UICenter.PopingStack(ctrl)
     -- 关闭自身
     ctrl:Hide()
     ctrl:SetInteractive(false)
@@ -205,7 +205,7 @@ function UICenter:PopingStack(ctrl)
 
     -- 栈顶面板
     local theLastCtrl = nil
-    theLastCtrl, ctrlNum = UICenter:GetTopCtrl()
+    theLastCtrl, ctrlNum = UICenter.GetTopCtrl()
     if nil == theLastCtrl then
         return
     end
@@ -224,11 +224,11 @@ function UICenter:PopingStack(ctrl)
     BlurPreCtrl(1)
 end
 -- 打开指定界面--
-function UICenter:OpenController(name, data)
-    local ctrl = self:GetController(name)
+function UICenter.OpenController(name, data)
+    local ctrl = UICenter.GetController(name)
     if ctrl == nil then
         LuaHandle.Load(name)
-        ctrl = self:GetController(name)
+        ctrl = UICenter.GetController(name)
     end
     -- 存在预处理逻辑，默认都是预处理成功
     if ctrl:PreHandle(data) then
@@ -238,7 +238,7 @@ function UICenter:OpenController(name, data)
     end
 end
 -- 向所有打开界面广播消息--
-function UICenter:DispatchEvent(type, ...)
+function UICenter.DispatchEvent(type, ...)
     for k, v in pairs(ControllerStack) do
         if v ~= nil and v.IsOpen then
             v:DispatchEvent(type, ...)
@@ -246,43 +246,43 @@ function UICenter:DispatchEvent(type, ...)
     end
 end
 -- 注册界面--
-function UICenter:RegisterController(ctrl)
+function UICenter.RegisterController(ctrl)
     if nil == ctrl.ControllerName then
         error("ctrl cannot have no name !!!")
     end
     ControllerCenter[ctrl.ControllerName] = ctrl
 end
 -- 移除界面--
-function UICenter:RemoveController(ctrl)
+function UICenter.RemoveController(ctrl)
     if nil == ctrl then
         return
     end
     -- ControllerCenter[ctrl.ControllerName] = nil
 end
 -- 注册sub界面--
-function UICenter:RegisterSubController(ctrl)
+function UICenter.RegisterSubController(ctrl)
     if nil == ctrl.ControllerName then
         error("ctrl cannot have no name !!!")
     end
     SubControllerCenter[ctrl.ControllerName] = ctrl
 end
 -- 移除sub界面--
-function UICenter:RemoveSubController(ctrl)
+function UICenter.RemoveSubController(ctrl)
     if nil == ctrl then
         return
     end
     -- SubControllerCenter[ctrl.ControllerName] = nil
 end
 -- 获取顶部界面--
-function UICenter:GetTopCtrl()
+function UICenter.GetTopCtrl()
     return GetOpenCtrl(#ControllerStack, -1)
 end
 -- 获取底部界面--
-function UICenter:GetBottomCtrl()
+function UICenter.GetBottomCtrl()
     return GetOpenCtrl(1, 1)
 end
 -- 获取指定界面--
-function UICenter:GetController(name)
+function UICenter.GetController(name)
     if name == nil then
         return nil
     end
@@ -290,7 +290,7 @@ function UICenter:GetController(name)
     return ControllerCenter[name]
 end
 -- 获取指定界面--
-function UICenter:GetSubController(name)
+function UICenter.GetSubController(name)
     if name == nil then
         return nil
     end
@@ -298,7 +298,7 @@ function UICenter:GetSubController(name)
     return SubControllerCenter[name]
 end
 -- 获取顶部的非弹框界面--
-function UICenter:GetTopCtrl2NotPopup()
+function UICenter.GetTopCtrl2NotPopup()
     local ctrl = nil
     for i = #ControllerStack, 1, -1 do
         if ControllerStack[i].Type ~= UIDefine.CtrlType.PopupBox then
@@ -309,7 +309,7 @@ function UICenter:GetTopCtrl2NotPopup()
     return ctrl
 end
 -- 获取顶部的全屏界面--
-function UICenter:GetTopFullScreenCtrl()
+function UICenter.GetTopFullScreenCtrl()
     local ctrl = nil
     for i = #ControllerStack, 1, -1 do
         if ControllerStack[i].Type == UIDefine.CtrlType.FullScreen then
@@ -320,14 +320,14 @@ function UICenter:GetTopFullScreenCtrl()
     return ctrl
 end
 -- 关闭指定界面--
-function UICenter:DestroyCtrl(name)
+function UICenter.DestroyCtrl(name)
     local ctrl = ControllerCenter[name]
     if nil ~= ctrl then
         ctrl:DestroyBySelf()
     end
 end
 -- 关闭所有的界面--
-function UICenter:DestroyAllCtrl(deep)
+function UICenter.DestroyAllCtrl(deep)
     if nil == deep then
         deep = false
     end
@@ -341,7 +341,7 @@ function UICenter:DestroyAllCtrl(deep)
     end
 end
 -- 更新所有打开的界面--
-function UICenter:CustomUpdate()
+function UICenter.CustomUpdate()
     for k, v in pairs(ControllerCenter) do
         v:Update()
     end
@@ -350,7 +350,7 @@ function UICenter:CustomUpdate()
     end
 end
 -- 更新所有打开的界面--
-function UICenter:CustomFixedUpdate()
+function UICenter.CustomFixedUpdate()
     for k, v in pairs(ControllerCenter) do
         v:FixedUpdate()
     end
@@ -360,7 +360,7 @@ function UICenter:CustomFixedUpdate()
 end
 
 -- 刷新所有打开的界面--
-function UICenter:RefreshAllCtrl()
+function UICenter.RefreshAllCtrl()
     for i = #ControllerStack, 1, -1 do
         if ControllerStack[i].IsOpen and not ControllerStack[i].IsDestroyed then
             ControllerStack[i]:Refresh()

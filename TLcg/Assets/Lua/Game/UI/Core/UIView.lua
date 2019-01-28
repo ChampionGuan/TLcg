@@ -58,7 +58,7 @@ local function UIView()
     t.Destroy = function(self)
         self.Events = nil
         self:OnDestroy()
-        UIUtils.DisposeUICom(self.PkgPath, self.PkgName, self.UI)
+        UIUtils.DisposeUICom(self.PkgPath, self.UI)
     end
 
     t.OnCreat = function(self)

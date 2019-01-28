@@ -20,7 +20,7 @@ end
 
 -- 返回登录
 local function BackToLogin()
-    UIManager.WaitSync(Define.SyncType.MsgSync, false)
+    UIManager.WaitSync(Define.SyncType.Sync, false)
     LevelManager.LoadScene(Define.LevelType.Bootup)
 end
 
@@ -49,7 +49,7 @@ local function SyncTimeOut()
             content = Localization.NetReloginFailure,
             btnRightTitle = Localization.BtnToLogin,
             btnRightFunc = BackToLogin,
-            syncType = Define.SyncType.MsgSync
+            syncType = Define.SyncType.Sync
         }
     else
         data = {
@@ -58,7 +58,7 @@ local function SyncTimeOut()
             btnRightTitle = Localization.BtnToWait,
             btnLeftFunc = BackToLogin,
             btnRightFunc = ContinueWait,
-            syncType = Define.SyncType.MsgSync
+            syncType = Define.SyncType.Sync
         }
     end
     -- 弹出二级弹框
@@ -83,7 +83,7 @@ local function AddC2SMsgId(moduleId, msgId)
     syncMsgCount = syncMsgCount + 1
     syncTimeoutCount = 1
     syncTimeoutTimer:start()
-    UIManager.WaitSync(Define.SyncType.MsgSync)
+    UIManager.WaitSync(Define.SyncType.Sync)
 
     -- 发送菊花同步的协议
     local msg, newModuleId, newMsgId = misc_decoder.NewC2sPingMsg()
@@ -113,8 +113,8 @@ function MsgHandle.ReceiveMsg(moduleId, msgId)
     if syncMsgCount > 0 then
         return
     end
-    UIManager.WaitSync(Define.SyncType.MsgSync, false)
-    UIManager.DispatchEvent(Event.ERROR_SYNC_CLOSE, Define.SyncType.MsgSync)
+    UIManager.WaitSync(Define.SyncType.Sync, false)
+    UIManager.DispatchEvent(Event.ERROR_SYNC_CLOSE, Define.SyncType.Sync)
     syncTimeoutTimer:pause()
 end
 
@@ -147,7 +147,7 @@ function MsgHandle.Destroy()
     syncMsgCount = 0
     syncTimeoutCount = 1
     syncTimeoutTimer:pause()
-    UIManager.WaitSync(Define.SyncType.MsgSync, false)
+    UIManager.WaitSync(Define.SyncType.Sync, false)
 end
 Event.AddListener(EventType.MUST_RECONNECT, MsgHandle.Destroy)
 Event.AddListener(EventType.MUST_RELOGIN, MsgHandle.Destroy)

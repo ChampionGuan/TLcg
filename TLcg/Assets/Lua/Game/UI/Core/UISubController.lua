@@ -161,7 +161,7 @@ local function UISubController(ctrlName, viewName)
         self.Events = nil
         self.Timers:DisposeAll()
         -- 移除ctrl
-        uiCenter:RemoveSubController(self)
+        uiCenter.RemoveSubController(self)
     end
     -- 是否已销毁--
     t.IsDispose = function(self)
@@ -190,7 +190,7 @@ local function UISubController(ctrlName, viewName)
         self.SubView.UI.position = CSharp.Vector3.zero
     end
 
-    uiCenter:RegisterSubController(t)
+    uiCenter.RegisterSubController(t)
     return t
 end
 

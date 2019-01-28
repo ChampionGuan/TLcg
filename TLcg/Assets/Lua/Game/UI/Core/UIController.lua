@@ -27,7 +27,7 @@ local function UIController(ctrlName, viewName, isRegister)
         uiCullingMask = LuaHandle.Load("Game.UI.Core.UICullingMask")
     end
     if nil == uiTimer then
-        uiTimer = LuaHandle.Load("Game.UI.Core.UITimer")
+        uiTimer = LuaHandle.Load("Game.Timer.Timer")
     end
 
     local t = {}
@@ -124,7 +124,7 @@ local function UIController(ctrlName, viewName, isRegister)
         self:OpenOver()
         -- 判断是否要推入栈中
         if nil == isPushStack or isPushStack then
-            uiCenter:PushingStack(self)
+            uiCenter.PushingStack(self)
         end
     end
     -- 关闭界面--
@@ -140,7 +140,7 @@ local function UIController(ctrlName, viewName, isRegister)
         self:CloseOver()
         -- 移除模糊
         blurEffect.RemoveBlur(self.ControllerName)
-        uiCenter:PopingStack(self)
+        uiCenter.PopingStack(self)
     end
     -- 显示界面--
     t.Show = function(self)
@@ -316,7 +316,7 @@ local function UIController(ctrlName, viewName, isRegister)
         -- 移除模糊
         blurEffect.RemoveBlur(self.ControllerName)
         -- 移除ctrl
-        uiCenter:RemoveController(self)
+        uiCenter.RemoveController(self)
     end
     -- 销毁界面--
     t.DestroyByOther = function(self, deep)
@@ -442,7 +442,7 @@ local function UIController(ctrlName, viewName, isRegister)
     end
 
     if nil == isRegister or isRegister then
-        uiCenter:RegisterController(t)
+        uiCenter.RegisterController(t)
     end
     return t
 end

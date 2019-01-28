@@ -1,3 +1,0 @@
-local Sync = {}
-
-return Sync

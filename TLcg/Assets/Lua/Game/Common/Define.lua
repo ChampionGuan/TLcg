@@ -13,7 +13,7 @@ Define.SyncType = {
     -- http请求
     HttpSync = 1,
     -- 消息同步
-    MsgSync = 2,
+    Sync = 2,
     -- 重连同步
     NetSync = 3,
     -- 登录时的菊花
