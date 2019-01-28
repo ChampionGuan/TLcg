@@ -56,6 +56,7 @@ end
 
 function _C:OnOpen(data)
     _C.View.CtrlLogin.selectedIndex = 0
+    _C.View.TextVersion.text = Common.Version.ServerResVersion
 end
 
 function _C:OnClose()

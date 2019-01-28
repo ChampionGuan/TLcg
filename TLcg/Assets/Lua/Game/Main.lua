@@ -1,10 +1,10 @@
 require "Common.LuaHandle"
 LuaHandle.Load("bit")
-LuaHandle.Load("Common.common")
+LuaHandle.Load("Common.Common")
+LuaHandle.Load("Common.CSUtils")
+LuaHandle.Load("Common.PlayerPrefs")
 LuaHandle.Load("Common.bezier")
-LuaHandle.Load("Common.csutils")
 LuaHandle.Load("Common.json")
-LuaHandle.Load("Common.playerprefs")
 LuaHandle.Load("Game.Config.Localization")
 LuaHandle.Load("Game.Common.Define")
 LuaHandle.Load("Game.Common.Event")

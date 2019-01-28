@@ -11,6 +11,7 @@ function _V:OnCreat()
     self.BtnSwitchServer = self.UI:GetChild("Button_SwitchServer")
     self.BtnAutofix = self.UI:GetChild("Button_Autofix")
     self.CtrlLogin = self.UI:GetController("Logic_C")
+    self.TextVersion = self.UI:GetChild("Text_Version")
 
     self.BtnRegister.onClick:Set(
         function()
