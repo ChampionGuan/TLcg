@@ -17,9 +17,9 @@ namespace LCG
         // 插在后排的lua
         private static List<string> m_backLua = new List<string>() { "autogen.autogen_modules", "Data.DataTrunk" };
         // 导出路径
-        private static string m_exportPath = string.Format("{0}/{1}/", Application.dataPath, "Lua/Game/Config");
+        private static string m_exportPath = string.Format("{0}/{1}/", Application.dataPath, "Lua/Launcher");
         // 配置名称
-        private static string m_configName = "LuaConfigs.lua";
+        private static string m_configName = "Preload.lua";
 
         [MenuItem("Tools/收集lua文件")]
         private static void BuildLuaWindow()
