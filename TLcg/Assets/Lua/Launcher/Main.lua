@@ -1,20 +1,19 @@
 require "Common.LuaHandle"
 LuaHandle.Load("Common.Common")
+LuaHandle.Load("Common.CSUtils")
 
 -- 更新检测
-local m_abHotfix = nil
+local m_abHotfix = LuaHandle.Load("Launcher.ABHotfix")
 
 -- 初始化
 function Initialize(type)
-    m_abHotfix = LuaHandle.Load("Launcher.ABHotfix")
-
-    if type == 1 then
+    if type == CSharp.EBootup.Launcher then
         m_abHotfix.Bootup(Over)
-    elseif type == 2 then
+    elseif type == CSharp.EBootup.Check then
         m_abHotfix.Check(Over)
-    elseif type == 3 then
+    elseif type == CSharp.EBootup.Repair then
         m_abHotfix.Repair(false, Over)
-    elseif type == 4 then
+    elseif type == CSharp.EBootup.DeepRepair then
         m_abHotfix.Repair(true, Over)
     end
 end
@@ -22,10 +21,9 @@ end
 -- 结束
 function Over()
     print("启动器结束！！")
-    OnDestroy()
+    m_abHotfix.Destroy()
     LuaHandle.Load("Launcher.CSHotfix")
-    CSharp.Main.Instance:StartupGame()
-    LuaHandle.Unload("Launcher.Main")
+    CSharp.Main.Instance:StartupGame(CSharp.EBootup.Game)
 end
 
 -- 更新
@@ -47,5 +45,8 @@ end
 
 -- 销毁
 function OnDestroy()
-    m_abHotfix.Destroy()
+    LuaHandle.Unload("Common.CSUtils")
+    LuaHandle.Unload("Launcher.CSHotfix")
+    LuaHandle.Unload("Launcher.ABHotfix")
+    LuaHandle.Unload("Launcher.Main")
 end

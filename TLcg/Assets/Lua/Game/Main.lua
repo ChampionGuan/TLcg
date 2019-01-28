@@ -71,4 +71,6 @@ function OnDestroy()
     UIManager.CustomDestroy()
     LevelManager.CustomDestroy()
     NetworkManager.CustomDestroy()
+    LuaHandle.UnloadAll()
+    LuaHandle.Unload("Game.Main")
 end

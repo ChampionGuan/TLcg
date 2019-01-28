@@ -100,6 +100,13 @@ namespace LCG
             m_root.SetActive(value);
         }
 
+        public void SetVolume(float value)
+        {
+            value = value < 0 ? 0 : value;
+            value = value > 1 ? 1 : value;
+            m_audioSource.volume = value;
+        }
+
         public void Release()
         {
             if (null != m_videoPlayer)

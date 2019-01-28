@@ -1,9 +1,7 @@
-LuaHandle.Load("Common.CSUtils")
 LuaHandle.Load("Common.json")
 LuaHandle.Load("Common.PlayerPrefs")
-local Tips = LuaHandle.Load("Launcher.Tips")
+local Tips = LuaHandle.Load("Launcher.Config").Hotfix
 local Video = LuaHandle.Load("Launcher.Video")
-local Audio = LuaHandle.Load("Launcher.Audio").Audio
 local XluaUtils = LuaHandle.Load("Common.XluaUtils")
 
 local ABHotfix = {}
@@ -194,7 +192,7 @@ local function HotfixHandle(value)
     if value.state == CSharp.EVersionState.CheckLocalVersion then
         m_mainUI.ProgressBar.value = 0
         m_mainUI.ProgressBar:TweenValue(50, 2):SetEase(CSharp.EaseType.CubicOut)
-        m_mainUI.Desc.text = Tips.Hotter_1
+        m_mainUI.Desc.text = Tips.Tip_1
         return
     end
 
@@ -211,7 +209,7 @@ local function HotfixHandle(value)
             ShowPopupUI(true)
             AddBtnEvent(m_popupUI.BtnConfirm, ABHotfix.ReCheck)
             AddBtnEvent(m_popupUI.BtnCancel, QuitApp)
-            m_popupUI.Desc.text = Tips.NetError
+            m_popupUI.Desc.text = Tips.Tip_Error
             m_popupUI.BtnState.selectedIndex = 2
             return
         end
@@ -257,7 +255,7 @@ local function HotfixHandle(value)
         ShowPopupUI(true)
         AddBtnEvent(m_popupUI.BtnConfirm, value.callBack)
         AddBtnEvent(m_popupUI.BtnCancel, QuitApp)
-        m_popupUI.Desc.text = string.format(Tips.Hotter_3, m_downloadSize)
+        m_popupUI.Desc.text = string.format(Tips.Tip_3, m_downloadSize)
         m_popupUI.BtnState.selectedIndex = 1
         return
     end
@@ -267,7 +265,7 @@ local function HotfixHandle(value)
         ShowPopupUI(true)
         AddBtnEvent(m_popupUI.BtnConfirm, value.callBack)
         AddBtnEvent(m_popupUI.BtnCancel, QuitApp)
-        m_popupUI.Desc.text = Tips.Hotter_4
+        m_popupUI.Desc.text = Tips.Tip_4
         m_popupUI.BtnState.selectedIndex = 1
         return
     end
@@ -282,9 +280,9 @@ local function HotfixHandle(value)
     if value.state == CSharp.EVersionState.DownloadProgress then
         ProgressBar(value.fValue * 100)
         if nil ~= m_downloadSpeed then
-            m_mainUI.Desc.text = string.format(Tips.Hotter_5, m_downloadSize, m_downloadSpeed)
+            m_mainUI.Desc.text = string.format(Tips.Tip_5, m_downloadSize, m_downloadSpeed)
         else
-            m_mainUI.Desc.text = string.format(Tips.Hotter_6, m_downloadSize)
+            m_mainUI.Desc.text = string.format(Tips.Tip_6, m_downloadSize)
         end
         return
     end
@@ -292,7 +290,7 @@ local function HotfixHandle(value)
     -- 解压进度
     if value.state == CSharp.EVersionState.UnzipProgress then
         ProgressBar(value.fValue * 100)
-        m_mainUI.Desc.text = Tips.Hotter_7
+        m_mainUI.Desc.text = Tips.Tip_7
         return
     end
 
@@ -301,7 +299,7 @@ local function HotfixHandle(value)
         ShowPopupUI(true)
         AddBtnEvent(m_popupUI.BtnConfirm, ABHotfix.ReCheck)
         AddBtnEvent(m_popupUI.BtnCancel, QuitApp)
-        m_popupUI.Desc.text = Tips.Hotter_8
+        m_popupUI.Desc.text = Tips.Tip_8
         m_popupUI.BtnState.selectedIndex = 1
         return
     end
@@ -311,7 +309,7 @@ local function HotfixHandle(value)
         ShowPopupUI(true)
         AddBtnEvent(m_popupUI.BtnConfirm, ABHotfix.ReCheck)
         AddBtnEvent(m_popupUI.BtnCancel, QuitApp)
-        m_popupUI.Desc.text = Tips.Hotter_9 .. value.sValue
+        m_popupUI.Desc.text = Tips.Tip_9 .. value.sValue
         m_popupUI.BtnState.selectedIndex = 2
         print("更新时网络异常！！", value.sValue)
         return
@@ -327,7 +325,7 @@ local function HotfixHandle(value)
                 QuitApp()
             end
         )
-        m_popupUI.Desc.text = Tips.Hotter_11
+        m_popupUI.Desc.text = Tips.Tip_11
         m_popupUI.BtnState.selectedIndex = 3
         return
     end
@@ -341,7 +339,7 @@ local function HotfixHandle(value)
 
     -- 热更完成，开始预加载lua
     if value.state == CSharp.EVersionState.HotfixComplete then
-        m_mainUI.Desc.text = Tips.Hotter_2
+        m_mainUI.Desc.text = Tips.Tip_2
         -- 如果检测到上次未完成重度修复，则继续
         if PlayerPrefs.GetAutoDeepfix() then
             ABHotfix.Repair(true, m_hotfixComplete)
@@ -374,7 +372,7 @@ local function AutofixHandle(value)
         ShowPopupUI(true)
         AddBtnEvent(m_popupUI.BtnConfirm, ABHotfix.ReRepair)
         AddBtnEvent(m_popupUI.BtnCancel, QuitApp)
-        m_popupUI.Desc.text = Tips.Hotter_14 .. value.sValue
+        m_popupUI.Desc.text = Tips.Tip_14 .. value.sValue
         m_popupUI.BtnState.selectedIndex = 2
         print("更新时网络异常！！", value.sValue)
         return
@@ -396,7 +394,7 @@ local function AutofixHandle(value)
         ShowPopupUI(true)
         AddBtnEvent(m_popupUI.BtnConfirm, value.callBack)
         AddBtnEvent(m_popupUI.BtnCancel, QuitApp)
-        m_popupUI.Desc.text = string.format(Tips.Hotter_3, m_downloadSize)
+        m_popupUI.Desc.text = string.format(Tips.Hotfix_3, m_downloadSize)
         m_popupUI.BtnState.selectedIndex = 1
         return
     end
@@ -406,7 +404,7 @@ local function AutofixHandle(value)
         ShowPopupUI(true)
         AddBtnEvent(m_popupUI.BtnConfirm, value.callBack)
         AddBtnEvent(m_popupUI.BtnCancel, QuitApp)
-        m_popupUI.Desc.text = Tips.Hotter_4
+        m_popupUI.Desc.text = Tips.Tip_4
         m_popupUI.BtnState.selectedIndex = 1
         return
     end
@@ -414,27 +412,27 @@ local function AutofixHandle(value)
     -- 下载修复进度
     if value.state == CSharp.EVersionState.AutofixProgress then
         ProgressBar(value.fValue * 100)
-        m_mainUI.Desc.text = Tips.Hotter_13
+        m_mainUI.Desc.text = Tips.Tip_13
         return
     end
 
     -- 检测文件进度
     if value.state == CSharp.EVersionState.CheckFileProgress then
         ProgressBar(value.fValue * 100)
-        m_mainUI.Desc.text = Tips.Hotter_12
+        m_mainUI.Desc.text = Tips.Tip_12
         return
     end
 
     -- 删除文件进度
     if value.state == CSharp.EVersionState.AutofixDeleteFile then
         ProgressBar(value.fValue * 100)
-        m_mainUI.Desc.text = Tips.Hotter_16
+        m_mainUI.Desc.text = Tips.Tip_16
         return
     end
 
     -- 修复完成，开始预加载lua
     if value.state == CSharp.EVersionState.AutofixComplete then
-        m_mainUI.Desc.text = Tips.Hotter_2
+        m_mainUI.Desc.text = Tips.Tip_2
         CSharp.Main.Instance:StartCoroutine(
             XluaUtils.cs_generator(
                 LoadLua,
@@ -523,13 +521,11 @@ end
 
 -- 初始化
 function ABHotfix.Initialize()
-    Audio.Initialize()
     Video.Initialize()
 end
 
 -- 更新
 function ABHotfix.FixedUpdate()
-    Audio:Update()
 end
 
 -- 销毁
@@ -542,15 +538,14 @@ function ABHotfix.Destroy()
     end
     m_mainUI.UI = nil
     m_popupUI.UI = nil
-    Audio.Destroy()
     Video.Destroy()
     LuaHandle.Unload("Common.CSUtils")
     LuaHandle.Unload("Common.json")
     LuaHandle.Unload("Common.PlayerPrefs")
     LuaHandle.Unload("Common.XluaUtils")
-    LuaHandle.Unload("Launcher.Tips")
+    LuaHandle.Unload("Launcher.Config")
     LuaHandle.Unload("Launcher.Video")
-    LuaHandle.Unload("Launcher.Audio")
+    LuaHandle.Unload("Launcher.Preload")
 end
 
 return ABHotfix

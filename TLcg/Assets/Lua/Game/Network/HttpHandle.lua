@@ -2,9 +2,9 @@
 local HttpHandle = {}
 
 -- 当前http请求个数
-local httpCount = 0
+local m_syncCount = 0
 -- 请求的http消息
-local httpMsg = {}
+local m_httpMsg = {}
 
 -- 返回登录
 local function BackToLogin()
@@ -14,16 +14,16 @@ end
 
 -- http递增
 local function CountAsc()
-    if httpCount <= 0 then
+    if m_syncCount <= 0 then
         UIManager.WaitSync(Define.SyncType.HttpSync, true)
     end
-    httpCount = httpCount + 1
+    m_syncCount = m_syncCount + 1
 end
 
 -- http递减
 local function CountDec()
-    httpCount = httpCount - 1
-    if httpCount <= 0 then
+    m_syncCount = m_syncCount - 1
+    if m_syncCount <= 0 then
         UIManager.WaitSync(Define.SyncType.HttpSync, false)
     end
 end
@@ -110,13 +110,13 @@ end
 
 -- http请求失败
 local function SyncError(index, error)
-    local msg = httpMsg[index]
+    local msg = m_httpMsg[index]
     if nil == msg then
         return
     end
     -- 不用菊花的不做处理！！
     if not msg.isSync then
-        httpMsg[index] = nil
+        m_httpMsg[index] = nil
         return
     end
 
@@ -133,12 +133,12 @@ local function SyncError(index, error)
     else
         ErrorCode(error, msg)
     end
-    httpMsg[index] = nil
+    m_httpMsg[index] = nil
 end
 
 -- http请求成功
 local function SyncSucceed(index, res)
-    local msg = httpMsg[index]
+    local msg = m_httpMsg[index]
     if nil == msg then
         return
     end
@@ -152,7 +152,7 @@ local function SyncSucceed(index, res)
         CountDec()
     end
     msg.onSucceed(res)
-    httpMsg[index] = nil
+    m_httpMsg[index] = nil
 end
 
 -- 新增http消息
@@ -165,8 +165,8 @@ local function AddHttpMsg(url, from, callback, data)
 
     -- 此处的拼接为约定！！
     local index = nil ~= from and url .. "?" .. from or url
-    if nil == httpMsg[index] then
-        httpMsg[index] = {
+    if nil == m_httpMsg[index] then
+        m_httpMsg[index] = {
             isKeepWaiting = nil ~= data and data.keepWaiting or false,
             isErrorPopup = nil ~= data and data.errorPopup or false,
             isErrorTip = nil ~= data and data.errorTip or false,
@@ -178,11 +178,11 @@ local function AddHttpMsg(url, from, callback, data)
             timeoutCount = 0
         }
     else
-        httpMsg[index].syncCount = httpMsg[index].syncCount + 1
+        m_httpMsg[index].syncCount = m_httpMsg[index].syncCount + 1
     end
 
     -- 需要菊花同步，且为偶数次超时
-    if httpMsg[index].isSync and math.fmod(httpMsg[index].timeoutCount, 2) == 0 then
+    if m_httpMsg[index].isSync and math.fmod(m_httpMsg[index].timeoutCount, 2) == 0 then
         CountAsc()
     end
 
@@ -219,14 +219,14 @@ end
 
 -- 初始化
 function HttpHandle.Initialize()
-    httpCount = 0
-    httpMsg = {}
+    m_syncCount = 0
+    m_httpMsg = {}
 end
 
 -- httpClear
 function HttpHandle.Destroy()
-    httpCount = 0
-    httpMsg = {}
+    m_syncCount = 0
+    m_httpMsg = {}
     UIManager.WaitSync(Define.SyncType.HttpSync, false)
 end
 

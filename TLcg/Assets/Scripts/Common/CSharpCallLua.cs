@@ -4,24 +4,24 @@ namespace LCG
 {
     public class CSharpCallLua : Singleton<CSharpCallLua>, Define.IMonoBase
     {
-        private Action<int> m_actionInitialize;
+        private Action<Define.EBootup> m_actionInitialize;
         private Action m_actionUpdate;
         private Action m_actionFixedUpdate;
         private Action m_actionDestroy;
         private Action<bool> m_actionAppliationFocus;
         private Action<byte[]> m_actionReceiveMsg;
 
-        public void Initialize(int? i = 1)
+        public void Initialize(Define.EBootup e)
         {
-            if (Main.Instance.Mode == Define.EMode.Launcher)
-            {
-                LuaEnv.Instance.DoString("require 'Launcher.Main'");
-            }
-            else
+            if (Main.Instance.Mode == Define.EMode.Game)
             {
                 LuaEnv.Instance.DoString("require 'Game.Main'");
             }
-            m_actionInitialize = LuaEnv.Instance.BindToLua<Action<int>>("Initialize");
+            else
+            {
+                LuaEnv.Instance.DoString("require 'Launcher.Main'");
+            }
+            m_actionInitialize = LuaEnv.Instance.BindToLua<Action<Define.EBootup>>("Initialize");
             m_actionUpdate = LuaEnv.Instance.BindToLua<Action>("Update");
             m_actionFixedUpdate = LuaEnv.Instance.BindToLua<Action>("FixedUpdate");
             m_actionDestroy = LuaEnv.Instance.BindToLua<Action>("OnDestroy");
@@ -30,7 +30,7 @@ namespace LCG
 
             if (null != m_actionInitialize)
             {
-                m_actionInitialize(i.Value);
+                m_actionInitialize(e);
             }
         }
 

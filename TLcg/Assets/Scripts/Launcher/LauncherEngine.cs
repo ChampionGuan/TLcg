@@ -8,12 +8,25 @@ namespace LCG
         /// <summary>
         /// 初始化
         /// </summary>
-        public void Initialize(Define.ELauncher e)
+        public void Initialize(Define.EBootup e)
         {
             ABCheck.Instance.Initialize(() =>
             {
-                CSharpCallLua.Instance.Initialize((int)e);
+                CSharpCallLua.Instance.Initialize(e);
             });
+        }
+
+        /// <summary>
+        /// 销毁
+        /// </summary>
+        public void Destroy()
+        {
+            CSharpCallLua.Instance.CustomDestroy();
+            Gameobjects.Instance.CustomDestroy();
+            ABAutofix.Instance.CustomDestroy();
+            ABCheck.Instance.CustomDestroy();
+            ResourceLoader.UnloadAll();
+            StopAllCoroutines();
         }
 
         /// <summary>
@@ -36,6 +49,24 @@ namespace LCG
         public void ABRepair(bool isDeep, Action<ABHelper.VersionArgs> handleState)
         {
             ABAutofix.Instance.Repair(isDeep, handleState);
+        }
+
+        /// <summary>
+        /// 检测是否需要更新
+        /// </summary>
+        /// <param name="versionId"></param>
+        /// <returns></returns>
+        public bool CheckNeedHotfix(string versionId)
+        {
+            if (ABCheck.Instance.IsNeedGoStore(versionId))
+            {
+                return true;
+            }
+            if (ABCheck.Instance.IsNeedHotter(versionId))
+            {
+                return true;
+            }
+            return false;
         }
 
         private void Update()

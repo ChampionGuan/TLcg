@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System;
 
 namespace LCG
 {
@@ -17,24 +18,27 @@ namespace LCG
             Instance = this;
             Target = transform;
             DontDestroyOnLoad(gameObject);
-            StartupLauncher(Define.ELauncher.Initialize);
+            StartupLauncher(Define.EBootup.Launcher);
         }
 
         /// <summary>
         /// 启动器
         /// </summary>
-        public void StartupLauncher(Define.ELauncher e)
+        public void StartupLauncher(Define.EBootup e)
         {
+            GameEngine.Instance.Destroy();
             Main.Instance.Mode = Define.EMode.Launcher;
             LauncherEngine.Instance.Initialize(e);
         }
+
         /// <summary>
         /// 开始游戏
         /// </summary>
-        public void StartupGame()
+        public void StartupGame(Define.EBootup e)
         {
+            LauncherEngine.Instance.Destroy();
             Main.Instance.Mode = Define.EMode.Game;
-            GameEngine.Instance.Initialize();
+            GameEngine.Instance.Initialize(e);
         }
 
         /// <summary>
@@ -44,15 +48,7 @@ namespace LCG
         /// <returns></returns>
         public bool CheckNeedHotfix(string versionId)
         {
-            if (ABCheck.Instance.IsNeedGoStore(versionId))
-            {
-                return true;
-            }
-            if (ABCheck.Instance.IsNeedHotter(versionId))
-            {
-                return true;
-            }
-            return false;
+            return LauncherEngine.Instance.CheckNeedHotfix(versionId);
         }
     }
 }

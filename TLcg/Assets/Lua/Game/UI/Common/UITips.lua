@@ -56,21 +56,21 @@ end
 -- 飘字
 local UITips = {}
 -- 计时中(计时过程中不会再出现飘字))
-local tick = nil
+local m_tick = nil
 -- 最后一条tip
-local lastTip = nil
+local m_lastTip = nil
 
 -- content 表示显示文本内容
 -- type 表示显示类型，true为成功，false为警示
 function UITips.Show(content, type)
-    if tick ~= nil then
-        if lastTip == content then
+    if m_tick ~= nil then
+        if m_lastTip == content then
             return
         end
         MsgsCenter.Enqueue({content, type})
     else
-        lastTip = content
-        tick = 1
+        m_lastTip = content
+        m_tick = 1
 
         local tip = TipsCenter.Get()
         tip.Content.text = content
@@ -87,7 +87,7 @@ function UITips.Clear()
     for _, v in pairs(TipsCenter.Using) do
         v.Effect:Stop()
     end
-    tick = nil
+    m_tick = nil
     TipsCenter.Using = {}
     MsgsCenter.Queue = {}
 end
@@ -104,12 +104,12 @@ function UITips.CustomDestroy()
 end
 
 function UITips.CustomUpdate()
-    if nil == tick then
+    if nil == m_tick then
         return
     end
-    tick = tick - TimerManager.deltaTime
-    if tick < 0 then
-        tick = nil
+    m_tick = m_tick - TimerManager.deltaTime
+    if m_tick < 0 then
+        m_tick = nil
         local msg = MsgsCenter.Dequeue()
         if nil ~= msg then
             UITips.Show(msg[1], msg[2])

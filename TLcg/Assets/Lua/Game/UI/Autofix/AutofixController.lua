@@ -5,9 +5,11 @@ local function BtnBack()
 end
 
 local function BtnFix()
+    CSharp.Main.Instance:StartupLauncher(CSharp.EBootup.Repair)
 end
 
 local function BtnDeepFix()
+    CSharp.Main.Instance:StartupLauncher(CSharp.EBootup.DeepRepair)
 end
 
 function _C:OnCreat()

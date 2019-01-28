@@ -9,10 +9,11 @@
             void CustomDestroy();
             void CustomAppFocus(bool focus);
         }
-        public enum ELauncher
+        public enum EBootup
         {
             None = 0,
-            Initialize,
+            Game,
+            Launcher,
             Check,
             Repair,
             DeepRepair

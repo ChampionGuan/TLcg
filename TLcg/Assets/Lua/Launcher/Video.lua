@@ -1,6 +1,4 @@
--- Video
 local Video = {}
-
 local VideoConfig = nil
 local VideoCtrl = nil
 
@@ -44,7 +42,7 @@ function Video.Play(id, onPlay, onOver)
         VideoError()
         return
     end
-    if VideoCtrl:Play(config.VideoUrl, config.Loop, config.Skip) then
+    if VideoCtrl:Play(config.VideoUrl, config.Loop, false) then
         m_curVideoConfig = config
         VideoCtrl:SetActive(true)
     else
@@ -67,8 +65,7 @@ function Video.Initialize()
     if nil ~= m_videoRoot then
         return
     end
-    VideoConfig = LuaHandle.Load("Game.Config.VideoConfig")
-
+    VideoConfig = LuaHandle.Load("Launcher.Config").Video
     m_videoRoot = CSharp.ResourceLoader.LoadObject("Prefabs/Misc/VideoPlayer", typeof(CSharp.GameObject))
     m_videoRoot = CSharp.UObject.Instantiate(m_videoRoot)
     m_videoRoot.name = "VideoPlayer"
@@ -76,6 +73,7 @@ function Video.Initialize()
     VideoCtrl = m_videoRoot:GetComponent(typeof(CSharp.Video))
     VideoCtrl.PreparedCallback = VideoPrepared
     VideoCtrl.OverCallback = VideoOver
+    VideoCtrl:SetVolume(PlayerPrefs.GetAudioMusicVolume() * PlayerPrefs.GetAudioMusicSwitch())
 
     Video.Stop()
 end
@@ -85,7 +83,7 @@ function Video.Destroy()
         return
     end
     VideoCtrl:CustomDestroy()
-    LuaHandle.Unload("Game.Config.VideoConfig")
+    LuaHandle.Unload("Launcher.Config")
     CSharp.ResourceLoader.UnloadObject("Prefabs/Misc/VideoPlayer")
     m_videoRoot = nil
 end

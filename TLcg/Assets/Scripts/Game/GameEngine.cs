@@ -7,9 +7,23 @@ namespace LCG
         /// <summary>
         /// 初始化
         /// </summary>
-        public void Initialize()
+        public void Initialize(Define.EBootup e)
         {
-            CSharpCallLua.Instance.Initialize();
+            CSharpCallLua.Instance.Initialize(e);
+        }
+
+        /// <summary>
+        /// 销毁
+        /// </summary>
+        public void Destroy()
+        {
+            CSharpCallLua.Instance.CustomDestroy();
+            Gameobjects.Instance.CustomDestroy();
+            Network.Instance.CustomDestroy();
+            Http.Instance.CustomDestroy();
+            SceneLoader.Instance.CustomDestroy();
+            ResourceLoader.UnloadAll();
+            StopAllCoroutines();
         }
 
         private void Update()

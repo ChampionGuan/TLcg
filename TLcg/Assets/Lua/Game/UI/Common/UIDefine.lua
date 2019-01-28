@@ -28,7 +28,7 @@ UIDefine.SortingOrder = {
     NetError = 700,
     -- 系统广播
     SystemMsg = 800,
-    -- 消息提示
+    -- 飘字
     TipsMsg = 900,
     -- 点击特效
     ClickEffect = 1000,

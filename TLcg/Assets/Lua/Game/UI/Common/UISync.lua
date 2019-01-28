@@ -1,21 +1,21 @@
 local UISync = {}
 
 -- 菊花面板
-local view = nil
+local m_view = nil
 -- 等待时间
-local tick = nil
+local m_tick = nil
 -- 多种菊花
-local syncTab = {}
+local m_syncTab = {}
 
 function UISync.Show(type, value)
     if value then
         if not UISync.Showing() then
-            tick = 0.5
+            m_tick = 0.5
         end
 
-        syncTab[type] = true
-        view.UI.visible = true
-        view.UI.sortingOrder =
+        m_syncTab[type] = true
+        m_view.UI.visible = true
+        m_view.UI.sortingOrder =
             type == Define.SyncType.NetSync and UIDefine.SortingOrder.NetSignal or UIDefine.SortingOrder.Sync
     else
         if not UISync.Showing() then
@@ -23,24 +23,24 @@ function UISync.Show(type, value)
         end
 
         if type == Define.SyncType.All then
-            syncTab = {}
+            m_syncTab = {}
         else
-            syncTab[type] = false
+            m_syncTab[type] = false
         end
 
         if UISync.Showing() then
-            view.UI.sortingOrder =
+            m_view.UI.sortingOrder =
                 type == Define.SyncType.NetSync and UIDefine.SortingOrder.Sync or UIDefine.SortingOrder.NetSignal
         else
-            view.ShowStat.selectedIndex = 1
-            view.UI.visible = false
-            tick = nil
+            m_view.ShowStat.selectedIndex = 1
+            m_view.UI.visible = false
+            m_tick = nil
         end
     end
 end
 
 function UISync.Showing()
-    for _, v in pairs(syncTab) do
+    for _, v in pairs(m_syncTab) do
         if v then
             return true
         end
@@ -49,34 +49,34 @@ function UISync.Showing()
 end
 
 function UISync.Clear()
-    view.ShowStat.selectedIndex = 1
-    view.UI.visible = false
-    syncTab = {}
-    tick = nil
+    m_view.ShowStat.selectedIndex = 1
+    m_view.UI.visible = false
+    m_syncTab = {}
+    m_tick = nil
 end
 
 function UISync.Initialize()
-    view = {}
-    view.UI = UIUtils.SpawnUICom("UI/Sync/Sync", "Sync", "Sync")
-    view.ShowStat = view.UI:GetController("Show_C")
-    view.ShowStat.selectedIndex = 1
+    m_view = {}
+    m_view.UI = UIUtils.SpawnUICom("UI/Sync/Sync", "Sync", "Sync")
+    m_view.ShowStat = m_view.UI:GetController("Show_C")
+    m_view.ShowStat.selectedIndex = 1
 end
 
 function UISync.CustomUpdate()
-    if nil == tick then
+    if nil == m_tick then
         return
     end
-    tick = tick - TimerManager.deltaTime
-    if tick < 0 then
-        view.ShowStat.selectedIndex = 0
-        tick = nil
+    m_tick = m_tick - TimerManager.deltaTime
+    if m_tick < 0 then
+        m_view.ShowStat.selectedIndex = 0
+        m_tick = nil
     end
 end
 
 function UISync.CustomDestroy()
-    UIUtils.DisposeUICom("UI/Sync/Sync", view.UI)
-    syncTab = {}
-    view = nil
+    UIUtils.DisposeUICom("UI/Sync/Sync", m_view.UI)
+    m_syncTab = {}
+    m_view = nil
 end
 
 return UISync

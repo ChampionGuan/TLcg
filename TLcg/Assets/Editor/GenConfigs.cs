@@ -106,7 +106,8 @@ namespace LCG
                 typeof(Http),
                 typeof(Http.ErrorCode),
                 typeof(SceneLoader),
-                typeof(ResourceLoader)
+                typeof(ResourceLoader),
+                typeof(Define.EBootup)
 #endregion
             };
 
@@ -132,6 +133,7 @@ namespace LCG
                 typeof(Action<string, int, int>),
                 typeof(Action<UnityEngine.Object>),
                 typeof(Action<Vector3, bool>),
+                typeof(Action<Define.EBootup>),
                 typeof(Func<bool>),
                 typeof(Action<ABHelper.VersionArgs>),
                 typeof(EventCallback0),
