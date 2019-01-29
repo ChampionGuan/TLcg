@@ -24,5 +24,7 @@
             Launcher,
             Game
         }
+
+        public static string ReporterPath = "Prefabs/Misc/Reporter";
     }
 }

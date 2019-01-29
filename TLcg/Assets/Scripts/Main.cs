@@ -8,6 +8,7 @@ namespace LCG
         public static Main Instance = null;
         public Define.EMode Mode { get; private set; }
         public Transform Target { get; private set; }
+        private Reporter m_reporter = null;
         void Awake()
         {
             if (null != Instance)
@@ -19,6 +20,7 @@ namespace LCG
             Target = transform;
             DontDestroyOnLoad(gameObject);
             StartupLauncher(Define.EBootup.Launcher);
+            OpenReporter(true);
         }
 
         /// <summary>
@@ -49,6 +51,27 @@ namespace LCG
         public bool CheckNeedHotfix(string versionId)
         {
             return LauncherEngine.Instance.CheckNeedHotfix(versionId);
+        }
+
+        /// <summary>
+        /// 打开日志
+        /// </summary>
+        public void OpenReporter(bool b)
+        {
+            if (null == m_reporter)
+            {
+                UnityEngine.Object obj = Resources.Load(Define.ReporterPath);
+                if (null != obj)
+                {
+                    GameObject go = (GameObject.Instantiate(obj) as GameObject);
+                    m_reporter = go.GetComponent<Reporter>();
+                    go.name = "Reporter";
+                }
+            }
+            if (null != m_reporter)
+            {
+                m_reporter.show = b;
+            }
         }
     }
 }
