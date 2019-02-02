@@ -22,6 +22,7 @@ namespace LCG
             Network.Instance.CustomDestroy();
             Http.Instance.CustomDestroy();
             SceneLoader.Instance.CustomDestroy();
+            TouchHandle.Instance.CustomDestroy();
             ResourceLoader.UnloadAll();
             StopAllCoroutines();
         }
@@ -35,6 +36,7 @@ namespace LCG
                 Network.Instance.CustomUpdate();
                 Http.Instance.CustomUpdate();
                 LuaEnv.Instance.CustomUpdate();
+                TouchHandle.Instance.CustomUpdate();
             }
         }
 
@@ -59,6 +61,7 @@ namespace LCG
                 Http.Instance.CustomDestroy();
                 SceneLoader.Instance.CustomDestroy();
                 LuaEnv.Instance.CustomDestroy();
+                TouchHandle.Instance.CustomDestroy();
                 ResourceLoader.UnloadAll();
                 StopAllCoroutines();
             }
