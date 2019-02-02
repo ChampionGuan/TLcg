@@ -124,7 +124,7 @@ namespace LCG
             }
             if (m_touchCount == 2)
             {
-                m_zoomDeltaValue = Vector2.Distance(m_touchInfo[0].downPos, m_touchInfo[1].downPos);
+                m_zoomDeltaValue = (m_touchInfo[0].downPos - m_touchInfo[1].downPos).magnitude;
             }
         }
         private void RefreshTouchInfo(Touch info)
@@ -165,7 +165,7 @@ namespace LCG
 
                     if (m_touchCount > 2 && i < 2)
                     {
-                        m_zoomDeltaValue = Vector2.Distance(m_touchInfo[0].downPos, m_touchInfo[1].downPos);
+                        m_zoomDeltaValue = (m_touchInfo[0].downPos - m_touchInfo[1].downPos).magnitude;
                     }
                     if (m_touchCount == 1 && null != TouchEndEvent)
                     {
@@ -355,13 +355,13 @@ namespace LCG
                     }
                     break;
                 case TouchType.Zoom:
-                    if (m_touchCount < 1)
+                    if (m_touchCount < 2)
                     {
                         break;
                     }
                     if (null != ZoomEvent)
                     {
-                        float dis = Vector2.Distance(m_touchInfo[0].downPos, m_touchInfo[1].downPos);
+                        float dis = (m_touchInfo[0].downPos - m_touchInfo[1].downPos).magnitude;
                         ZoomEvent.Invoke(dis - m_zoomDeltaValue);
                         m_zoomDeltaValue = dis;
                     }
