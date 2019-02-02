@@ -124,7 +124,7 @@ namespace LCG
             }
             if (m_touchCount == 2)
             {
-                m_zoomDeltaValue = (m_touchInfo[0].downPos - m_touchInfo[1].downPos).magnitude;
+                m_zoomDeltaValue = (m_touchInfo[0].downPos - m_touchInfo[1].downPos).sqrMagnitude;
             }
         }
         private void RefreshTouchInfo(Touch info)
@@ -165,7 +165,7 @@ namespace LCG
 
                     if (m_touchCount > 2 && i < 2)
                     {
-                        m_zoomDeltaValue = (m_touchInfo[0].downPos - m_touchInfo[1].downPos).magnitude;
+                        m_zoomDeltaValue = (m_touchInfo[0].downPos - m_touchInfo[1].downPos).sqrMagnitude;
                     }
                     if (m_touchCount == 1 && null != TouchEndEvent)
                     {
@@ -361,13 +361,13 @@ namespace LCG
                     }
                     if (null != ZoomEvent)
                     {
-                        float dis = (m_touchInfo[0].downPos - m_touchInfo[1].downPos).magnitude;
-                        ZoomEvent.Invoke(dis - m_zoomDeltaValue);
+                        float dis = (m_touchInfo[0].downPos - m_touchInfo[1].downPos).sqrMagnitude;
+                        ZoomEvent.Invoke((dis - m_zoomDeltaValue) * 0.00001f);
                         m_zoomDeltaValue = dis;
                     }
                     break;
                 case TouchType.None:
-                    if (m_dragDeltaPos.x <= 0.05f && m_dragDeltaPos.y <= 0.05f)
+                    if (m_dragDeltaPos.sqrMagnitude < 0.025f)
                     {
                         break;
                     }
