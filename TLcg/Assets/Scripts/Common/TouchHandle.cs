@@ -43,7 +43,7 @@ namespace LCG
             DragDamp = 0.15f;
         }
 
-        public void SetArgs(Func<bool> touchValid, Action<Vector2> click, Action<Vector2> drag, Action<Vector2> touchBegin, Action<Vector2> touchEnd, Action<float> zoom, Action<float> scrollWheel, float dragDamp, int maxTouchCount)
+        public void SetArgs(Func<bool> touchValid = null, Action<Vector2> click = null, Action<Vector2> drag = null, Action<Vector2> touchBegin = null, Action<Vector2> touchEnd = null, Action<float> zoom = null, Action<float> scrollWheel = null, float? dragDamp = null, int? maxTouchCount = null)
         {
             TouchValidEvent = touchValid;
             ClickEvent = click;
@@ -52,21 +52,12 @@ namespace LCG
             TouchEndEvent = touchEnd;
             ZoomEvent = zoom;
             ScrollWheelEvent = scrollWheel;
-            DragDamp = dragDamp;
-            MaxTouchCount = maxTouchCount;
+            DragDamp = null == dragDamp ? 0.15f : dragDamp.Value;
+            MaxTouchCount = null == maxTouchCount ? 1 : maxTouchCount.Value;
         }
-
         public void Clear()
         {
-            TouchValidEvent = null;
-            ClickEvent = null;
-            DragEvent = null;
-            TouchBeginEvent = null;
-            TouchEndEvent = null;
-            ZoomEvent = null;
-            ScrollWheelEvent = null;
-            DragDamp = 0.15f;
-            MaxTouchCount = 1;
+            CustomDestroy();
         }
         #region 触摸屏
         private void CheckTouch()
@@ -230,7 +221,7 @@ namespace LCG
         #region 鼠标、滚轮
         private void CheckMouse()
         {
-            if (Input.GetMouseButton(0))
+            if (Input.GetMouseButtonDown(0))
             {
                 AddMouseInfo();
             }
@@ -338,7 +329,7 @@ namespace LCG
             }
             else
             {
-                return IsTouchValid();
+                return TouchValidEvent();
             }
         }
         private void Handle()
@@ -363,18 +354,6 @@ namespace LCG
                         ScrollWheelEvent.Invoke(Input.GetAxis("Mouse ScrollWheel"));
                     }
                     break;
-                case TouchType.None:
-                    if (m_dragDeltaPos.sqrMagnitude == 0)
-                    {
-                        break;
-                    }
-                    if (null != DragEvent)
-                    {
-                        m_dragDeltaPos.x = Mathf.Lerp(m_dragDeltaPos.x, 0, DragDamp);
-                        m_dragDeltaPos.y = Mathf.Lerp(m_dragDeltaPos.y, 0, DragDamp);
-                        DragEvent.Invoke(m_dragDeltaPos);
-                    }
-                    break;
                 case TouchType.Zoom:
                     if (m_touchCount < 1)
                     {
@@ -385,6 +364,18 @@ namespace LCG
                         float dis = Vector2.Distance(m_touchInfo[0].downPos, m_touchInfo[1].downPos);
                         ZoomEvent.Invoke(dis - m_zoomDeltaValue);
                         m_zoomDeltaValue = dis;
+                    }
+                    break;
+                case TouchType.None:
+                    if (m_dragDeltaPos.x <= 0.05f && m_dragDeltaPos.y <= 0.05f)
+                    {
+                        break;
+                    }
+                    if (null != DragEvent)
+                    {
+                        m_dragDeltaPos.x = Mathf.Lerp(m_dragDeltaPos.x, 0, DragDamp);
+                        m_dragDeltaPos.y = Mathf.Lerp(m_dragDeltaPos.y, 0, DragDamp);
+                        DragEvent.Invoke(m_dragDeltaPos);
                     }
                     break;
                 default: break;
