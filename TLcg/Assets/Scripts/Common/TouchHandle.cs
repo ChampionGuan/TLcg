@@ -420,18 +420,9 @@ namespace LCG
         private class TouchInfo
         {
             public int fingerId;
-            // 按下坐标
             public Vector2 downPos;
-            // 距离上次改变的距离增量
-            public Vector2 deltaPos;
-            public void Clear()
-            {
-                fingerId = -1;
-                downPos.x = 0;
-                downPos.y = 0;
-                deltaPos.x = 0;
-                deltaPos.y = 0;
-            }
+            public Vector2 deltaPos; // 距离上次改变的距离增量
+           
             public void Update(Vector2 dPos, Vector2 dePos)
             {
                 deltaPos.x = dePos.x;
