@@ -219,15 +219,16 @@ namespace LCG
             {
                 ABHelper.Encrypt(ref bytes);
             }
-            // 转换为utf8
-            using (Stream stream = new MemoryStream(bytes))
-            {
-                using (StreamReader sr = new StreamReader(stream))
-                {
-                    string code = sr.ReadToEnd();
-                    return System.Text.Encoding.UTF8.GetBytes(code);
-                }
-            }
+            // // 转换为utf8
+            // using (Stream stream = new MemoryStream(bytes))
+            // {
+            //     using (StreamReader sr = new StreamReader(stream))
+            //     {
+            //         string code = sr.ReadToEnd();
+            //         return System.Text.Encoding.UTF8.GetBytes(code);
+            //     }
+            // }
+            return bytes;
         }
         public class ReferenceCount
         {

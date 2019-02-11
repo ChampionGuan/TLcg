@@ -693,6 +693,26 @@ namespace LCG
             }
         }
         /// <summary>
+        /// 文件夹删除
+        /// </summary>
+        public static void DirectoryRemove(string dir)
+        {
+            if (Directory.Exists(dir))
+            {
+                Directory.Delete(dir, true);
+            }
+        }
+        /// <summary>
+        /// 文件夹重命名
+        /// </summary>
+        private static void DirectoryRename(string dir, string newDir)
+        {
+            if (Directory.Exists(dir))
+            {
+                Directory.Move(dir, newDir);
+            }
+        }
+        /// <summary>
         /// 压缩文件
         /// </summary>
         /// <param name="filename"></param>

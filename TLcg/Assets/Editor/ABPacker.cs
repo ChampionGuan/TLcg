@@ -40,7 +40,7 @@ namespace LCG
         }
         private static void ParseTheVersion()
         {
-            TextAsset resInfo = Resources.Load<TextAsset>("resversion");
+            TextAsset resInfo = Resources.Load<TextAsset>("versionId");
             if (null != resInfo)
             {
                 TheVersionNum = ABHelper.VersionNumSplit(resInfo.text.Replace("\r", ""));
