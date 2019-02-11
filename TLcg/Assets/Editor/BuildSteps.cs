@@ -12,8 +12,8 @@ namespace LCG
         static System.Diagnostics.Process m_process = null;
         static EditorWindow m_editorWindow;
 
-        static string m_appName = "Tlcg";
-        static string m_companyName = "Champion";
+        static string m_appName = "tlcg";
+        static string m_companyName = "champion";
         static string m_productName = "test";
         static string m_versionNum = "0.0.0.0";
         static string m_scriptingDefineSymbols = "HOTFIX_ENABLE;";
