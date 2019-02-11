@@ -10,7 +10,7 @@ else
     -- CS.LCG.LuaEnv.Instance:DoString(
     --     "xlua.hotfix(CS.LCG.CameraControllerMainCity, 'Update', function(self) print('maincity Camera') end)"
     -- )
-    CS.LCG.LuaEnv.Instance:DoString(
+    -- CS.LCG.LuaEnv.Instance:DoString(
         -- "xlua.hotfix(CS.LCG.Bootup, 'HotfixTest', function(self) print('lua hotfix log') end)"
-    )
+    -- )
 end

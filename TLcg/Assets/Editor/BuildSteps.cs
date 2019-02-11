@@ -228,7 +228,7 @@ namespace LCG
                 return;
             }
 
-
+            PlayerSettings.companyName = m_companyName;
             PlayerSettings.productName = m_productName;
             PlayerSettings.applicationIdentifier = "com." + m_companyName + "." + m_appName;
             PlayerSettings.SetScriptingDefineSymbolsForGroup(m_buildTargetGroup, m_scriptingDefineSymbols);
