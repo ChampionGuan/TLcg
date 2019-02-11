@@ -42,7 +42,22 @@ namespace LCG
             MaxTouchCount = 1;
             DragDamp = 0.15f;
         }
-
+        public void SetDragArgs(Func<bool> touchValid = null, Action<Vector2> drag = null, float? dragDamp = null)
+        {
+            SetArgs(touchValid, null, drag, null, null, null, null, dragDamp, 1);
+        }
+        public void SetClickArgs(Func<bool> touchValid = null, Action<Vector2> click = null)
+        {
+            SetArgs(touchValid, click, null, null, null, null, null, null, 1);
+        }
+        public void SetZoomArgs(Func<bool> touchValid = null, Action<float> zoom = null, Action<float> scrollWheel = null, int? maxTouchCount = null)
+        {
+            SetArgs(touchValid, null, null, null, null, zoom, scrollWheel, null, maxTouchCount);
+        }
+        public void SetTouchArgs(Func<bool> touchValid = null, Action<Vector2> touchBegin = null, Action<Vector2> touchEnd = null)
+        {
+            SetArgs(touchValid, null, null, touchBegin, touchEnd, null, null, null, 5);
+        }
         public void SetArgs(Func<bool> touchValid = null, Action<Vector2> click = null, Action<Vector2> drag = null, Action<Vector2> touchBegin = null, Action<Vector2> touchEnd = null, Action<float> zoom = null, Action<float> scrollWheel = null, float? dragDamp = null, int? maxTouchCount = null)
         {
             TouchValidEvent = touchValid;
@@ -422,7 +437,7 @@ namespace LCG
             public int fingerId;
             public Vector2 downPos;
             public Vector2 deltaPos; // 距离上次改变的距离增量
-           
+
             public void Update(Vector2 dPos, Vector2 dePos)
             {
                 deltaPos.x = dePos.x;
