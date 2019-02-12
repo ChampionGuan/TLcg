@@ -150,7 +150,6 @@ namespace LCG
                 else
                 {
                     Debug.Log("生成版本成功！");
-                    ABHelper.WriteFile(Application.dataPath + "/Resources/" + ABHelper.OriginalVersionName, m_versionNum);
                 }
             }
             catch (System.Exception e)
@@ -166,6 +165,7 @@ namespace LCG
                 DirRemove(m_luaTempFolderPath);
                 // ScriptingBackend
                 PlayerSettings.SetScriptingBackend(m_buildTargetGroup, ScriptingImplementation.IL2CPP);
+                ABHelper.WriteFile(Application.dataPath + "/Resources/" + ABHelper.OriginalVersionName, m_versionNum);
                 AssetDatabase.Refresh();
                 AssetDatabase.SaveAssets();
 

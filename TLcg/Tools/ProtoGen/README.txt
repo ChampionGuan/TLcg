@@ -1,0 +1,4 @@
+BlockInfo.proto服务端使用
+BlockInfo_Client.proto服务端使用
+两份Proto中的字段需要同步改动
+快速生成cs文件可使用ProtoGen.bat进行批处理

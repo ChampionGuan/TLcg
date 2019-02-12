@@ -1,0 +1,9 @@
+syntax = "proto2";
+package proto;
+
+message BlockInfoProto {
+    repeated int32 x = 1;
+    repeated int32 y = 2;
+	repeated int32 type = 3;
+    repeated int32 h = 5;
+}
