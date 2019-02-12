@@ -15,3 +15,6 @@ TLcg/TLcg.Editor.csproj
 TLcg/Assets/3rdLibs/XLua/Gen/*
 TLcg/Assets/3rdLibs/XLua/Gen.meta
 TLcg/Builds/*
+TLcg/Temp/*
+TLcg/Assets/Resources/Lua/*
+TLcg/Assets/Resources/Lua.meta

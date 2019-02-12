@@ -8,16 +8,16 @@ namespace LCG
 {
     public class BuildLuaConfigs : EditorWindow
     {
-        // lua文件夹路径
-        private static List<string> m_folderLua = new List<string>() { "Protobuf", "autogen", "Config", "Common", "Data", "Actor", "Manager", "Misc", "Net", "Skill", "Timer", "Battle" };
-        // 剔除的lua
-        private static List<string> m_exclusiveLua = new List<string>() { "Common.Common", "Common.LuaHandle", "Config.WorldMapConfig" };
-        // 插在前排的lua
-        private static List<string> m_forwardLua = new List<string>() { "bit", "protobuf", "autogen.shared_pb", "Common.Define", "Common.CSUtils", "Common.UIUtils", "Common.LogicUtils", "Common.Utils", "Config.Localization", "Config.UIConfig" };
-        // 插在后排的lua
-        private static List<string> m_backLua = new List<string>() { "autogen.autogen_modules", "Data.DataTrunk" };
         // 导出路径
         private static string m_exportPath = string.Format("{0}/{1}/", Application.dataPath, "Lua/Launcher");
+        // lua文件夹路径
+        private static List<string> m_folderLua = new List<string>() { "Protobuf", "Common", "Game/Common", "Game/Config", "Game/Data", "Game/LevelLogic", "Game/Manager", "Game/Network", "Game/Timer" };
+        // 插在前排的lua
+        private static List<string> m_forwardLua = new List<string>() { "bit", "protobuf", "Common.CSUtils", "Game.Common.Define", "Game.Common.Utils", "Game.Common.UIUtils", "Game.Common.Event", "Game.UI.Common.UIConfig" };
+        // 插在后排的lua
+        private static List<string> m_backLua = new List<string>() { "Game.Manager.DataManager" };
+        // 剔除的lua
+        private static List<string> m_exclusiveLua = new List<string>() { "Common.Common", "Common.LuaHandle", "Game.Network.NetConnect" };
         // 配置名称
         private static string m_configName = "Preload.lua";
 
@@ -54,11 +54,8 @@ namespace LCG
                 }
 
                 string nv = v.Replace("Assets/Lua/", "");
-#if UNITY_IOS
-            nv = nv.Replace(@"/", ".");            
-#else
+                nv = nv.Replace(@"/", ".");
                 nv = nv.Replace(@"\", ".");
-#endif
                 nv = nv.Replace(".lua", "");
 
                 if (m_exclusiveLua.Contains(nv) || m_forwardLua.Contains(nv) || m_backLua.Contains(nv))

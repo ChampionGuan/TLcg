@@ -7,7 +7,7 @@ using System.IO;
 
 namespace LCG
 {
-    public class BuildSteps : EditorWindow
+    public class BuildAppSteps : EditorWindow
     {
         static System.Diagnostics.Process m_process = null;
         static EditorWindow m_editorWindow;
@@ -17,19 +17,19 @@ namespace LCG
         static string m_productName = "test";
         static string m_versionNum = "0.0.0.0";
         static string m_scriptingDefineSymbols = "HOTFIX_ENABLE;";
+        static string m_dataPathPrefix = Application.dataPath + "/";
+        static string m_luaResourceFolderPath = m_dataPathPrefix + "Lua/";
+        static string m_luaTempFolderPath = m_dataPathPrefix + "Resources/Lua/";
         static string[] m_buildScenes = null;
         static string m_buildPath = string.Empty;
         static BuildTarget m_buildTarget = BuildTarget.Android;
         static BuildTargetGroup m_buildTargetGroup = BuildTargetGroup.Android;
         static BuildOptions m_buildOptions = BuildOptions.None;
-        static string m_dataPathPrefix = Application.dataPath + "/";
-        static string m_luaResourceFolderPath = m_dataPathPrefix + "Lua/";
-        static string m_luaTempFolderPath = m_dataPathPrefix + "Resources/Lua/";
         static string m_luajitWorkingPath = "/Luajit/luajit-2.1.0b2/src/";
         static string m_luajitExePath = "luajit.exe";
 
         [MenuItem("版本/打包")]
-        private static void BuildCoreDllWindow()
+        private static void Build()
         {
             m_process = new System.Diagnostics.Process();
             m_process.StartInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
@@ -54,9 +54,9 @@ namespace LCG
                 return;
             }
             string[] version = ABHelper.VersionNumSplit(m_versionNum);
-            m_versionNum = ABHelper.VersionNumCombine(version[0], (int.Parse(version[1]) + 1).ToString(), version[2], version[2]);
+            m_versionNum = ABHelper.VersionNumCombine(version[0], (int.Parse(version[1]) + 1).ToString(), version[2], version[3]);
 
-            m_editorWindow = EditorWindow.GetWindow(typeof(BuildSteps), true, "打包");
+            m_editorWindow = EditorWindow.GetWindow(typeof(BuildAppSteps), true, "打包");
         }
 
         private static string mode = "debug";
@@ -95,12 +95,19 @@ namespace LCG
 
             if (GUILayout.Button("Build"))
             {
-                BulidTarget(platform, mode == "debug");
+                switch (platform)
+                {
+                    case "android": m_buildTarget = BuildTarget.Android; break;
+                    case "ios": m_buildTarget = BuildTarget.iOS; break;
+                    default: m_buildTarget = BuildTarget.NoTarget; break;
+                }
+
+                BulidTarget(mode == "debug");
             }
         }
 
         //目标平台
-        private static void BulidTarget(string target, bool isDebug = false)
+        private static void BulidTarget(bool isDebug = false)
         {
             try
             {
@@ -113,7 +120,7 @@ namespace LCG
                 // 场景
                 EditorScenes();
                 // 打包环境
-                BuildEnv(target, isDebug);
+                BuildEnv(isDebug);
 
                 // 处理XLua脚本
                 CSObjectWrapEditor.Generator.ClearAll();
@@ -175,14 +182,14 @@ namespace LCG
                 m_editorWindow.Close();
             }
         }
-        private static void BuildEnv(string target, bool isDebug = false)
+        private static void BuildEnv(bool isDebug = false)
         {
             string target_dir = "";
             string target_name = "";
             string buildFolderPath = Application.dataPath.Replace("/Assets", "");
             m_buildOptions = isDebug ? (BuildOptions.CompressWithLz4 | BuildOptions.Development | BuildOptions.AllowDebugging | BuildOptions.ConnectWithProfiler) : (BuildOptions.CompressWithLz4HC | BuildOptions.SymlinkLibraries);
 
-            if (target == "android")
+            if (m_buildTarget == BuildTarget.Android)
             {
                 target_dir = buildFolderPath + "/Builds/Android";
                 target_name = m_companyName + "_" + m_appName + ".apk";
@@ -192,34 +199,34 @@ namespace LCG
                 PlayerSettings.Android.keyaliasName = "com.champion.tlcg";
                 PlayerSettings.Android.keyaliasPass = "champion";
             }
-            else if (target == "ios")
+            else if (m_buildTarget == BuildTarget.iOS)
             {
                 target_dir = buildFolderPath + "/Builds/iOS";
-                target_name = m_appName;
+                target_name = m_companyName + "_" + m_appName;
                 m_buildTargetGroup = BuildTargetGroup.iOS;
                 m_buildTarget = BuildTarget.iOS;
                 EditorUserBuildSettings.iOSBuildConfigType = isDebug ? iOSBuildType.Debug : iOSBuildType.Release;
                 PlayerSettings.iOS.appleDeveloperTeamID = "8F8GWDZC89";
             }
-            else if (target == "standalone")
+            else if (m_buildTarget == BuildTarget.StandaloneWindows)
             {
                 target_dir = buildFolderPath + "/Builds/Windows";
-                target_name = m_appName + ".exe";
+                target_name = m_companyName + "_" + m_appName + ".exe";
                 m_buildTargetGroup = BuildTargetGroup.Standalone;
                 m_buildTarget = BuildTarget.StandaloneWindows;
             }
-            else if (target == "osx")
+            else if (m_buildTarget == BuildTarget.StandaloneOSX)
             {
                 target_dir = buildFolderPath + "/Builds/OSX";
-                target_name = m_appName + ".app";
+                target_name = m_companyName + "_" + m_appName + ".app";
                 m_buildTargetGroup = BuildTargetGroup.Standalone;
                 m_buildTarget = BuildTarget.StandaloneOSX;
                 PlayerSettings.iOS.appleDeveloperTeamID = "8F8GWDZC89";
             }
-            else if (target == "web")
+            else if (m_buildTarget == BuildTarget.WebGL)
             {
                 target_dir = buildFolderPath + "/Builds/WebGL";
-                target_name = m_appName;
+                target_name = m_companyName + "_" + m_appName;
                 m_buildTargetGroup = BuildTargetGroup.WebGL;
                 m_buildTarget = BuildTarget.WebGL;
             }
@@ -308,9 +315,9 @@ namespace LCG
                     Debug.LogError(e.Message);
                 }
 
-                Debug.Log("~~~~~执行输出\n" + m_process.StandardOutput.ReadToEnd());
-                Debug.Log("~~~~~执行错误\n" + m_process.StandardError.ReadToEnd());
-                Debug.Log("~~~~~执行返回码：" + m_process.ExitCode);
+                // Debug.Log("~~~~~执行输出\n" + m_process.StandardOutput.ReadToEnd());
+                // Debug.Log("~~~~~执行错误\n" + m_process.StandardError.ReadToEnd());
+                // Debug.Log("~~~~~执行返回码：" + m_process.ExitCode);
 
                 // 处理成功后
                 if (m_process.ExitCode == 0)

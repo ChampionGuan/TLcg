@@ -1,4 +1,4 @@
-local protoIdConfig = LuaHandle.Load("Config.ProtoIdConfig")
+local protoIdConfig = LuaHandle.Load("Game.Config.ProtoIdConfig")
 local protoIdBlacklist = protoIdConfig.BlacklistId
 local protoIdLogin = protoIdConfig.LoginProtoId
 

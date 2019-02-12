@@ -567,7 +567,7 @@ namespace LCG
         /// <returns></returns>
         public static bool LoadScene(string path, string sname)
         {
-            if (null != ABVersion.CurVersionInfo && ABVersion.CurVersionInfo.IsValid)
+            if (null == ABVersion.CurVersionInfo || !ABVersion.CurVersionInfo.IsValid)
             {
                 return false;
             }
@@ -576,7 +576,7 @@ namespace LCG
             // 检测是否从ab加载
             TrySyncLoadFromAB(path + ".ab", sname, null, out obj, true);
 
-            return null == obj;
+            return null != obj;
         }
         /// <summary>
         /// 卸载场景

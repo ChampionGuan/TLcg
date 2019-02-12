@@ -325,6 +325,7 @@ local function HotfixHandle(value)
                 QuitApp()
             end
         )
+        AddBtnEvent(m_popupUI.BtnCancel, QuitApp)
         m_popupUI.Desc.text = Tips.Tip_11
         m_popupUI.BtnState.selectedIndex = 3
         return

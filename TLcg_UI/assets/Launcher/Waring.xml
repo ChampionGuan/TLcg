@@ -7,7 +7,7 @@
     </graph>
     <graph id="n13_rt3h" name="Bg_1" xy="231,176" size="871,396" group="n16_rkze" type="rect" fillColor="#ff999999"/>
     <graph id="n14_rt3h" name="Bg_2" xy="261,193" size="809,210" group="n16_rkze" type="rect" fillColor="#ff666666"/>
-    <text id="n6_gk2w" name="Text_Content" xy="332,228" size="668,159" group="n16_rkze" fontSize="24" color="#bba7b9" align="center" vAlign="middle" autoSize="none" text="....................."/>
+    <text id="n6_gk2w" name="Text_Content" xy="332,228" size="668,159" group="n16_rkze" fontSize="24" color="#bba7b9" align="center" vAlign="middle" ubb="true" autoSize="none" text="....................."/>
     <component id="n9_gk2w" name="Button_Quit" src="ege89" fileName="Button/Button_2.xml" xy="365,431" size="274,106" group="n16_rkze">
       <Button title="离开"/>
     </component>
