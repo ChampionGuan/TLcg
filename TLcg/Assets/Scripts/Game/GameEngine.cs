@@ -9,6 +9,7 @@ namespace LCG
         /// </summary>
         public void Initialize(Define.EBootup e)
         {
+            HotfixTest();
             CSharpCallLua.Instance.Initialize(e);
         }
 
@@ -73,6 +74,11 @@ namespace LCG
             {
                 CSharpCallLua.Instance.CustomAppFocus(focus);
             }
+        }
+
+        public void HotfixTest()
+        {
+            Debug.Log("cs hotfix log!");
         }
     }
 }

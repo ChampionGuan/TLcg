@@ -88,6 +88,11 @@ namespace LCG
             {
                 platform = t;
             }
+            t = "window";
+            if (EditorGUILayout.Toggle(t, platform == "window"))
+            {
+                platform = t;
+            }
             EditorGUILayout.Space();
 
             m_versionNum = GUILayout.TextField(m_versionNum);
@@ -99,6 +104,7 @@ namespace LCG
                 {
                     case "android": m_buildTarget = BuildTarget.Android; break;
                     case "ios": m_buildTarget = BuildTarget.iOS; break;
+                    case "window": m_buildTarget = BuildTarget.StandaloneWindows; break;
                     default: m_buildTarget = BuildTarget.NoTarget; break;
                 }
 
@@ -111,11 +117,17 @@ namespace LCG
         {
             try
             {
+                Debug.Log("开始预处理过程...");
+
                 if (!ABHelper.VersionNumMatch(m_versionNum))
                 {
                     throw new Exception("版号异常！！");
                 }
-                Debug.Log("开始预处理过程...");
+                else
+                {
+                    ABHelper.WriteFile(Application.dataPath + "/Resources/" + ABHelper.OriginalVersionName, m_versionNum);
+                }
+                AssetDatabase.Refresh();
 
                 // 场景
                 EditorScenes();
@@ -172,7 +184,6 @@ namespace LCG
                 DirRemove(m_luaTempFolderPath);
                 // ScriptingBackend
                 PlayerSettings.SetScriptingBackend(m_buildTargetGroup, ScriptingImplementation.IL2CPP);
-                ABHelper.WriteFile(Application.dataPath + "/Resources/" + ABHelper.OriginalVersionName, m_versionNum);
                 AssetDatabase.Refresh();
                 AssetDatabase.SaveAssets();
 
@@ -192,7 +203,7 @@ namespace LCG
             if (m_buildTarget == BuildTarget.Android)
             {
                 target_dir = buildFolderPath + "/Builds/Android";
-                target_name = m_companyName + "_" + m_appName + ".apk";
+                target_name = m_appName + ".apk";
                 m_buildTargetGroup = BuildTargetGroup.Android;
                 m_buildTarget = BuildTarget.Android;
                 PlayerSettings.Android.keystorePass = "champion";
@@ -202,7 +213,7 @@ namespace LCG
             else if (m_buildTarget == BuildTarget.iOS)
             {
                 target_dir = buildFolderPath + "/Builds/iOS";
-                target_name = m_companyName + "_" + m_appName;
+                target_name = m_appName;
                 m_buildTargetGroup = BuildTargetGroup.iOS;
                 m_buildTarget = BuildTarget.iOS;
                 EditorUserBuildSettings.iOSBuildConfigType = isDebug ? iOSBuildType.Debug : iOSBuildType.Release;
@@ -211,14 +222,14 @@ namespace LCG
             else if (m_buildTarget == BuildTarget.StandaloneWindows)
             {
                 target_dir = buildFolderPath + "/Builds/Windows";
-                target_name = m_companyName + "_" + m_appName + ".exe";
+                target_name = m_appName + ".exe";
                 m_buildTargetGroup = BuildTargetGroup.Standalone;
                 m_buildTarget = BuildTarget.StandaloneWindows;
             }
             else if (m_buildTarget == BuildTarget.StandaloneOSX)
             {
                 target_dir = buildFolderPath + "/Builds/OSX";
-                target_name = m_companyName + "_" + m_appName + ".app";
+                target_name = m_appName + ".app";
                 m_buildTargetGroup = BuildTargetGroup.Standalone;
                 m_buildTarget = BuildTarget.StandaloneOSX;
                 PlayerSettings.iOS.appleDeveloperTeamID = "8F8GWDZC89";
@@ -226,7 +237,7 @@ namespace LCG
             else if (m_buildTarget == BuildTarget.WebGL)
             {
                 target_dir = buildFolderPath + "/Builds/WebGL";
-                target_name = m_companyName + "_" + m_appName;
+                target_name = m_appName;
                 m_buildTargetGroup = BuildTargetGroup.WebGL;
                 m_buildTarget = BuildTarget.WebGL;
             }
