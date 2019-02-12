@@ -205,7 +205,6 @@ namespace LCG
                 target_dir = buildFolderPath + "/Builds/Android";
                 target_name = m_appName + ".apk";
                 m_buildTargetGroup = BuildTargetGroup.Android;
-                m_buildTarget = BuildTarget.Android;
                 PlayerSettings.Android.keystorePass = "champion";
                 PlayerSettings.Android.keyaliasName = "com.champion.tlcg";
                 PlayerSettings.Android.keyaliasPass = "champion";
@@ -215,7 +214,6 @@ namespace LCG
                 target_dir = buildFolderPath + "/Builds/iOS";
                 target_name = m_appName;
                 m_buildTargetGroup = BuildTargetGroup.iOS;
-                m_buildTarget = BuildTarget.iOS;
                 EditorUserBuildSettings.iOSBuildConfigType = isDebug ? iOSBuildType.Debug : iOSBuildType.Release;
                 PlayerSettings.iOS.appleDeveloperTeamID = "8F8GWDZC89";
             }
@@ -224,14 +222,12 @@ namespace LCG
                 target_dir = buildFolderPath + "/Builds/Windows";
                 target_name = m_appName + ".exe";
                 m_buildTargetGroup = BuildTargetGroup.Standalone;
-                m_buildTarget = BuildTarget.StandaloneWindows;
             }
             else if (m_buildTarget == BuildTarget.StandaloneOSX)
             {
                 target_dir = buildFolderPath + "/Builds/OSX";
                 target_name = m_appName + ".app";
                 m_buildTargetGroup = BuildTargetGroup.Standalone;
-                m_buildTarget = BuildTarget.StandaloneOSX;
                 PlayerSettings.iOS.appleDeveloperTeamID = "8F8GWDZC89";
             }
             else if (m_buildTarget == BuildTarget.WebGL)
@@ -239,7 +235,6 @@ namespace LCG
                 target_dir = buildFolderPath + "/Builds/WebGL";
                 target_name = m_appName;
                 m_buildTargetGroup = BuildTargetGroup.WebGL;
-                m_buildTarget = BuildTarget.WebGL;
             }
             else
             {
