@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.IO;
 using System;
 
 namespace LCG
@@ -8,7 +9,7 @@ namespace LCG
         public static Main Instance = null;
         public Define.EMode Mode { get; private set; }
         public Transform Target { get; private set; }
-        private Reporter m_reporter = null;
+        private FileStream m_fsLog = null;
         void Awake()
         {
             if (null != Instance)
@@ -18,11 +19,19 @@ namespace LCG
             }
             Instance = this;
             Target = transform;
+            Debug.unityLogger.logEnabled = Debug.isDebugBuild;
+            Application.logMessageReceivedThreaded += SaveLogMessage;
+
             DontDestroyOnLoad(gameObject);
             StartupLauncher(Define.EBootup.Launcher);
-            OpenReporter(true);
         }
-
+        void Destroy()
+        {
+            if (null != m_fsLog)
+            {
+                m_fsLog.Close();
+            }
+        }
         /// <summary>
         /// 启动器
         /// </summary>
@@ -58,20 +67,43 @@ namespace LCG
         /// </summary>
         public void OpenReporter(bool b)
         {
-            if (null == m_reporter)
+            if (null == Reporter.Instance)
             {
                 UnityEngine.Object obj = Resources.Load(Define.ReporterPath);
                 if (null != obj)
                 {
-                    GameObject go = (GameObject.Instantiate(obj) as GameObject);
-                    m_reporter = go.GetComponent<Reporter>();
-                    go.name = "Reporter";
+                    GameObject.Instantiate(obj);
                 }
             }
-            if (null != m_reporter)
+            if (null != Reporter.Instance)
             {
-                m_reporter.show = b;
+                Reporter.Instance.show = b;
             }
+        }
+
+        /// <summary>
+        /// 保存log信息
+        /// </summary>
+        private void SaveLogMessage(string condition, string stackTrace, LogType type)
+        {
+            switch (type)
+            {
+                case LogType.Log: condition = string.Format("【log】{0}", condition); break;
+                case LogType.Warning: condition = string.Format("【Warning】{0}", condition); break;
+                case LogType.Error: condition = string.Format("【Error】{0}", condition); break;
+                default: break;
+            }
+            if (null == m_fsLog)
+            {
+                m_fsLog = new FileStream(Define.OutputLogPath, FileMode.Create);
+            }
+
+            byte[] bytes = System.Text.Encoding.Default.GetBytes(condition);
+            m_fsLog.Write(bytes, 0, bytes.Length);
+            bytes = System.Text.Encoding.Default.GetBytes(stackTrace + "\n");
+            m_fsLog.Write(bytes, 0, bytes.Length);
+
+            m_fsLog.Flush();
         }
     }
 }

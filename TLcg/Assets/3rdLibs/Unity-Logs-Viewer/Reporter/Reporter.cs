@@ -283,10 +283,13 @@ public class Reporter : MonoBehaviour
 #endif
     string systemMemorySize;
 
+    public static Reporter Instance = null;
     void Awake()
     {
         if (!Initialized)
             Initialize();
+        Instance = this;
+        gameObject.name = "Reporter";
         DontDestroyOnLoad(gameObject);
     }
 

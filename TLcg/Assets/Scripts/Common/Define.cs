@@ -1,4 +1,6 @@
-﻿namespace LCG
+﻿using UnityEngine;
+
+namespace LCG
 {
     public static class Define
     {
@@ -26,5 +28,6 @@
         }
 
         public static string ReporterPath = "Prefabs/Misc/Reporter";
+        public static string OutputLogPath = Application.persistentDataPath + "/output.txt";
     }
 }
