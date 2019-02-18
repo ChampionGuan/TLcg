@@ -335,7 +335,7 @@ function UICenter.DestroyAllCtrl(deep)
         ControllerStack = {}
     end
     for k, v in pairs(ControllerCenter) do
-        if not v.IsCannotDestroy then
+        if not v.IsCannotDestroy or deep then
             v:DestroyByOther(deep)
         end
     end

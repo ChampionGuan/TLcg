@@ -45,6 +45,7 @@ end
 
 -- 销毁
 function OnDestroy()
+    m_abHotfix.Destroy()
     LuaHandle.Unload("Common.CSUtils")
     LuaHandle.Unload("Launcher.CSHotfix")
     LuaHandle.Unload("Launcher.ABHotfix")
