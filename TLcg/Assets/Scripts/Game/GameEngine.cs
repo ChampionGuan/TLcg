@@ -18,14 +18,17 @@ namespace LCG
         /// </summary>
         public void Destroy()
         {
-            CSharpCallLua.Instance.CustomDestroy();
-            Gameobjects.Instance.CustomDestroy();
-            Network.Instance.CustomDestroy();
-            Http.Instance.CustomDestroy();
-            SceneLoader.Instance.CustomDestroy();
-            TouchHandle.Instance.CustomDestroy();
-            ResourceLoader.UnloadAll();
-            StopAllCoroutines();
+            if (Main.Instance.Mode == Define.EMode.Game)
+            {
+                CSharpCallLua.Instance.CustomDestroy();
+                Gameobjects.Instance.CustomDestroy();
+                Network.Instance.CustomDestroy();
+                Http.Instance.CustomDestroy();
+                SceneLoader.Instance.CustomDestroy();
+                TouchHandle.Instance.CustomDestroy();
+                ResourceLoader.UnloadAll();
+                StopAllCoroutines();
+            }
         }
 
         private void Update()

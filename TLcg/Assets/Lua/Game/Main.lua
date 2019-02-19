@@ -17,6 +17,7 @@ LuaHandle.Load("Game.Manager.TimerManager")
 LuaHandle.Load("Game.Manager.UIManager")
 LuaHandle.Load("Game.Manager.LevelManager")
 LuaHandle.Load("Game.Manager.NetworkManager")
+LuaHandle.Load("Game.Manager.HttpManager")
 
 -- 初始化
 function Initialize(type)
@@ -28,6 +29,7 @@ function Initialize(type)
     UIManager.Initialize()
     LevelManager.Initialize()
     NetworkManager.Initialize()
+    HttpManager.Initialize()
 end
 
 -- 更新
@@ -65,7 +67,7 @@ end
 
 -- 收到消息
 function OnReceiveMsg(msg)
-    NetwrokManager.ReceiveMsg(msg)
+    NetworkManager.ReceiveMsg(msg)
 end
 
 -- 销毁
@@ -77,6 +79,7 @@ function OnDestroy()
     UIManager.CustomDestroy()
     LevelManager.CustomDestroy()
     NetworkManager.CustomDestroy()
+    HttpManager.CustomDestroy()
     LuaHandle.UnloadAll()
     LuaHandle.Unload("Game.Main")
 end

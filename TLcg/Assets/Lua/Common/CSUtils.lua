@@ -76,3 +76,4 @@ CSharp.Http = CS.LCG.Http
 CSharp.HttpErrorCode = CSharp.Http.ErrorCode
 CSharp.EBootup = CS.LCG.Define.EBootup
 CSharp.Gameobjects = CS.LCG.Gameobjects
+CSharp.ABHttpImg = CS.LCG.ABHttpImg

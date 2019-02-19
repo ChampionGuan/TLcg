@@ -21,12 +21,15 @@ namespace LCG
         /// </summary>
         public void Destroy()
         {
-            CSharpCallLua.Instance.CustomDestroy();
-            Gameobjects.Instance.CustomDestroy();
-            ABAutofix.Instance.CustomDestroy();
-            ABCheck.Instance.CustomDestroy();
-            ResourceLoader.UnloadAll();
-            StopAllCoroutines();
+            if (Main.Instance.Mode == Define.EMode.Launcher)
+            {
+                CSharpCallLua.Instance.CustomDestroy();
+                Gameobjects.Instance.CustomDestroy();
+                ABAutofix.Instance.CustomDestroy();
+                ABCheck.Instance.CustomDestroy();
+                ResourceLoader.UnloadAll();
+                StopAllCoroutines();
+            }
         }
 
         /// <summary>

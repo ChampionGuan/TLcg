@@ -1,5 +1,5 @@
 -- http连接的超时处理
-local HttpHandle = {}
+HttpManager = LuaHandle.Load("Game.Manager.IManager")()
 
 -- 当前http请求个数
 local m_syncCount = 0
@@ -202,7 +202,7 @@ end
 --     -- 错误飘字
 --     errorTip = true
 -- }
-function HttpHandle.Get(url, callback, data)
+function HttpManager.Get(url, callback, data)
     print("http请求：", url)
     if AddHttpMsg(url, nil, callback, data) then
         CSharp.Http.Get(url, SyncSucceed, SyncError)
@@ -210,24 +210,28 @@ function HttpHandle.Get(url, callback, data)
 end
 
 -- Post
-function HttpHandle.Post(url, from, callback, data)
+function HttpManager.Post(url, from, callback, data)
     print("http请求：", url, from)
     if AddHttpMsg(url, from, callback, data) then
         CSharp.Http.Post(url, from, SyncSucceed, SyncError)
     end
 end
 
+-- Image
+function HttpManager.Image(url, succeedCallBack)
+    print("http iamge：", url)
+    CSharp.ABHttpImg.Instance:GetImage(url, succeedCallBack)
+end
+
 -- 初始化
-function HttpHandle.Initialize()
+function HttpManager.Initialize()
     m_syncCount = 0
     m_httpMsg = {}
 end
 
 -- httpClear
-function HttpHandle.Destroy()
+function HttpManager.CustomDestroy()
     m_syncCount = 0
     m_httpMsg = {}
     UIManager.WaitSync(Define.SyncType.HttpSync, false)
 end
-
-return HttpHandle
