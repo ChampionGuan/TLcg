@@ -74,6 +74,10 @@ namespace LCG
 
         public void ReceiveServerMsg(byte[] msg)
         {
+            if (null == msg)
+            {
+                return;
+            }
             if (null != m_actionReceiveMsg)
             {
                 m_actionReceiveMsg(msg);

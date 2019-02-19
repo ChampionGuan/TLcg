@@ -26,21 +26,9 @@ function Over()
     CSharp.Main.Instance:StartupGame(CSharp.EBootup.Game)
 end
 
--- 更新
-function Update()
-end
-
 -- 固定更新
 function FixedUpdate()
     m_abHotfix.FixedUpdate()
-end
-
--- 焦点
-function OnAppFocus(hasfocus)
-end
-
--- 收到消息
-function OnReceiveMsg(msg)
 end
 
 -- 销毁
