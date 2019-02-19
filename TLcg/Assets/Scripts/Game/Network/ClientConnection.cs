@@ -104,12 +104,12 @@ namespace LCG
 
             byte[] head;
             int msgLength = msg.Length;
-            if (msgLength <= 127) //2,7 -1
+            if (msgLength <= 127) //2^7 -1
             {
                 head = new byte[1];
                 head[0] = (byte)msgLength;
             }
-            else if (msgLength <= 16383) //2,14 -1
+            else if (msgLength <= 16383) //2^14 -1
             {
                 head = new byte[2];
                 head[0] = (byte)(0x80 | (msgLength & 0x7f));
