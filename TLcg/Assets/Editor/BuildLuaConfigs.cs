@@ -9,7 +9,7 @@ namespace LCG
     public class BuildLuaConfigs : EditorWindow
     {
         // 导出路径
-        private static string m_exportPath = string.Format("{0}/{1}/", Application.dataPath, "Lua/Launcher");
+        private static string m_exportPath = string.Format("{0}/{1}/", Application.dataPath, "Lua/Game/Config");
         // lua文件夹路径
         private static List<string> m_folderLua = new List<string>() { "Protobuf", "Common", "Game/Common", "Game/Config", "Game/Data", "Game/LevelLogic", "Game/Manager", "Game/Network", "Game/Timer" };
         // 插在前排的lua
@@ -17,9 +17,9 @@ namespace LCG
         // 插在后排的lua
         private static List<string> m_backLua = new List<string>() { "Game.Manager.DataManager" };
         // 剔除的lua
-        private static List<string> m_exclusiveLua = new List<string>() { "Common.Common", "Common.LuaHandle", "Game.Network.NetConnect" };
+        private static List<string> m_exclusiveLua = new List<string>() { "Common.Common", "Common.LuaHandle", "Game.Network.NetConnect", "Game.Config.LuaPreloadConfig" };
         // 配置名称
-        private static string m_configName = "Preload.lua";
+        private static string m_configName = "LuaPreloadConfig.lua";
 
         [MenuItem("Tools/收集lua文件")]
         private static void BuildLuaWindow()

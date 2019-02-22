@@ -2,12 +2,12 @@ local loadedLua = CS.LCG.ResourceLoader.LoadedLua
 
 -- lua白名单（此名单下脚本不卸载，比如一些公共数据存储）
 local blackLuaList = {
-    "Game.Main",
-    "Launcher.Main",
-    "Common.Common",
-    "Common.LuaHandle",
-    "bit",
-    "pb"
+    ["Game.Main"] = 1,
+    ["Launcher.Main"] = 1,
+    ["Common.Common"] = 1,
+    ["Common.LuaHandle"] = 1,
+    ["bit"] = 1,
+    ["pb"] = 1
 }
 
 LuaHandle = {}

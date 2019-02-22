@@ -1,85 +1,85 @@
 require "Common.LuaHandle"
-LuaHandle.Load("bit")
 LuaHandle.Load("Common.Common")
 LuaHandle.Load("Common.CSUtils")
-LuaHandle.Load("Common.PlayerPrefs")
-LuaHandle.Load("Common.bezier")
-LuaHandle.Load("Common.json")
-LuaHandle.Load("Game.Config.Localization")
-LuaHandle.Load("Game.Common.Define")
-LuaHandle.Load("Game.Common.Event")
-LuaHandle.Load("Game.Common.Utils")
-LuaHandle.Load("Game.Common.UIUtils")
-LuaHandle.Load("Game.Manager.DataManager")
-LuaHandle.Load("Game.Manager.AudioManager")
-LuaHandle.Load("Game.Manager.VideoManager")
-LuaHandle.Load("Game.Manager.TimerManager")
-LuaHandle.Load("Game.Manager.UIManager")
-LuaHandle.Load("Game.Manager.LevelManager")
-LuaHandle.Load("Game.Manager.NetworkManager")
-LuaHandle.Load("Game.Manager.HttpManager")
+LuaHandle.Load("Game.Manager.PreloadManager")
 
 -- 初始化
 function Initialize(type)
-    print("开始游戏")
-    DataManager.Initialize()
-    AudioManager.Initialize()
-    VideoManager.Initialize()
-    TimerManager.Initialize()
-    UIManager.Initialize()
-    LevelManager.Initialize()
-    NetworkManager.Initialize()
-    HttpManager.Initialize()
+    PreloadManager.Initialize(
+        function()
+            print("开始游戏")
+            DataManager.Initialize()
+            AudioManager.Initialize()
+            VideoManager.Initialize()
+            TimerManager.Initialize()
+            UIManager.Initialize()
+            NetworkManager.Initialize()
+            HttpManager.Initialize()
+            LevelManager.Initialize()
+        end
+    )
 end
 
 -- 更新
 function Update()
-    DataManager.CustomUpdate()
-    AudioManager.CustomUpdate()
-    VideoManager.CustomUpdate()
-    TimerManager.CustomUpdate()
-    UIManager.CustomUpdate()
-    LevelManager.CustomUpdate()
-    NetworkManager.CustomUpdate()
+    if PreloadManager.Initialized then
+        DataManager.CustomUpdate()
+        AudioManager.CustomUpdate()
+        VideoManager.CustomUpdate()
+        TimerManager.CustomUpdate()
+        UIManager.CustomUpdate()
+        LevelManager.CustomUpdate()
+        NetworkManager.CustomUpdate()
+    end
 end
 
 -- 固定更新
 function FixedUpdate()
-    DataManager.CustomFixedUpdate()
-    AudioManager.CustomFixedUpdate()
-    VideoManager.CustomFixedUpdate()
-    TimerManager.CustomFixedUpdate()
-    UIManager.CustomFixedUpdate()
-    LevelManager.CustomFixedUpdate()
-    NetworkManager.CustomFixedUpdate()
+    if PreloadManager.Initialized then
+        DataManager.CustomFixedUpdate()
+        AudioManager.CustomFixedUpdate()
+        VideoManager.CustomFixedUpdate()
+        TimerManager.CustomFixedUpdate()
+        UIManager.CustomFixedUpdate()
+        LevelManager.CustomFixedUpdate()
+        NetworkManager.CustomFixedUpdate()
+    end
 end
 
 -- 焦点
 function OnAppFocus(hasfocus)
-    DataManager.OnAppFocus(hasfocus)
-    AudioManager.OnAppFocus(hasfocus)
-    VideoManager.OnAppFocus(hasfocus)
-    TimerManager.OnAppFocus(hasfocus)
-    UIManager.OnAppFocus(hasfocus)
-    LevelManager.OnAppFocus(hasfocus)
-    NetworkManager.OnAppFocus(hasfocus)
+    if PreloadManager.Initialized then
+        DataManager.OnAppFocus(hasfocus)
+        AudioManager.OnAppFocus(hasfocus)
+        VideoManager.OnAppFocus(hasfocus)
+        TimerManager.OnAppFocus(hasfocus)
+        UIManager.OnAppFocus(hasfocus)
+        LevelManager.OnAppFocus(hasfocus)
+        NetworkManager.OnAppFocus(hasfocus)
+    end
 end
 
 -- 收到消息
 function OnReceiveMsg(msg)
-    NetworkManager.ReceiveMsg(msg)
+    if PreloadManager.Initialized then
+        NetworkManager.ReceiveMsg(msg)
+    end
 end
 
 -- 销毁
 function OnDestroy()
-    DataManager.CustomDestroy()
-    AudioManager.CustomDestroy()
-    VideoManager.CustomDestroy()
-    TimerManager.CustomDestroy()
-    UIManager.CustomDestroy()
-    LevelManager.CustomDestroy()
-    NetworkManager.CustomDestroy()
-    HttpManager.CustomDestroy()
-    LuaHandle.UnloadAll()
-    LuaHandle.Unload("Game.Main")
+    if PreloadManager.Initialized then
+        DataManager.CustomDestroy()
+        AudioManager.CustomDestroy()
+        VideoManager.CustomDestroy()
+        TimerManager.CustomDestroy()
+        UIManager.CustomDestroy()
+        LevelManager.CustomDestroy()
+        NetworkManager.CustomDestroy()
+        HttpManager.CustomDestroy()
+        LuaHandle.UnloadAll()
+        LuaHandle.Unload("Game.Main")
+    else
+        PreloadManager.CustomDestroy()
+    end
 end

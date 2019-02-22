@@ -3,6 +3,7 @@
   <resources>
     <component id="ege80" name="Loading.xml" path="/" exported="true"/>
     <component id="ege81" name="ProgressBar_1.xml" path="/ProgressBar/"/>
+    <component id="dw0x2" name="LoadAssets.xml" path="/" exported="true"/>
   </resources>
   <publish name="Loading" path="E:\2_champion\TLcg\TLcg\Assets\Resources\UI\Loading"/>
 </packageDescription>

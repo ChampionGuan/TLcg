@@ -2,7 +2,6 @@ LuaHandle.Load("Common.json")
 LuaHandle.Load("Common.PlayerPrefs")
 local Tips = LuaHandle.Load("Launcher.Config").Hotfix
 local Video = LuaHandle.Load("Launcher.Video")
-local XluaUtils = LuaHandle.Load("Common.XluaUtils")
 
 local ABHotfix = {}
 local m_mainUI = {}
@@ -149,27 +148,6 @@ local function DownloadSize(value)
     else
         return value .. "B"
     end
-end
-
-local function LoadLua(complete)
-    luaConfig = LuaHandle.Load("Launcher.Preload")
-
-    local index, max = 0, #luaConfig
-    local wait = CSharp.WaitForEndOfFrame()
-
-    m_mainUI.ProgressBar.max = max
-    m_mainUI.ProgressBar.value = 0
-
-    while (index <= max) do
-        index = index + 1
-        LuaHandle.Load(luaConfig[index])
-        m_mainUI.ProgressBar.value = index
-        if index % 5 == 0 then
-            coroutine.yield(wait)
-        end
-    end
-
-    complete()
 end
 
 local m_downloadSize = nil
@@ -345,15 +323,8 @@ local function HotfixHandle(value)
         if PlayerPrefs.GetAutoDeepfix() then
             ABHotfix.Repair(true, m_hotfixComplete)
         else
-            CSharp.Main.Instance:StartCoroutine(
-                XluaUtils.cs_generator(
-                    LoadLua,
-                    function()
-                        m_hotfixComplete()
-                        DisposeUI()
-                    end
-                )
-            )
+            m_hotfixComplete()
+            DisposeUI()
         end
         return
     end
@@ -434,16 +405,9 @@ local function AutofixHandle(value)
     -- 修复完成，开始预加载lua
     if value.state == CSharp.EVersionState.AutofixComplete then
         m_mainUI.Desc.text = Tips.Tip_2
-        CSharp.Main.Instance:StartCoroutine(
-            XluaUtils.cs_generator(
-                LoadLua,
-                function()
-                    PlayerPrefs.SaveAutoDeepfix(false)
-                    m_autofixComplete()
-                    DisposeUI()
-                end
-            )
-        )
+        PlayerPrefs.SaveAutoDeepfix(false)
+        m_autofixComplete()
+        DisposeUI()
         return
     end
 end
@@ -537,16 +501,11 @@ function ABHotfix.Destroy()
     if nil ~= m_popupUI.UI then
         m_popupUI.UI:Dispose()
     end
+    Video.Destroy()
     m_mainUI.UI = nil
     m_popupUI.UI = nil
-    Video.Destroy()
-    LuaHandle.Unload("Common.CSUtils")
-    LuaHandle.Unload("Common.json")
-    LuaHandle.Unload("Common.PlayerPrefs")
-    LuaHandle.Unload("Common.XluaUtils")
-    LuaHandle.Unload("Launcher.Config")
-    LuaHandle.Unload("Launcher.Video")
-    LuaHandle.Unload("Launcher.Preload")
+    CSharp.ResourceLoader.UnloadUI("UI/Launcher/Launcher")
+    LuaHandle.UnloadAll()
 end
 
 return ABHotfix
