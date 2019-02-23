@@ -18,8 +18,6 @@ using System.Collections.Generic;
 #if UNITY_CHANGE3
 using UnityEngine.SceneManagement;
 #endif
-using XLua;
-using FairyGUI;
 
 [System.Serializable]
 public class Images
