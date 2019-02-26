@@ -21,7 +21,6 @@ namespace LCG
         //lua中要使用到C#库的配置，比如C#标准库，或者Unity API，第三方库等。
         [LuaCallCSharp]
         public static List<Type> LuaCallCSharp = new List<Type>() {
-                typeof(System.Object),
 #region unityEngine
                 typeof(WaitForSeconds),
                 typeof(WaitForEndOfFrame),
@@ -45,8 +44,8 @@ namespace LCG
                 typeof(AudioListener),
                 typeof(AudioClip),
                 typeof(UnityEngine.Audio.AudioMixer),
-                typeof(UnityEngine.Input),
-                typeof(UnityEngine.KeyCode),
+                typeof(Input),
+                typeof(KeyCode),
 #endregion
 
 #region fairygui
@@ -91,7 +90,6 @@ namespace LCG
                 typeof(GoWrapper),
                 typeof(LongPressGesture),
 #endregion
-
 
 #region custom
                 typeof(Main),

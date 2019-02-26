@@ -2,7 +2,7 @@
 using System.Collections;
 using DG.Tweening;
 
-namespace LPCFramework
+namespace LCG
 {
     public class Gyroscope : MonoBehaviour
     {

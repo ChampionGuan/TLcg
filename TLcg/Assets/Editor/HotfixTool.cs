@@ -9,13 +9,13 @@ namespace LCG
 {
     public static class HotfixTool
     {
-        [Hotfix]
+        [Hotfix(HotfixFlag.IgnoreProperty)]
         public static List<Type> by_field = new List<Type>()
          {
              typeof(Main),
          };
 
-        [Hotfix]
+        [Hotfix(HotfixFlag.IgnoreProperty)]
         public static List<Type> by_property
         {
             get
@@ -31,8 +31,8 @@ namespace LCG
                     }
                 }
 
-                //Type[] coreClass = Assembly.Load("Core").GetTypes();
-                //foreach (var value in coreClass)
+                //Type[] coreclass = Assembly.Load("Core").GetTypes();
+                //foreach (var value in coreclass)
                 //{
                 //    if (value.Namespace == "LCG")
                 //    {

@@ -1,4 +1,5 @@
 TLcg_UI/.objs
+TLcg/obj/*
 TLcg/Library/*
 TLcg/Temp/*
 TLcg/.vs
@@ -18,3 +19,5 @@ TLcg/Builds/*
 TLcg/Temp/*
 TLcg/Assets/Resources/Lua/*
 TLcg/Assets/Resources/Lua.meta
+TLcg/Assembly-CSharp.csproj
+TLcg/Assembly-CSharp-Editor.csproj
