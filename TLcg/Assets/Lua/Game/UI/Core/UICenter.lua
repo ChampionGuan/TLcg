@@ -1,4 +1,4 @@
-﻿local UICenter = {}
+local UICenter = {}
 -- 当界面显示时
 UICenter.OnCtrlShow = nil
 -- 当界面隐藏时

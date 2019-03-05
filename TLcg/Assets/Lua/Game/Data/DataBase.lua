@@ -1,4 +1,4 @@
-﻿local DataBase = function()
+local DataBase = function()
     local t = {}
     t.S2CMsgEvents = {}
 

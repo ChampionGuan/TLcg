@@ -1,4 +1,4 @@
-﻿Bezier = function()
+Bezier = function()
     local t = {}
 
     t.startPos = nil

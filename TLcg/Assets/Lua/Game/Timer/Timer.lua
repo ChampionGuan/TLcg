@@ -1,4 +1,4 @@
-﻿local index = 1
+local index = 1
 local function Timer()
     local t = {}
 

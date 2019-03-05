@@ -1,4 +1,4 @@
-﻿local MaincityLevelLogic = LuaHandle.Load("Game.LevelLogic.LevelLogic")()
+local MaincityLevelLogic = LuaHandle.Load("Game.LevelLogic.LevelLogic")()
 
 -- 进入场景--
 function MaincityLevelLogic:OnEnterScene(callback)

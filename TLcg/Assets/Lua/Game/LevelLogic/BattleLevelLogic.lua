@@ -1,4 +1,4 @@
-﻿local BattleLevelLogic = LuaHandle.Load("Game.LevelLogic.LevelLogic")()
+local BattleLevelLogic = LuaHandle.Load("Game.LevelLogic.LevelLogic")()
 
 -- 进入场景--
 function BattleLevelLogic:OnEnterScene(callback)

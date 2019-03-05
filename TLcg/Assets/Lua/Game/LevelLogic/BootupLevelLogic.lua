@@ -1,4 +1,4 @@
-﻿-- 启动场景逻辑脚本
+-- 启动场景逻辑脚本
 local BootupLevelLogic = LuaHandle.Load("Game.LevelLogic.LevelLogic")()
 
 -- 进入场景--

@@ -1,4 +1,4 @@
-﻿-- 此脚本由工具生成
+-- 此脚本由工具生成
 
 Localization = {
     AbilityLimitWarnning= "成长值到达上限,快去转生提升上限吧",

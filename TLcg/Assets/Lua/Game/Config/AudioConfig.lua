@@ -1,4 +1,4 @@
-﻿-- 此脚本由工具生成
+-- 此脚本由工具生成
 
 local AudioConfig = {
     BGM_Login = {

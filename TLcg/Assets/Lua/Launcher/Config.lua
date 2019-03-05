@@ -1,4 +1,4 @@
-﻿return {
+return {
     Hotfix = {
         Tip_1 = "正在检测版本…",
         Tip_2 = "正在进行资源初始化……",

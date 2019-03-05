@@ -1,3 +1,3 @@
-﻿local LoginData = LuaHandle.Load("Game.Data.DataBase")()
+local LoginData = LuaHandle.Load("Game.Data.DataBase")()
 
 return LoginData

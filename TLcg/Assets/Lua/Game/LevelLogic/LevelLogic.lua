@@ -1,4 +1,4 @@
-﻿-- 场景逻辑
+-- 场景逻辑
 local LevelLogic = function()
     local t = {}
 

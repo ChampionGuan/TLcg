@@ -1,4 +1,4 @@
-﻿return {
+return {
     [1] = {
         Id = 1,
         Type = Define.LevelType.Bootup,
