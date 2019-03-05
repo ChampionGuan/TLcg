@@ -1,4 +1,4 @@
-﻿namespace FairyGUI
+namespace FairyGUI
 {
 	/// <summary>
 	/// 

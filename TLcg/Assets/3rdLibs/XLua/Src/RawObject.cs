@@ -1,4 +1,4 @@
-﻿namespace XLua
+namespace XLua
 {
     public interface RawObject
     {

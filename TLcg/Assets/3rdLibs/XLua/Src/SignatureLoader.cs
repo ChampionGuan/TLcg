@@ -1,4 +1,4 @@
-﻿#if !UNITY_WSA || UNITY_EDITOR
+#if !UNITY_WSA || UNITY_EDITOR
 using System.Security.Cryptography;
 #else
 using Windows.Security.Cryptography;
