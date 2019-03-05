@@ -65,10 +65,21 @@ end
 function _C:OnUpdate()
     if CSharp.Input.GetKeyUp(CSharp.KeyCode.A) then
         UIManager.WaitSync(1, true)
+        local a = CSharp.Gameobjects.Instance:Spawner("Prefabs/Misc/AudioPlayer", false)
+        local b = CSharp.Gameobjects.Instance:Spawner("Prefabs/Misc/AudioPlayer", false)
+        local c = CSharp.Gameobjects.Instance:Spawner("Prefabs/Misc/AudioPlayer", false)
+        local d = CSharp.Gameobjects.Instance:Spawner("Prefabs/Misc/AudioPlayer", false)
+        a:CustomDestroy()
+        b:CustomDestroy()
+        c:CustomDestroy()
+        d:CustomDestroy()
     end
+
     if CSharp.Input.GetKeyUp(CSharp.KeyCode.S) then
         UIManager.WaitSync(2, true)
+        CSharp.Gameobjects.Instance:Destroy(0.5)
     end
+    
     if CSharp.Input.GetKeyUp(CSharp.KeyCode.D) then
         UIManager.WaitSync(4, true)
     end

@@ -31,14 +31,14 @@ namespace LCG
                     }
                 }
 
-                //Type[] coreclass = Assembly.Load("Core").GetTypes();
-                //foreach (var value in coreclass)
-                //{
-                //    if (value.Namespace == "LCG")
-                //    {
-                //        hotfixList.Add(value);
-                //    }
-                //}
+                // Type[] coreclass = Assembly.Load("Assembly-Core").GetTypes();
+                // foreach (var value in coreclass)
+                // {
+                //     if (value.Namespace == "LCG")
+                //     {
+                //         hotfixList.Add(value);
+                //     }
+                // }
 
                 return hotfixList;
             }

@@ -51,8 +51,9 @@ namespace LCG
         }
         public void CustomDestroy()
         {
+            CustomDestroy(false);
         }
-        public void CustomDestroy(bool isDeep = false)
+        public void CustomDestroy(bool isDeep)
         {
             if (null == theGameobject)
             {

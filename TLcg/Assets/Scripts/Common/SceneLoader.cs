@@ -83,7 +83,7 @@ namespace LCG
         {
             while (curPercent < toPercent)
             {
-                curPercent++;
+                curPercent += 2;
                 if (null != LoadUpdate)
                 {
                     LoadUpdate.Invoke(curPercent);

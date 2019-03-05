@@ -23,6 +23,15 @@ namespace LCG
             m_pool.Destroy(path);
             m_poolScene.Destroy(path);
         }
+        public void Destroy(float ratio)
+        {
+            // 当内存达到一定值时，销毁一部分实例对象
+            // var v = (((float)System.GC.GetTotalMemory(false)) / 1024 / 1024); // Mb
+            ratio = ratio < 0 ? 0 : ratio;
+            ratio = ratio > 1 ? 1 : ratio;
+            m_pool.Destroy(ratio);
+            m_poolScene.Destroy(ratio);
+        }
         public void CustomUpdate()
         {
             m_pool.CustomUpdate();
@@ -84,6 +93,18 @@ namespace LCG
                         m_idle[path][i].CustomDestroy(true);
                     }
                     m_idle[path].Clear();
+                }
+            }
+            public void Destroy(float ratio)
+            {
+                foreach (var v in m_idle.Values)
+                {
+                    int c = Mathf.FloorToInt(v.Count * ratio);
+                    for (int i = v.Count - 1; i >= c; i--)
+                    {
+                        v[i].CustomDestroy(true);
+                        v.RemoveAt(i);
+                    }
                 }
             }
             private UnityMono GetFromPool(string path)
