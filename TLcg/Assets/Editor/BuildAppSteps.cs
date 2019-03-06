@@ -4,6 +4,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System;
 using System.IO;
+using UnityEditor.Callbacks;
+using UnityEditor.iOS.Xcode;
 
 namespace LCG
 {
@@ -12,9 +14,9 @@ namespace LCG
         static System.Diagnostics.Process m_process = null;
         static EditorWindow m_editorWindow;
 
-        static string m_appName = "tlcg";
+        static string m_productName = "tlcg";
         static string m_companyName = "champion";
-        static string m_productName = "test";
+        static string m_appIdentifier = "com.champion.tlcg";
         static string m_versionNum = "0.0.0.0";
         static string m_scriptingDefineSymbols = "HOTFIX_ENABLE;";
         static string m_dataPathPrefix = Application.dataPath + "/";
@@ -203,7 +205,7 @@ namespace LCG
             if (m_buildTarget == BuildTarget.Android)
             {
                 target_dir = buildFolderPath + "/Builds/Android";
-                target_name = m_appName + ".apk";
+                target_name = m_productName + ".apk";
                 m_buildTargetGroup = BuildTargetGroup.Android;
                 PlayerSettings.Android.keystorePass = "champion";
                 PlayerSettings.Android.keyaliasName = "com.champion.tlcg";
@@ -212,28 +214,28 @@ namespace LCG
             else if (m_buildTarget == BuildTarget.iOS)
             {
                 target_dir = buildFolderPath + "/Builds/iOS";
-                target_name = m_appName;
+                target_name = m_productName;
                 m_buildTargetGroup = BuildTargetGroup.iOS;
                 EditorUserBuildSettings.iOSBuildConfigType = isDebug ? iOSBuildType.Debug : iOSBuildType.Release;
-                PlayerSettings.iOS.appleDeveloperTeamID = "8F8GWDZC89";
+                PlayerSettings.iOS.appleDeveloperTeamID = "YG2T7K2S55";
             }
             else if (m_buildTarget == BuildTarget.StandaloneWindows)
             {
                 target_dir = buildFolderPath + "/Builds/Windows";
-                target_name = m_appName + ".exe";
+                target_name = m_productName + ".exe";
                 m_buildTargetGroup = BuildTargetGroup.Standalone;
             }
             else if (m_buildTarget == BuildTarget.StandaloneOSX)
             {
                 target_dir = buildFolderPath + "/Builds/OSX";
-                target_name = m_appName + ".app";
+                target_name = m_productName + ".app";
                 m_buildTargetGroup = BuildTargetGroup.Standalone;
-                PlayerSettings.iOS.appleDeveloperTeamID = "8F8GWDZC89";
+                PlayerSettings.iOS.appleDeveloperTeamID = "YG2T7K2S55";
             }
             else if (m_buildTarget == BuildTarget.WebGL)
             {
                 target_dir = buildFolderPath + "/Builds/WebGL";
-                target_name = m_appName;
+                target_name = m_productName;
                 m_buildTargetGroup = BuildTargetGroup.WebGL;
             }
             else
@@ -243,7 +245,7 @@ namespace LCG
 
             PlayerSettings.companyName = m_companyName;
             PlayerSettings.productName = m_productName;
-            PlayerSettings.applicationIdentifier = "com." + m_companyName + "." + m_appName;
+            PlayerSettings.applicationIdentifier = m_appIdentifier;
             PlayerSettings.SetScriptingDefineSymbolsForGroup(m_buildTargetGroup, m_scriptingDefineSymbols);
             PlayerSettings.SetArchitecture(m_buildTargetGroup, 2);
 
@@ -428,6 +430,31 @@ namespace LCG
             catch (Exception e)
             {
                 throw;
+            }
+        }
+
+        [PostProcessBuild(999)]
+        public static void OnPostprocessBuild(BuildTarget buildTarget, string path)
+        {
+            // 仅在iOS运行
+            if (buildTarget == BuildTarget.iOS)
+            {
+                string projectPath = path + "/Unity-iPhone.xcodeproj/project.pbxproj";
+
+                PBXProject proj = new PBXProject();
+                proj.ReadFromFile(projectPath);
+
+                string target = proj.TargetGuidByName("Unity-iPhone");
+                var capManager = new ProjectCapabilityManager(projectPath, m_productName + ".entitlements", PBXProject.GetUnityTargetName());
+
+                // 设置签名
+                proj.SetTeamId(target, "YG2T7K2S55"); //自动签名 自动选择证书 TeamID
+                proj.SetBuildProperty(target, "ENABLE_BITCODE", "NO");
+                // Set a custom link flag
+                proj.AddBuildProperty(target, "OTHER_LDFLAGS", "-ObjC");
+                // proj.AddBuildProperty(target, "SystemCapabilities", "{com.apple.Push = {enabled = 1;};}");
+
+                proj.WriteToFile(projectPath);
             }
         }
     }
