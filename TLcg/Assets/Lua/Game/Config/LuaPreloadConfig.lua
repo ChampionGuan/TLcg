@@ -43,6 +43,7 @@ return {
 	"Game.Manager.IManager",
 	"Game.Manager.LevelManager",
 	"Game.Manager.NetworkManager",
+	"Game.Manager.PreloadManager",
 	"Game.Manager.TimerManager",
 	"Game.Manager.UIManager",
 	"Game.Manager.VideoManager",

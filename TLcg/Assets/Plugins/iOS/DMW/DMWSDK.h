@@ -1,4 +1,0 @@
-@interface DMWSDK : NSObject
-
-
-@end
