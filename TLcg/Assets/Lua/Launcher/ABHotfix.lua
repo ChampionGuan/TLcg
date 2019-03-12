@@ -166,17 +166,18 @@ local function HotfixHandle(value)
         return
     end
 
-    -- 开始检测本地（进度条滚动到50%，此处刻意！！）
+    -- 当前版本号
+    if value.state == CSharp.EVersionState.ServerVersionId then
+        m_mainUI.Version.text = value.sValue
+        Common.Version.ServerResVersion = value.sValue
+        return
+    end
+
+    -- 开始检测本地
     if value.state == CSharp.EVersionState.CheckLocalVersion then
         m_mainUI.ProgressBar.value = 0
         m_mainUI.ProgressBar:TweenValue(50, 2):SetEase(CSharp.EaseType.CubicOut)
         m_mainUI.Desc.text = Tips.Tip_1
-        return
-    end
-
-    -- 检测本地结束（进度条滚动到100%，此处刻意！！）
-    if value.state == CSharp.EVersionState.CheckLocalVersionOver then
-        m_mainUI.ProgressBar:TweenValue(100, 0.5):SetEase(CSharp.EaseType.CubicOut)
         return
     end
 
@@ -309,23 +310,25 @@ local function HotfixHandle(value)
         return
     end
 
-    -- 当前版本号
-    if value.state == CSharp.EVersionState.ServerVersionId then
-        m_mainUI.Version.text = value.sValue
-        Common.Version.ServerResVersion = value.sValue
-        return
-    end
-
     -- 热更完成，开始预加载lua
     if value.state == CSharp.EVersionState.HotfixComplete then
-        m_mainUI.Desc.text = Tips.Tip_2
-        -- 如果检测到上次未完成重度修复，则继续
-        if PlayerPrefs.GetAutoDeepfix() then
-            ABHotfix.Repair(true, m_hotfixComplete)
-        else
-            m_hotfixComplete()
-            DisposeUI()
+        -- 结束！！
+        local cb = function()
+            -- 如果检测到上次未完成重度修复，则继续
+            if PlayerPrefs.GetAutoDeepfix() then
+                ABHotfix.Repair(true, m_hotfixComplete)
+            else
+                m_hotfixComplete()
+                DisposeUI()
+            end
         end
+        local pvalue = m_mainUI.ProgressBar.value
+        if pvalue < 100 then
+            m_mainUI.ProgressBar:TweenValue(100, (100 - pvalue) * 0.01):SetEase(CSharp.EaseType.CubicOut):OnComplete(cb)
+        else
+            cb()
+        end
+
         return
     end
 end
@@ -404,10 +407,18 @@ local function AutofixHandle(value)
 
     -- 修复完成，开始预加载lua
     if value.state == CSharp.EVersionState.AutofixComplete then
-        m_mainUI.Desc.text = Tips.Tip_2
-        PlayerPrefs.SaveAutoDeepfix(false)
-        m_autofixComplete()
-        DisposeUI()
+        -- 结束！！
+        local cb = function()
+            PlayerPrefs.SaveAutoDeepfix(false)
+            m_autofixComplete()
+            DisposeUI()
+        end
+        local pvalue = m_mainUI.ProgressBar.value
+        if pvalue < 100 then
+            m_mainUI.ProgressBar:TweenValue(100, (100 - pvalue) * 0.01):SetEase(CSharp.EaseType.CubicOut):OnComplete(cb)
+        else
+            cb()
+        end
         return
     end
 end

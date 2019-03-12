@@ -22,7 +22,7 @@ namespace LCG
             Debug.unityLogger.logEnabled = Debug.isDebugBuild;
             Application.logMessageReceivedThreaded += SaveLogMessage;
 
-            OpenReporter(true);
+            // OpenReporter(true);
             DontDestroyOnLoad(gameObject);
             StartupLauncher(Define.EBootup.Launcher);
         }
