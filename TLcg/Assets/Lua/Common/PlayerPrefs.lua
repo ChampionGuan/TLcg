@@ -90,42 +90,42 @@ function PlayerPrefs.GetGraphicsQuality()
 end
 
 -- 保存音乐状态
-function PlayerPrefs.SaveAudioMusicSwitch(stat)
+function PlayerPrefs.SetMusicSwitch(stat)
     m_cshapeLocal:SaveInt(Type.AudioMusicOn, stat)
 end
 
 -- 获取音乐状态
-function PlayerPrefs.GetAudioMusicSwitch()
+function PlayerPrefs.GetMusicSwitch()
     return m_cshapeLocal:GetInt(Type.AudioMusicOn)
 end
 
 -- 保存音效状态
-function PlayerPrefs.SaveAudioEffectSwitch(stat)
+function PlayerPrefs.SetEffectSwitch(stat)
     m_cshapeLocal:SaveInt(Type.AudioEffectOn, stat)
 end
 
 -- 获取音效状态
-function PlayerPrefs.GetAudioEffectSwitch()
+function PlayerPrefs.GetEffectSwitch()
     return m_cshapeLocal:GetInt(Type.AudioEffectOn)
 end
 
 -- 保存音乐音量
-function PlayerPrefs.SaveAudioMusicVolume(volume)
+function PlayerPrefs.SetMusicVolume(volume)
     m_cshapeLocal:SaveFloat(Type.AudioMusic, volume * 2)
 end
 
 -- 获取音乐音量
-function PlayerPrefs.GetAudioMusicVolume()
+function PlayerPrefs.GetMusicVolume()
     return m_cshapeLocal:GetFloat(Type.AudioMusic) * 0.5
 end
 
 -- 保存音效音量
-function PlayerPrefs.SaveAudioEffectVolume(volume)
+function PlayerPrefs.SetEffectVolume(volume)
     m_cshapeLocal:SaveFloat(Type.AudioEffect, volume * 2)
 end
 
 -- 获取音效音量
-function PlayerPrefs.GetAudioEffectVolume()
+function PlayerPrefs.GetEffectVolume()
     return m_cshapeLocal:GetFloat(Type.AudioEffect) * 0.5
 end
 

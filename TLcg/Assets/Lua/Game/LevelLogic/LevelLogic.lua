@@ -2,19 +2,20 @@
 local LevelLogic = function()
     local t = {}
 
-    t.Config = nil
-    t.InsInfo = nil
+    t.TheConfig = nil
+    t.TheInsInfo = nil
     t.EnterScene = function(self, callBack)
-        self.Config = LevelManager.CurrLevelConfig
-        self.InsInfo = LevelManager.IncomingInfo
+        self.TheConfig = LevelManager.CurLevelConfig
+        self.TheInsInfo = LevelManager.IncomingInfo
+        AudioManager.Play(CSharp.AudioState.Play, self.TheConfig.AudioId)
         Event.Dispatch(EventType.ENTER_SCENCE)
         self:OnEnterScene(callBack)
     end
     t.ExitScene = function(self)
         Event.Dispatch(EventType.EXIT_SCENCE)
         self:OnExitScene()
-        self.Config = nil
-        self.InsInfo = nil
+        self.TheConfig = nil
+        self.TheInsInfo = nil
     end
     t.Update = function(self)
         self:OnUpdate()
