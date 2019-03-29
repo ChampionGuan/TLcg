@@ -60,8 +60,8 @@ local function CheckKeepWaiting(msg)
     local data = nil
     if msg.syncCount >= 3 then
         data = {
-            content = Localization.NetReloginFailure,
-            btnRightTitle = Localization.BtnToLogin,
+            content = Localization.LoginFailure,
+            btnRightTitle = Localization.BackToLogin,
             btnRightFunc = BackToLogin
         }
     else
@@ -74,8 +74,8 @@ local function CheckKeepWaiting(msg)
         end
         data = {
             content = Localization.NetTimeOut,
-            btnLeftTitle = Localization.BtnToLogin,
-            btnRightTitle = Localization.BtnToWait,
+            btnLeftTitle = Localization.BackToLogin,
+            btnRightTitle = Localization.KeepToWait,
             btnLeftFunc = BackToLogin,
             btnRightFunc = toRehttp
         }
@@ -93,9 +93,9 @@ local function ErrorCode(error, msg)
     elseif error == CSharp.HttpErrorCode.RequstTimeOut then
         desc = Localization.NetTimeOut
     elseif error == CSharp.HttpErrorCode.ReceiveZero then
-        desc = Localization.ReceiveZero
+        desc = Localization.NetReceiveZero
     elseif error == CSharp.HttpErrorCode.ReceiveUndone then
-        desc = Localization.ReceiveZero
+        desc = Localization.NetReceiveZero
     else
         desc = Localization.NetError
     end
@@ -144,7 +144,7 @@ local function SyncSucceed(index, res)
     end
     -- 是否为页面错误
     if nil ~= tonumber(Utils.stringSub_1(res, 0, 3)) then
-        SyncError(index, Localization.ReceiveZero)
+        SyncError(index, Localization.NetReceiveZero)
         return
     end
 

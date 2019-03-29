@@ -20,11 +20,20 @@ namespace LCG
         private AudioListener m_defaultAudioListener;
         private UnityEngine.Audio.AudioMixer m_audioMixer;
 
+        // 预加载列表
+        private List<string> m_preloadList = new List<string>();
+        // 空闲音源
         private List<AudioSourceInfo> m_idleAudio = new List<AudioSourceInfo>();
+        // 待移除音源
+        private List<AudioSourceInfo> m_removeAudio = new List<AudioSourceInfo>();
+        // 音乐音源
         private Dictionary<int, AudioSourceInfo> m_musicAudio = new Dictionary<int, AudioSourceInfo>();
+        // 音效音源
         private Dictionary<int, AudioSourceInfo> m_effectAudio = new Dictionary<int, AudioSourceInfo>();
-        private Dictionary<string, Dictionary<int, AudioSourceInfo>> m_groupAudio = new Dictionary<string, Dictionary<int, AudioSourceInfo>>();
-        private List<AudioSourceInfo> m_removeList = new List<AudioSourceInfo>();
+        // 同组音源队列
+        private Dictionary<string, List<AudioSourceInfo>> m_groupAudio = new Dictionary<string, List<AudioSourceInfo>>();
+        // 同路径音源队列
+        private Dictionary<string, List<AudioSourceInfo>> m_pathAudio = new Dictionary<string, List<AudioSourceInfo>>();
 
         void Awake()
         {
@@ -41,99 +50,153 @@ namespace LCG
             foreach (var v in m_musicAudio.Values)
             {
                 v.Update();
-                if (v.IsIdle())
+                if (v.CheckIdle())
                 {
-                    m_removeList.Add(v);
+                    m_removeAudio.Add(v);
                 }
             }
-            foreach (var v in m_removeList)
+            foreach (var v in m_removeAudio)
             {
                 m_musicAudio.Remove(v.InsId);
                 m_idleAudio.Add(v);
-                if (m_groupAudio.ContainsKey(v.TheGroupName) && m_groupAudio[v.TheGroupName].ContainsKey(v.InsId))
+                if (m_groupAudio.ContainsKey(v.TheGroupName) && m_groupAudio[v.TheGroupName].Contains(v))
                 {
-                    m_groupAudio[v.TheGroupName].Remove(v.InsId);
+                    m_groupAudio[v.TheGroupName].Remove(v);
+                }
+                if (m_pathAudio.ContainsKey(v.ThePath) && m_pathAudio[v.ThePath].Contains(v))
+                {
+                    m_pathAudio[v.ThePath].Remove(v);
                 }
             }
-            m_removeList.Clear();
+            m_removeAudio.Clear();
             foreach (var v in m_effectAudio.Values)
             {
                 v.Update();
-                if (v.IsIdle())
+                if (v.CheckIdle())
                 {
-                    m_removeList.Add(v);
+                    m_removeAudio.Add(v);
                 }
             }
-            foreach (var v in m_removeList)
+            foreach (var v in m_removeAudio)
             {
                 m_effectAudio.Remove(v.InsId);
                 m_idleAudio.Add(v);
-                if (m_groupAudio.ContainsKey(v.TheGroupName) && m_groupAudio[v.TheGroupName].ContainsKey(v.InsId))
+                if (m_groupAudio.ContainsKey(v.TheGroupName) && m_groupAudio[v.TheGroupName].Contains(v))
                 {
-                    m_groupAudio[v.TheGroupName].Remove(v.InsId);
+                    m_groupAudio[v.TheGroupName].Remove(v);
+                }
+                if (m_pathAudio.ContainsKey(v.ThePath) && m_pathAudio[v.ThePath].Contains(v))
+                {
+                    m_pathAudio[v.ThePath].Remove(v);
                 }
             }
-            m_removeList.Clear();
+            m_removeAudio.Clear();
         }
         public void CustomDestroy()
         {
             foreach (var v in m_musicAudio.Values)
             {
-                v.OnComplete = null;
+                v.Destroy();
             }
             foreach (var v in m_effectAudio.Values)
             {
-                v.OnComplete = null;
+                v.Destroy();
             }
             ResourceLoader.UnloadObject("Prefabs/Misc/AudioMixer");
         }
-        public int? Play(AudioState state, int? insId, string audioPath, string groupName, bool groupMutex, bool isEffect, bool isFade, bool isLoop, float defaultVolume, float minDistance, float maxDistance, Transform follower)
+        public void Preload(string path)
         {
-            if (null != insId)
+            if (m_preloadList.Contains(path))
             {
-                if (m_musicAudio.ContainsKey(insId.Value))
+                return;
+            }
+            ResourceLoader.LoadObject(path);
+            m_preloadList.Add(path);
+        }
+        public void Unload(string path)
+        {
+            if (!m_preloadList.Contains(path))
+            {
+                return;
+            }
+            m_preloadList.Remove(path);
+            ResourceLoader.UnloadObject(path);
+        }
+        public void UnloadAll()
+        {
+            foreach (var v in m_preloadList)
+            {
+                ResourceLoader.UnloadObject(v);
+            }
+            m_preloadList.Clear();
+        }
+        public int? Play(
+            AudioState state,
+            int? insId,
+            string path,
+            bool pathMutex,
+            string group,
+            bool groupMutex,
+            bool isEffect,
+            bool isFade,
+            bool isLoop,
+            float initialVolume,
+            float minDistance,
+            float maxDistance,
+            Transform follower,
+            Action onComplete)
+        {
+            if (null != insId && ChangeAudioState(state, insId.Value))
+            {
+                return insId.Value;
+            }
+            if (string.IsNullOrEmpty(path) || string.IsNullOrEmpty(group))
+            {
+                return null;
+            }
+
+            AudioSourceInfo audio = null;
+
+            // 同路径互斥
+            if (pathMutex && m_pathAudio.ContainsKey(path))
+            {
+                foreach (var v in m_pathAudio[path])
                 {
-                    SetAudioState(m_musicAudio[insId.Value], state);
-                    return insId.Value;
-                }
-                if (m_effectAudio.ContainsKey(insId.Value))
-                {
-                    SetAudioState(m_effectAudio[insId.Value], state);
-                    return insId.Value;
+                    if (ChangeAudioState(state, v.InsId))
+                    {
+                        return v.InsId;
+                    }
                 }
             }
 
-            if (string.IsNullOrEmpty(audioPath))
-            {
-                return null;
-            }
-            if (string.IsNullOrEmpty(groupName))
-            {
-                return null;
-            }
-            AudioSourceInfo audio = GetIdleAudio(null != follower);
-            audio.ThePath = audioPath;
-            audio.TheGroupName = groupName;
+            audio = GetIdleAudio(null != follower);
+            audio.IsLoading = true;
             audio.IsFade = isFade;
-            audio.DefaultVolume = defaultVolume;
+            audio.IsGroupMutex = groupMutex;
+            audio.IsPathMutex = pathMutex;
+            audio.ThePath = path;
+            audio.TheGroupName = group;
+            audio.TheInitialVolume = initialVolume;
+            audio.TheComplete = onComplete;
             audio.TheAudio.loop = isLoop;
             audio.TheAudio.minDistance = minDistance;
             audio.TheAudio.maxDistance = maxDistance;
 
+            // 音效、音乐区分
             if (isEffect)
             {
-                audio.TheAudio.volume = defaultVolume * m_effectVolume;
+                audio.TheAudio.volume = initialVolume * m_effectVolume;
                 m_effectAudio.Add(audio.InsId, audio);
             }
             else
             {
-                audio.TheAudio.volume = defaultVolume * m_musicVolume;
+                audio.TheAudio.volume = initialVolume * m_musicVolume;
                 m_musicAudio.Add(audio.InsId, audio);
             }
 
             ResourceLoader.AsyncLoadObject(audio.ThePath, typeof(AudioClip), (clip) =>
             {
-                SetAudioGroup(audio, clip as AudioClip, state, groupMutex);
+                SetAudioGroup(audio, clip as AudioClip, state);
             });
 
             return audio.InsId;
@@ -144,30 +207,68 @@ namespace LCG
             {
                 return;
             }
-            foreach (var v in m_groupAudio[name].Values)
+            foreach (var v in m_groupAudio[name])
             {
                 SetAudioState(v, state);
             }
         }
-        public void SetAudioGroup(AudioSourceInfo audio, AudioClip clip, AudioState state, bool groupMutex)
+        public void PlayByPathName(string name, AudioState state)
+        {
+            if (!m_pathAudio.ContainsKey(name))
+            {
+                return;
+            }
+            foreach (var v in m_pathAudio[name])
+            {
+                SetAudioState(v, state);
+            }
+        }
+        public bool ChangeAudioState(AudioState state, int insId)
+        {
+            if (m_musicAudio.ContainsKey(insId))
+            {
+                SetAudioState(m_musicAudio[insId], state);
+                return true;
+            }
+            if (m_effectAudio.ContainsKey(insId))
+            {
+                SetAudioState(m_effectAudio[insId], state);
+                return true;
+            }
+            return false;
+        }
+        public void SetAudioGroup(AudioSourceInfo audio, AudioClip clip, AudioState state)
         {
             if (null == clip)
             {
                 return;
             }
+            audio.IsLoading = false;
             audio.TheAudio.clip = clip;
             if (!m_groupAudio.ContainsKey(audio.TheGroupName))
             {
-                m_groupAudio.Add(audio.TheGroupName, new Dictionary<int, AudioSourceInfo>());
+                m_groupAudio.Add(audio.TheGroupName, new List<AudioSourceInfo>());
             }
-            if (groupMutex)
+            if (!m_pathAudio.ContainsKey(audio.ThePath))
             {
-                foreach (var v in m_groupAudio[audio.TheGroupName].Values)
+                m_pathAudio.Add(audio.ThePath, new List<AudioSourceInfo>());
+            }
+            if (audio.IsGroupMutex)
+            {
+                foreach (var v in m_groupAudio[audio.TheGroupName])
                 {
                     v.Stop();
                 }
             }
-            m_groupAudio[audio.TheGroupName].Add(audio.InsId, audio);
+            if (audio.IsPathMutex)
+            {
+                foreach (var v in m_pathAudio[audio.ThePath])
+                {
+                    v.Stop();
+                }
+            }
+            m_groupAudio[audio.TheGroupName].Add(audio);
+            m_pathAudio[audio.ThePath].Add(audio);
 
             UnityEngine.Audio.AudioMixerGroup[] groups = m_audioMixer.FindMatchingGroups(audio.TheGroupName);
             if (groups.Length > 0)
@@ -206,7 +307,7 @@ namespace LCG
             {
                 foreach (var v in m_effectAudio.Values)
                 {
-                    v.TheAudio.volume = v.DefaultVolume * volume;
+                    v.TheAudio.volume = v.TheInitialVolume * volume;
                 }
                 m_effectVolume = volume;
             }
@@ -214,7 +315,7 @@ namespace LCG
             {
                 foreach (var v in m_musicAudio.Values)
                 {
-                    v.TheAudio.volume = v.DefaultVolume * volume;
+                    v.TheAudio.volume = v.TheInitialVolume * volume;
                 }
                 m_musicVolume = volume;
             }
@@ -285,28 +386,25 @@ namespace LCG
             public int InsId;
             public bool Is3d;
             public bool IsFade;
-            public float DefaultVolume;
+            public bool IsLoading;
+            public bool IsGroupMutex;
+            public bool IsPathMutex;
+            public float TheInitialVolume;
             public string ThePath;
             public string TheGroupName;
             public Transform TheSelf;
             public Transform TheFollow;
             public AudioSource TheAudio;
-            public Action OnComplete = null;
+            public Action TheComplete = null;
             private Coroutine CoroutineFade;
 
-            public bool IsIdle()
+            public bool CheckIdle()
             {
-                if (TheAudio.isPlaying)
+                if (IsLoading || TheAudio.isPlaying)
                 {
                     return false;
                 }
-                if (null != CoroutineFade)
-                {
-                    Audio.Instance.StopCoroutine(CoroutineFade);
-                }
-                TheFollow = null;
-                CoroutineFade = null;
-                OnComplete = null;
+                Destroy();
                 return true;
             }
             public void Play()
@@ -324,7 +422,6 @@ namespace LCG
                 {
                     CoroutineFade = Audio.Instance.StartCoroutine(OnFade(true));
                 }
-                TheAudio.Play();
             }
             public void Stop()
             {
@@ -337,7 +434,6 @@ namespace LCG
                 {
                     CoroutineFade = Audio.Instance.StartCoroutine(OnFade(false));
                 }
-                OnComplete = null;
             }
             public void Pause()
             {
@@ -349,9 +445,14 @@ namespace LCG
             }
             public void Update()
             {
-                if (null != OnComplete && !TheAudio.isPlaying)
+                if (IsLoading)
                 {
-                    OnComplete.Invoke();
+                    return;
+                }
+                if (null != TheComplete && !TheAudio.isPlaying)
+                {
+                    TheComplete.Invoke();
+                    TheComplete = null;
                 }
                 if (!Is3d || null == TheFollow)
                 {
@@ -366,6 +467,25 @@ namespace LCG
                     TheSelf.position = TheFollow.position;
                 }
             }
+            public void Destroy()
+            {
+                if (null != CoroutineFade)
+                {
+                    Audio.Instance.StopCoroutine(CoroutineFade);
+                }
+
+                if (null != TheAudio.clip)
+                {
+                    TheAudio.Stop();
+                    TheAudio.clip = null;
+                    ResourceLoader.UnloadObject(ThePath);
+                }
+
+                IsLoading = false;
+                TheFollow = null;
+                TheComplete = null;
+                CoroutineFade = null;
+            }
             private IEnumerator OnFade(bool fadein)
             {
                 if (fadein)
@@ -374,6 +494,7 @@ namespace LCG
                     float volume = 0;
                     float interval = TheAudio.volume * 0.04f;
                     TheAudio.volume = volume;
+                    TheAudio.Play();
                     while (frame <= 25)
                     {
                         frame++;
@@ -396,6 +517,7 @@ namespace LCG
                     }
                     TheFollow = null;
                     TheAudio.Stop();
+                    TheAudio.clip = null;
                     ResourceLoader.UnloadObject(ThePath);
                 }
                 yield return null;

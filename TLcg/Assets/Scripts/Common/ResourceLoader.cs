@@ -130,8 +130,14 @@ namespace LCG
                 lastSceneName = sname;
             }
         }
-        public static void UnloadScene()
+        public static void UnloadScene(string sname)
         {
+            ABLoader.UnloadScene(ScenePathPrefix + sname);
+            // 和上一场景一致
+            if (lastSceneName == sname)
+            {
+                lastSceneName = null;
+            }
         }
         public static List<string> LoadedLua = new List<string>();
         public static byte[] LoadLua(ref string filePath)

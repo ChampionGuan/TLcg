@@ -67,10 +67,10 @@ function AudioManager.SetMusicVolume(volume, save)
     AudioCtrl:SetAudioVolume(m_musicSwitch * m_musicVolume, false)
 end
 
--- 播放audio
-function AudioManager.Play(state, id, insId, followTarget)
+-- 获取音源配置
+function AudioManager.GetConfig(id)
     -- 配置id为空
-    if nil == id and nil == insId then
+    if nil == id then
         return nil
     end
 
@@ -93,20 +93,71 @@ function AudioManager.Play(state, id, insId, followTarget)
         return nil
     end
 
+    return audioConfig
+end
+
+-- 播放audio
+function AudioManager.Play(state, id, insId, followTarget, onComplete)
+    -- 配置id为空
+    if nil == id and nil == insId then
+        return nil
+    end
+
+    local audioConfig = AudioManager.GetConfig(id)
+    if nil == audioConfig then
+        return nil
+    end
+
     return AudioCtrl:Play(
         state,
         insId,
-        audioConfig.path,
-        audioConfig.groupName,
-        audioConfig.groupMutex,
-        audioConfig.isEffect,
-        audioConfig.isFade,
-        audioConfig.isLoop,
-        audioConfig.defaultVolume,
-        audioConfig.minDistance,
-        audioConfig.maxDistance,
-        followTarget
+        audioConfig.Path,
+        audioConfig.PathMutex,
+        audioConfig.GroupName,
+        audioConfig.GroupMutex,
+        audioConfig.IsEffect,
+        audioConfig.IsFade,
+        audioConfig.IsLoop,
+        audioConfig.InitialVolume,
+        audioConfig.MinDistance,
+        audioConfig.MaxDistance,
+        followTarget,
+        onComplete
     )
+end
+
+-- 预加载
+function AudioManager.Preload(id)
+    -- 配置id为空
+    if nil == id then
+        return nil
+    end
+
+    local audioGroupConfig = AudioGroupConfig[id]
+    -- 音源组
+    if nil == audioGroupConfig or #audioGroupConfig <= 0 then
+        print("group key is nil " .. id)
+        return nil
+    end
+
+    -- 随机种子
+    if #audioGroupConfig > 1 then
+        math.randomseed(tostring(os.time()):reverse():sub(1, 6))
+    end
+    -- 随机音源
+    local audioConfig = AudioConfig[audioGroupConfig[math.random(1, #audioGroupConfig)]]
+    -- 无效配置
+    if nil == audioConfig then
+        print("audio config is nil ")
+        return nil
+    end
+
+    AudioCtrl:Preload(audioConfig.Path)
+end
+
+-- 卸载所有预加载
+function AudioManager.UnloadAll()
+    AudioCtrl:UnloadAll()
 end
 
 function AudioManager.Initialize()
@@ -132,6 +183,7 @@ function AudioManager.CustomDestroy()
     if nil == m_audioRoot then
         return
     end
+    AudioCtrl:CustomDestroy()
     LuaHandle.Unload("Game.Config.AudioConfig")
     LuaHandle.Unload("Game.Config.AudioGroupConfig")
     CSharp.Gameobjects.Instance:Destroy("Prefabs/Misc/AudioPlayer")

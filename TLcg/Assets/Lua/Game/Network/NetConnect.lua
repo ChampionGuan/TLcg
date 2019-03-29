@@ -88,21 +88,21 @@ local function netReconnectPopup()
         -- 超时处理
         if count >= 3 then
             data = {
-                content = Localization.NetReloginFailure,
-                btnRightTitle = Localization.BtnToLogin,
+                content = Localization.LoginFailure,
+                btnRightTitle = Localization.BackToLogin,
                 btnRightFunc = backToLogin
             }
         else
             data = {
-                content = string.format(Localization.Connecting_2, count),
-                btnLeftTitle = Localization.BtnToLogin,
-                btnRightTitle = Localization.BtnToReconnect,
+                content = string.format(Localization.Connecting, count),
+                btnLeftTitle = Localization.BackToLogin,
+                btnRightTitle = Localization.Reconnect,
                 btnLeftFunc = backToLogin,
                 btnRightFunc = toReconnect
             }
             -- 首次重连
             if count == 1 then
-                data.content = Localization.NetFirstConnect
+                data.content = Localization.ConnectFailure
             end
         end
         -- 打开重连弹框
@@ -125,7 +125,7 @@ function NetConnect.initialize()
                 UIManager.getNetworkErrorTip(misc_decoder.ModuleID, misc_decoder.S2C_FAIL_DISCONECT_REASON, code)
             local data = {
                 content = Localization[errorKey],
-                btnRightTitle = Localization.BtnToLogin,
+                btnRightTitle = Localization.BackToLogin,
                 btnRightFunc = backToLogin
             }
             UIManager.OpenController(UIConfig.ControllerName.NetErrorPopup, data)
@@ -185,8 +185,8 @@ function NetConnect.connect(ip, port, token, key, callBack)
         -- 打开重连弹框
         local data = {
             content = Localization.NetUnreachable,
-            btnLeftTitle = Localization.BtnToLogin,
-            btnRightTitle = Localization.BtnToReconnect,
+            btnLeftTitle = Localization.BackToLogin,
+            btnRightTitle = Localization.Reconnect,
             btnLeftFunc = backToLogin,
             btnRightFunc = toReconnect
         }

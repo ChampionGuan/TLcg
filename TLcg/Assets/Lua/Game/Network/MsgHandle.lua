@@ -46,16 +46,16 @@ local function SyncTimeOut()
     local data = nil
     if syncTimeoutCount >= 3 then
         data = {
-            content = Localization.NetReloginFailure,
-            btnRightTitle = Localization.BtnToLogin,
+            content = Localization.LoginFailure,
+            btnRightTitle = Localization.BackToLogin,
             btnRightFunc = BackToLogin,
             syncType = Define.SyncType.Sync
         }
     else
         data = {
             content = Localization.NetTimeOut,
-            btnLeftTitle = Localization.BtnToLogin,
-            btnRightTitle = Localization.BtnToWait,
+            btnLeftTitle = Localization.BackToLogin,
+            btnRightTitle = Localization.KeepToWait,
             btnLeftFunc = BackToLogin,
             btnRightFunc = ContinueWait,
             syncType = Define.SyncType.Sync

@@ -1,49 +1,64 @@
 -- 此脚本由工具生成
+-- Path：             音源路径
+-- PathMutex：        是否同路径音源互斥
+-- IsEffect：         是否为音效
+-- IsLoop：           是否循环播放
+-- IsFade：           是否淡入淡出
+-- GroupName：        所在组名称
+-- GroupMutex：       是否同组互斥
+-- UnloadType:        卸载模式，0：及时卸载，1：切换场景后卸载
+-- InitialVolume：    初始音量
+-- MinDistance：      如果为3d音源，最短距离
+-- MaxDistance：      如果为3d音源，最远距离
 
 local AudioConfig = {
     BGM_Login = {
-        path = "Audio/BGM_Login",
-        isEffect = true,
-        isLoop = true,
-        isFade = true,
-        groupName = "Bg",
-        groupMutex = true,
-        defaultVolume = 1,
-        minDistance = 0,
-        maxDistance = 500
+        Path = "Audio/BGM_Login",
+        PathMutex = false,
+        IsEffect = false,
+        IsLoop = true,
+        IsFade = true,
+        GroupName = "Bg",
+        GroupMutex = true,
+        InitialVolume = 1,
+        MinDistance = 0,
+        MaxDistance = 500
     },
     BGM_City01 = {
-        path = "Audio/BGM_City01",
-        isEffect = true,
-        isLoop = false,
-        isFade = true,
-        groupName = "Bg",
-        groupMutex = true,
-        defaultVolume = 1,
-        minDistance = 0,
-        maxDistance = 500
+        Path = "Audio/BGM_City01",
+        PathMutex = false,
+        IsEffect = false,
+        IsLoop = false,
+        IsFade = true,
+        GroupName = "Bg",
+        GroupMutex = true,
+        InitialVolume = 1,
+        MinDistance = 0,
+        MaxDistance = 500
     },
     BGM_Field01 = {
-        path = "Audio/BGM_Field01",
-        isEffect = true,
-        isLoop = true,
-        isFade = true,
-        groupName = "Bg",
-        groupMutex = true,
-        defaultVolume = 0.9,
-        minDistance = 0,
-        maxDistance = 500
+        Path = "Audio/BGM_Field01",
+        PathMutex = false,
+        IsEffect = false,
+        IsLoop = true,
+        IsFade = true,
+        GroupName = "Bg",
+        GroupMutex = true,
+        InitialVolume = 0.9,
+        MinDistance = 0,
+        MaxDistance = 500
     },
     BGM_Battle01 = {
-        path = "Audio/BGM_Battle01",
-        isEffect = true,
-        isLoop = true,
-        isFade = true,
-        groupName = "Bg",
-        groupMutex = true,
-        defaultVolume = 0.6,
-        minDistance = 0,
-        maxDistance = 500
+        Path = "Audio/BGM_Battle01",
+        PathMutex = false,
+        IsEffect = false,
+        IsLoop = true,
+        IsFade = true,
+        GroupName = "Bg",
+        GroupMutex = true,
+        InitialVolume = 0.6,
+        MinDistance = 0,
+        MaxDistance = 500
     }
 }
 return AudioConfig
