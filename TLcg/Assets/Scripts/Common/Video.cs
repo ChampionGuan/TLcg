@@ -113,11 +113,11 @@ namespace LCG
             }
         }
 
-        public void PlaySubtitle(float strat, float end, string text)
+        public void PlaySubtitle(float start, float end, string text)
         {
             m_subtitleRoot.SetActive(true);
             m_subtitleText.text = string.Empty;
-            StartCoroutine(Subtitle(strat, end, text));
+            StartCoroutine(Subtitle(start, end, text));
         }
 
         public void StopSubtitle()

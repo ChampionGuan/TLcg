@@ -13,7 +13,7 @@ local function VideoPrepared()
     end
 end
 
-local function VideoOver()
+local function VideoComplete()
     if nil ~= m_onOverCallback then
         m_onOverCallback()
     end
@@ -55,12 +55,6 @@ function Video.Stop()
     VideoCtrl:SetActive(false)
 end
 
-function Video.Release()
-    VideoCtrl:Stop()
-    VideoCtrl:Release()
-    VideoCtrl:SetActive(false)
-end
-
 function Video.Initialize()
     if nil ~= m_videoRoot then
         return
@@ -72,7 +66,7 @@ function Video.Initialize()
 
     VideoCtrl = m_videoRoot:GetComponent(typeof(CSharp.Video))
     VideoCtrl.PreparedCallback = VideoPrepared
-    VideoCtrl.CompleteCallback = VideoOver
+    VideoCtrl.CompleteCallback = VideoComplete
     VideoCtrl:SetVolume(PlayerPrefs.GetMusicVolume() * PlayerPrefs.GetMusicSwitch())
 
     Video.Stop()

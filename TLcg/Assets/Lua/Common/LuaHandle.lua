@@ -1,7 +1,7 @@
 local loadedLua = CS.LCG.ResourceLoader.LoadedLua
 
 -- lua白名单（此名单下脚本不卸载，比如一些公共数据存储）
-local blackLuaList = {
+local dontUnloadList = {
     ["Game.Main"] = 1,
     ["Launcher.Main"] = 1,
     ["Common.Common"] = 1,
@@ -39,7 +39,7 @@ function LuaHandle.UnloadAll()
     local luaPath = ""
     for i = loadedLua.Count - 1, 0, -1 do
         luaPath = loadedLua[i]
-        if nil == blackLuaList[luaPath] then
+        if nil == dontUnloadList[luaPath] then
             LuaHandle.Unload(luaPath)
         end
     end
