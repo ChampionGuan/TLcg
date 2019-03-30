@@ -24,7 +24,7 @@ local AudioConfig = {
         GroupMutex = true,
         TrackName = "Bg",
         TrackMutex = true,
-        InitialVolume = 1,
+        DefaultVolume = 1,
         MinDistance = 0,
         MaxDistance = 500
     },
@@ -38,7 +38,7 @@ local AudioConfig = {
         GroupMutex = true,
         TrackName = "Bg",
         TrackMutex = true,
-        InitialVolume = 1,
+        DefaultVolume = 1,
         MinDistance = 0,
         MaxDistance = 500
     },
@@ -52,7 +52,7 @@ local AudioConfig = {
         GroupMutex = true,
         TrackName = "Bg",
         TrackMutex = true,
-        InitialVolume = 0.9,
+        DefaultVolume = 0.9,
         MinDistance = 0,
         MaxDistance = 500
     },
@@ -66,7 +66,7 @@ local AudioConfig = {
         GroupMutex = true,
         TrackName = "Bg",
         TrackMutex = true,
-        InitialVolume = 0.6,
+        DefaultVolume = 0.6,
         MinDistance = 0,
         MaxDistance = 500
     }

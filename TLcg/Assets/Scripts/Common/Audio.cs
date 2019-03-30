@@ -79,8 +79,11 @@ namespace LCG
             {
                 v.Destroy();
             }
+            if (null != Instance)
+            {
+                StopAllCoroutines();
+            }
             ResourceLoader.UnloadObject("Prefabs/Misc/AudioMixer");
-            StopAllCoroutines();
         }
         public void Preload(string path)
         {
@@ -91,7 +94,7 @@ namespace LCG
             ResourceLoader.LoadObject(path);
             m_preloadList.Add(path);
         }
-        public void Unload(string path)
+        public void RemovePreload(string path)
         {
             if (!m_preloadList.Contains(path))
             {
@@ -100,7 +103,7 @@ namespace LCG
             ResourceLoader.UnloadObject(path);
             m_preloadList.Remove(path);
         }
-        public void UnloadAll()
+        public void RemoveAllPreload()
         {
             foreach (var v in m_preloadList)
             {
@@ -140,7 +143,7 @@ namespace LCG
             bool isEffect,
             bool isFade,
             bool isLoop,
-            float initialVolume,
+            float defalutVolume,
             float minDistance,
             float maxDistance,
             Transform follower,
@@ -178,7 +181,7 @@ namespace LCG
             audio.IsTrackMutex = trackMutex;
             audio.TheGroupName = group;
             audio.IsGroupMutex = groupMutex;
-            audio.TheInitialVolume = initialVolume;
+            audio.TheDefaultVolume = defalutVolume;
             audio.TheComplete = onComplete;
             audio.TheAudio.loop = isLoop;
             audio.TheAudio.minDistance = minDistance;
@@ -187,12 +190,12 @@ namespace LCG
             // 音效、音乐区分
             if (isEffect)
             {
-                audio.TheAudio.volume = initialVolume * m_effectVolume;
+                audio.TheAudio.volume = defalutVolume * m_effectVolume;
                 m_effectAudio.Add(audio.InsId, audio);
             }
             else
             {
-                audio.TheAudio.volume = initialVolume * m_musicVolume;
+                audio.TheAudio.volume = defalutVolume * m_musicVolume;
                 m_musicAudio.Add(audio.InsId, audio);
             }
 
@@ -332,7 +335,7 @@ namespace LCG
             {
                 foreach (var v in m_effectAudio.Values)
                 {
-                    v.TheAudio.volume = v.TheInitialVolume * volume;
+                    v.TheAudio.volume = v.TheDefaultVolume * volume;
                 }
                 m_effectVolume = volume;
             }
@@ -340,7 +343,7 @@ namespace LCG
             {
                 foreach (var v in m_musicAudio.Values)
                 {
-                    v.TheAudio.volume = v.TheInitialVolume * volume;
+                    v.TheAudio.volume = v.TheDefaultVolume * volume;
                 }
                 m_musicVolume = volume;
             }
@@ -444,7 +447,7 @@ namespace LCG
             public bool IsTrackMutex;
             public bool IsGroupMutex;
             public bool IsPathMutex;
-            public float TheInitialVolume;
+            public float TheDefaultVolume;
             public string ThePath;
             public string TheTrackName;
             public string TheGroupName;
@@ -527,12 +530,12 @@ namespace LCG
             }
             public void Destroy()
             {
-                if (null != CoroutineFade)
+                if (null != CoroutineFade && null != Audio.Instance)
                 {
                     Audio.Instance.StopCoroutine(CoroutineFade);
                 }
 
-                if (null != TheAudio.clip)
+                if (null != TheAudio && null != TheAudio.clip)
                 {
                     TheAudio.Stop();
                     TheAudio.clip = null;

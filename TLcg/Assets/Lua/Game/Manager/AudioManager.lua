@@ -119,7 +119,7 @@ function AudioManager.Play(state, id, insId, followTarget, onComplete)
         audioConfig.IsEffect,
         audioConfig.IsFade,
         audioConfig.IsLoop,
-        audioConfig.InitialVolume,
+        audioConfig.DefaultVolume,
         audioConfig.MinDistance,
         audioConfig.MaxDistance,
         followTarget,
@@ -137,9 +137,14 @@ function AudioManager.Preload(id)
     AudioCtrl:Preload(audioConfig.Path)
 end
 
--- 卸载所有预加载
-function AudioManager.UnloadAll()
-    AudioCtrl:UnloadAll()
+-- 移除预加载
+function AudioManager.RemovePreload(path)
+    AudioCtrl:RemovePreload()
+end
+
+-- 移除所有预加载
+function AudioManager.RemoveAllPreload()
+    AudioCtrl:RemoveAllPreload()
 end
 
 function AudioManager.Initialize()
