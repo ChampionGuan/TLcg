@@ -30,6 +30,8 @@ namespace LCG
         private Dictionary<int, AudioSourceInfo> m_musicAudio = new Dictionary<int, AudioSourceInfo>();
         // 音效音源
         private Dictionary<int, AudioSourceInfo> m_effectAudio = new Dictionary<int, AudioSourceInfo>();
+        // 同组音轨队列
+        private Dictionary<string, List<AudioSourceInfo>> m_trackAudio = new Dictionary<string, List<AudioSourceInfo>>();
         // 同组音源队列
         private Dictionary<string, List<AudioSourceInfo>> m_groupAudio = new Dictionary<string, List<AudioSourceInfo>>();
         // 同路径音源队列
@@ -55,20 +57,8 @@ namespace LCG
                     m_removeAudio.Add(v);
                 }
             }
-            foreach (var v in m_removeAudio)
-            {
-                m_musicAudio.Remove(v.InsId);
-                m_idleAudio.Add(v);
-                if (m_groupAudio.ContainsKey(v.TheGroupName) && m_groupAudio[v.TheGroupName].Contains(v))
-                {
-                    m_groupAudio[v.TheGroupName].Remove(v);
-                }
-                if (m_pathAudio.ContainsKey(v.ThePath) && m_pathAudio[v.ThePath].Contains(v))
-                {
-                    m_pathAudio[v.ThePath].Remove(v);
-                }
-            }
-            m_removeAudio.Clear();
+            RemoveAudio(false);
+
             foreach (var v in m_effectAudio.Values)
             {
                 v.Update();
@@ -77,20 +67,7 @@ namespace LCG
                     m_removeAudio.Add(v);
                 }
             }
-            foreach (var v in m_removeAudio)
-            {
-                m_effectAudio.Remove(v.InsId);
-                m_idleAudio.Add(v);
-                if (m_groupAudio.ContainsKey(v.TheGroupName) && m_groupAudio[v.TheGroupName].Contains(v))
-                {
-                    m_groupAudio[v.TheGroupName].Remove(v);
-                }
-                if (m_pathAudio.ContainsKey(v.ThePath) && m_pathAudio[v.ThePath].Contains(v))
-                {
-                    m_pathAudio[v.ThePath].Remove(v);
-                }
-            }
-            m_removeAudio.Clear();
+            RemoveAudio(true);
         }
         public void CustomDestroy()
         {
@@ -103,6 +80,7 @@ namespace LCG
                 v.Destroy();
             }
             ResourceLoader.UnloadObject("Prefabs/Misc/AudioMixer");
+            StopAllCoroutines();
         }
         public void Preload(string path)
         {
@@ -119,8 +97,8 @@ namespace LCG
             {
                 return;
             }
-            m_preloadList.Remove(path);
             ResourceLoader.UnloadObject(path);
+            m_preloadList.Remove(path);
         }
         public void UnloadAll()
         {
@@ -130,11 +108,33 @@ namespace LCG
             }
             m_preloadList.Clear();
         }
+        /// <summary>
+        /// 播放音源
+        /// </summary>
+        /// <param name="state">音源状态</param>
+        /// <param name="insId">音源实例化id</param>
+        /// <param name="path">音源路径</param>
+        /// <param name="pathMutex">是否同音源路径互斥</param>
+        /// <param name="track">音源所在轨</param>
+        /// <param name="trackMutex">是否音源所在轨互斥</param>
+        /// <param name="group">音源所在组</param>
+        /// <param name="groupMutex">音源所在组互斥</param>
+        /// <param name="isEffect">是否为音效</param>
+        /// <param name="isFade">是否渐入渐出</param>
+        /// <param name="isLoop">是否为循环</param>
+        /// <param name="initialVolume">初始音量</param>
+        /// <param name="minDistance">3d音源，最近距离</param>
+        /// <param name="maxDistance">3d音源，最远距离</param>
+        /// <param name="follower">3d音源，跟随对象</param>
+        /// <param name="onComplete">音源播放结束回调</param>
+        /// <returns></returns>
         public int? Play(
             AudioState state,
             int? insId,
             string path,
             bool pathMutex,
+            string track,
+            bool trackMutex,
             string group,
             bool groupMutex,
             bool isEffect,
@@ -170,12 +170,14 @@ namespace LCG
             }
 
             audio = GetIdleAudio(null != follower);
-            audio.IsLoading = true;
+            audio.IsPause = true;
             audio.IsFade = isFade;
-            audio.IsGroupMutex = groupMutex;
-            audio.IsPathMutex = pathMutex;
             audio.ThePath = path;
+            audio.IsPathMutex = pathMutex;
+            audio.TheTrackName = track;
+            audio.IsTrackMutex = trackMutex;
             audio.TheGroupName = group;
+            audio.IsGroupMutex = groupMutex;
             audio.TheInitialVolume = initialVolume;
             audio.TheComplete = onComplete;
             audio.TheAudio.loop = isLoop;
@@ -196,10 +198,21 @@ namespace LCG
 
             ResourceLoader.AsyncLoadObject(audio.ThePath, typeof(AudioClip), (clip) =>
             {
-                SetAudioGroup(audio, clip as AudioClip, state);
+                SetAudioTrack(audio, clip as AudioClip, state);
             });
 
             return audio.InsId;
+        }
+        public void PlayByTrackName(string name, AudioState state)
+        {
+            if (!m_trackAudio.ContainsKey(name))
+            {
+                return;
+            }
+            foreach (var v in m_trackAudio[name])
+            {
+                SetAudioState(v, state);
+            }
         }
         public void PlayByGroupName(string name, AudioState state)
         {
@@ -237,21 +250,32 @@ namespace LCG
             }
             return false;
         }
-        public void SetAudioGroup(AudioSourceInfo audio, AudioClip clip, AudioState state)
+        public void SetAudioTrack(AudioSourceInfo audio, AudioClip clip, AudioState state)
         {
             if (null == clip)
             {
                 return;
             }
-            audio.IsLoading = false;
+            audio.IsPause = false;
             audio.TheAudio.clip = clip;
-            if (!m_groupAudio.ContainsKey(audio.TheGroupName))
+            if (!m_trackAudio.ContainsKey(audio.TheTrackName))
             {
-                m_groupAudio.Add(audio.TheGroupName, new List<AudioSourceInfo>());
+                m_trackAudio.Add(audio.TheTrackName, new List<AudioSourceInfo>());
             }
             if (!m_pathAudio.ContainsKey(audio.ThePath))
             {
                 m_pathAudio.Add(audio.ThePath, new List<AudioSourceInfo>());
+            }
+            if (!m_groupAudio.ContainsKey(audio.TheGroupName))
+            {
+                m_groupAudio.Add(audio.TheGroupName, new List<AudioSourceInfo>());
+            }
+            if (audio.IsTrackMutex)
+            {
+                foreach (var v in m_trackAudio[audio.TheTrackName])
+                {
+                    v.Stop();
+                }
             }
             if (audio.IsGroupMutex)
             {
@@ -267,13 +291,14 @@ namespace LCG
                     v.Stop();
                 }
             }
+            m_trackAudio[audio.TheTrackName].Add(audio);
             m_groupAudio[audio.TheGroupName].Add(audio);
             m_pathAudio[audio.ThePath].Add(audio);
 
-            UnityEngine.Audio.AudioMixerGroup[] groups = m_audioMixer.FindMatchingGroups(audio.TheGroupName);
-            if (groups.Length > 0)
+            UnityEngine.Audio.AudioMixerGroup[] tracks = m_audioMixer.FindMatchingGroups(audio.TheTrackName);
+            if (tracks.Length > 0)
             {
-                audio.TheAudio.outputAudioMixerGroup = groups[0];
+                audio.TheAudio.outputAudioMixerGroup = tracks[0];
             }
 
             SetAudioState(audio, state);
@@ -373,6 +398,35 @@ namespace LCG
 
             return audio;
         }
+        private void RemoveAudio(bool isEffect)
+        {
+            foreach (var v in m_removeAudio)
+            {
+                if (isEffect)
+                {
+                    m_effectAudio.Remove(v.InsId);
+                }
+                else
+                {
+                    m_musicAudio.Remove(v.InsId);
+                }
+
+                m_idleAudio.Add(v);
+                if (m_trackAudio.ContainsKey(v.TheTrackName) && m_trackAudio[v.TheTrackName].Contains(v))
+                {
+                    m_trackAudio[v.TheTrackName].Remove(v);
+                }
+                if (m_groupAudio.ContainsKey(v.TheGroupName) && m_groupAudio[v.TheGroupName].Contains(v))
+                {
+                    m_groupAudio[v.TheGroupName].Remove(v);
+                }
+                if (m_pathAudio.ContainsKey(v.ThePath) && m_pathAudio[v.ThePath].Contains(v))
+                {
+                    m_pathAudio[v.ThePath].Remove(v);
+                }
+            }
+            m_removeAudio.Clear();
+        }
         public enum AudioState
         {
             None = -1,
@@ -386,11 +440,13 @@ namespace LCG
             public int InsId;
             public bool Is3d;
             public bool IsFade;
-            public bool IsLoading;
+            public bool IsPause;
+            public bool IsTrackMutex;
             public bool IsGroupMutex;
             public bool IsPathMutex;
             public float TheInitialVolume;
             public string ThePath;
+            public string TheTrackName;
             public string TheGroupName;
             public Transform TheSelf;
             public Transform TheFollow;
@@ -400,7 +456,7 @@ namespace LCG
 
             public bool CheckIdle()
             {
-                if (IsLoading || TheAudio.isPlaying)
+                if (IsPause || TheAudio.isPlaying)
                 {
                     return false;
                 }
@@ -437,15 +493,17 @@ namespace LCG
             }
             public void Pause()
             {
+                IsPause = true;
                 TheAudio.Pause();
             }
             public void UnPause()
             {
+                IsPause = false;
                 TheAudio.UnPause();
             }
             public void Update()
             {
-                if (IsLoading)
+                if (IsPause)
                 {
                     return;
                 }
@@ -478,10 +536,10 @@ namespace LCG
                 {
                     TheAudio.Stop();
                     TheAudio.clip = null;
-                    ResourceLoader.UnloadObject(ThePath);
+                    Audio.Instance.StartCoroutine(Unload(ThePath));
                 }
 
-                IsLoading = false;
+                IsPause = false;
                 TheFollow = null;
                 TheComplete = null;
                 CoroutineFade = null;
@@ -518,9 +576,14 @@ namespace LCG
                     TheFollow = null;
                     TheAudio.Stop();
                     TheAudio.clip = null;
-                    ResourceLoader.UnloadObject(ThePath);
+                    Audio.Instance.StartCoroutine(Unload(ThePath));
                 }
                 yield return null;
+            }
+            private IEnumerator Unload(string path)
+            {
+                yield return new WaitForSeconds(3);
+                ResourceLoader.UnloadObject(path);
             }
         }
     }

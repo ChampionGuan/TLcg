@@ -6,6 +6,8 @@
 -- IsFade：           是否淡入淡出
 -- GroupName：        所在组名称
 -- GroupMutex：       是否同组互斥
+-- TrackName：        所在轨名称
+-- TrackMutex：       是否同轨互斥
 -- UnloadType:        卸载模式，0：及时卸载，1：切换场景后卸载
 -- InitialVolume：    初始音量
 -- MinDistance：      如果为3d音源，最短距离
@@ -18,8 +20,10 @@ local AudioConfig = {
         IsEffect = false,
         IsLoop = true,
         IsFade = true,
-        GroupName = "Bg",
+        GroupName = "Default",
         GroupMutex = true,
+        TrackName = "Bg",
+        TrackMutex = true,
         InitialVolume = 1,
         MinDistance = 0,
         MaxDistance = 500
@@ -30,8 +34,10 @@ local AudioConfig = {
         IsEffect = false,
         IsLoop = false,
         IsFade = true,
-        GroupName = "Bg",
+        GroupName = "Default",
         GroupMutex = true,
+        TrackName = "Bg",
+        TrackMutex = true,
         InitialVolume = 1,
         MinDistance = 0,
         MaxDistance = 500
@@ -42,8 +48,10 @@ local AudioConfig = {
         IsEffect = false,
         IsLoop = true,
         IsFade = true,
-        GroupName = "Bg",
+        GroupName = "Default",
         GroupMutex = true,
+        TrackName = "Bg",
+        TrackMutex = true,
         InitialVolume = 0.9,
         MinDistance = 0,
         MaxDistance = 500
@@ -54,8 +62,10 @@ local AudioConfig = {
         IsEffect = false,
         IsLoop = true,
         IsFade = true,
-        GroupName = "Bg",
+        GroupName = "Default",
         GroupMutex = true,
+        TrackName = "Bg",
+        TrackMutex = true,
         InitialVolume = 0.6,
         MinDistance = 0,
         MaxDistance = 500

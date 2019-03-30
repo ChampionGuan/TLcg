@@ -98,7 +98,6 @@ end
 
 -- 播放audio
 function AudioManager.Play(state, id, insId, followTarget, onComplete)
-    -- 配置id为空
     if nil == id and nil == insId then
         return nil
     end
@@ -113,6 +112,8 @@ function AudioManager.Play(state, id, insId, followTarget, onComplete)
         insId,
         audioConfig.Path,
         audioConfig.PathMutex,
+        audioConfig.TrackName,
+        audioConfig.TrackMutex,
         audioConfig.GroupName,
         audioConfig.GroupMutex,
         audioConfig.IsEffect,
@@ -128,27 +129,8 @@ end
 
 -- 预加载
 function AudioManager.Preload(id)
-    -- 配置id为空
-    if nil == id then
-        return nil
-    end
-
-    local audioGroupConfig = AudioGroupConfig[id]
-    -- 音源组
-    if nil == audioGroupConfig or #audioGroupConfig <= 0 then
-        print("group key is nil " .. id)
-        return nil
-    end
-
-    -- 随机种子
-    if #audioGroupConfig > 1 then
-        math.randomseed(tostring(os.time()):reverse():sub(1, 6))
-    end
-    -- 随机音源
-    local audioConfig = AudioConfig[audioGroupConfig[math.random(1, #audioGroupConfig)]]
-    -- 无效配置
+    local audioConfig = AudioManager.GetConfig(id)
     if nil == audioConfig then
-        print("audio config is nil ")
         return nil
     end
 

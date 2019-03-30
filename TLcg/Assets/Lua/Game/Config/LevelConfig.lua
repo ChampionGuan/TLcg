@@ -18,6 +18,6 @@ return {
         Type = Define.LevelType.Battle,
         LogicScript = "Game.LevelLogic.BattleLevelLogic",
         SceneName = "Battle",
-        AudioId = 2
+        AudioId = 3
     }
 }
