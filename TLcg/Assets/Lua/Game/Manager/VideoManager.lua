@@ -9,16 +9,25 @@ local m_onOverCallback = nil
 local m_curVideoConfig = nil
 
 local function VideoPrepared()
+    if nil ~= m_curVideoConfig.Subtitle and #m_curVideoConfig.Subtitle > 0 then
+        for k, v in pairs(m_curVideoConfig.Subtitle) do
+            VideoCtrl:PlaySubtitle(v.Start, v.End, v.Content)
+        end
+    end
+
     if nil ~= m_onPlayCallback then
         m_onPlayCallback()
     end
 end
 
-local function VideoOver()
+local function VideoComplete()
+    m_curVideoConfig = nil
+    VideoCtrl:StopSubtitle()
+    VideoCtrl:SetActive(false)
+
     if nil ~= m_onOverCallback then
         m_onOverCallback()
     end
-    m_curVideoConfig = nil
 end
 
 local function VideoError()
@@ -54,7 +63,7 @@ function VideoManager.Play(id, onPlay, onOver)
         VideoError()
         return
     end
-    if VideoCtrl:Play(config.VideoUrl, config.Loop, config.Skip) then
+    if VideoCtrl:Play(config.VideoUrl, config.Loop, config.Skip, config.AutoDestroy) then
         m_curVideoConfig = config
         VideoCtrl:SetActive(true)
     else
@@ -67,10 +76,8 @@ function VideoManager.Stop()
     VideoCtrl:SetActive(false)
 end
 
-function VideoManager.Release()
-    VideoCtrl:Stop()
-    VideoCtrl:Release()
-    VideoCtrl:SetActive(false)
+function VideoManager.UnloadAll()
+    VideoCtrl:UnloadAll()
 end
 
 function VideoManager.Initialize()
@@ -84,7 +91,7 @@ function VideoManager.Initialize()
 
     VideoCtrl = m_videoRoot:GetComponent(typeof(CSharp.Video))
     VideoCtrl.PreparedCallback = VideoPrepared
-    VideoCtrl.OverCallback = VideoOver
+    VideoCtrl.CompleteCallback = VideoComplete
 
     VideoManager.Stop()
 end

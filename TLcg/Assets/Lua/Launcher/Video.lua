@@ -72,7 +72,7 @@ function Video.Initialize()
 
     VideoCtrl = m_videoRoot:GetComponent(typeof(CSharp.Video))
     VideoCtrl.PreparedCallback = VideoPrepared
-    VideoCtrl.OverCallback = VideoOver
+    VideoCtrl.CompleteCallback = VideoOver
     VideoCtrl:SetVolume(PlayerPrefs.GetMusicVolume() * PlayerPrefs.GetMusicSwitch())
 
     Video.Stop()
