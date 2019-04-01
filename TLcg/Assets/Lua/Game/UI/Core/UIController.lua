@@ -114,7 +114,7 @@ local function UIController(ctrlName, viewName, isRegister)
         end
 
         self.Data = data
-        self.AliveTime = uiDisposeConfig[self.ControllerName] or 3
+        self.AliveTime = uiDisposeConfig[self.ControllerName] or 5
         -- 子ctrl打开
         for k, v in pairs(self.SubCtrl) do
             v:Open(self, data)
