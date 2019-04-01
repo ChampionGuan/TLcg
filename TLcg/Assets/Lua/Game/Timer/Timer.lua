@@ -13,6 +13,11 @@ local function Timer()
         if nil == self.Update then
             return
         end
+        self.Tick = self.Tick - 1
+        if self.Tick > 0 then
+            return
+        end
+        self.Tick = self.TickDuration
         if nil == self.Host then
             self.Update(self.CurCd, self.MaxCd)
         else
@@ -27,10 +32,12 @@ local function Timer()
         self.Complete(self.Host)
     end
 
-    function t:Init(cdMax, isCycle, funcStart, funcUpdate, funcComplete, host)
+    function t:Init(cdMax, tickDuration, isCycle, funcStart, funcUpdate, funcComplete, host)
         index = index + 1
         self.InsId = index
         self.IsCycle = isCycle or false
+        self.Tick = 0
+        self.TickDuration = tickDuration or 15
         self.CurCd = cdMax
         self.MaxCd = cdMax
         self.Start = funcStart
@@ -43,6 +50,7 @@ local function Timer()
     end
 
     function t:AddCd(cdAdd)
+        self.Tick = 0
         self.MaxCd = self.MaxCd + cdAdd
         self.CurCd = self.CurCd + cdAdd
     end
@@ -85,7 +93,7 @@ local function TimerCenter()
     t.CurrRealtime = 0
     t.LastRealtime = CSharp.Time.realtimeSinceStartup
 
-    function t:New(cdMax, ignoreTimescale, isCycle, funcStart, funcUpdate, funcComplete, host)
+    function t:New(cdMax, tickDuration, ignoreTimescale, isCycle, funcStart, funcUpdate, funcComplete, host)
         if cdMax == nil then
             return
         end
@@ -94,7 +102,7 @@ local function TimerCenter()
         if nil == tab then
             tab = Timer()
         end
-        tab:Init(cdMax, isCycle, funcStart, funcUpdate, funcComplete, host)
+        tab:Init(cdMax, tickDuration, isCycle, funcStart, funcUpdate, funcComplete, host)
         if ignoreTimescale then
             self.UsingIgnore[tab.InsId] = tab
             self.UsingNormal[tab.InsId] = nil

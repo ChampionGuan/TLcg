@@ -3,11 +3,11 @@ TimerManager = LuaHandle.Load("Game.Manager.IManager")()
 TimerManager.deltaTime = 0
 TimerManager.fixedDeltaTime = 0
 
--- 当前时间戳(服务器给)
+-- 当前时间戳(服务器给，固定时间推送至客户端)
 TimerManager.CurTimestamp = 0
 -- 客户端时区（客户端计算）
 TimerManager.CurTimeZone = 0
--- 客户端与服务器时区差
+-- 客户端与服务器时区差(服务器给服务器时区，与客户端时区相差而得)
 TimerManager.TimeZoneDiff = 0
 
 -- 计时器中心
@@ -44,14 +44,15 @@ end
 
 -- 新计时器
 -- cdMax:计时值
+-- tickDuration:调用间隔
 -- ignoreTimescale:忽略timescale
 -- isCycle:循环使用，到时重置
 -- funcStart:计时开始回调
 -- funcUpdate:计时进行回调
 -- funcComplete:计时结束回调
 -- host:计时器宿主
-function TimerManager.NewTimer(cdMax, ignoreTimescale, isCycle, funcStart, funcUpdate, funcComplete, host)
-    return TimerCenter:New(cdMax, ignoreTimescale, isCycle, funcStart, funcUpdate, funcComplete, host)
+function TimerManager.NewTimer(cdMax, tickDuration, ignoreTimescale, isCycle, funcStart, funcUpdate, funcComplete, host)
+    return TimerCenter:New(cdMax, tickDuration, ignoreTimescale, isCycle, funcStart, funcUpdate, funcComplete, host)
 end
 
 -- 计时器加时
