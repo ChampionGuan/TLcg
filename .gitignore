@@ -21,3 +21,5 @@ TLcg/Assets/Resources/Lua/*
 TLcg/Assets/Resources/Lua.meta
 TLcg/Assembly-CSharp.csproj
 TLcg/Assembly-CSharp-Editor.csproj
+TLcg/ab_TLcg/
+TLcg/ab_TLcg_server/

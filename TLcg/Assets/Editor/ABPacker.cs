@@ -22,7 +22,7 @@ namespace LCG
         private static List<string> BundleFilePath = new List<string>();
 
         private static string[] TheVersionNum = new string[4] { "0", "0", "0", "0" };
-        private static string TheRootFolderName = "ab_male7";
+        private static string TheRootFolderName = "ab_tlcg";
 
         [MenuItem("Tools/资源打包优化版")]
         public static void OpenBundlePackerWindow()
@@ -198,8 +198,11 @@ namespace LCG
 
         private static bool IsNeedFileRes(string fileName)
         {
-            if (fileName.EndsWith(".fontsettings") || fileName.EndsWith(".anim") || fileName.EndsWith(".renderTexture") || fileName.EndsWith(".flare") || fileName.EndsWith(".shader") || fileName.EndsWith(".mask") || fileName.EndsWith(".playable") || fileName.EndsWith(".controller") || fileName.EndsWith(".mixer") || fileName.EndsWith(".prefab") || fileName.EndsWith(".mp3") || fileName.EndsWith(".mp4") ||fileName.EndsWith(".shader") || fileName.EndsWith(".ttf")
-                || fileName.EndsWith(".bytes") || fileName.EndsWith(".png") || fileName.EndsWith(".jpg") || fileName.EndsWith(".txt"))
+            if (fileName.EndsWith(".meta"))
+            {
+                return false;
+            }
+            if (File.Exists(fileName))
             {
                 return true;
             }

@@ -18,7 +18,7 @@ namespace LCG
         private static List<string> BundleLuaPath = new List<string>(new string[] { "Lua" });
         private static List<string> BundleFilePath = new List<string>();
 
-        private static string TheRootFolderName = "ab_male7_server";
+        private static string TheRootFolderName = "ab_tlcg_server";
 
         [MenuItem("Tools/资源打包服务器")]
         public static void UnityPacker()
@@ -143,8 +143,11 @@ namespace LCG
 
         private static bool IsNeedFileRes(string fileName)
         {
-            if (fileName.EndsWith(".prefab") || fileName.EndsWith(".mp3") || fileName.EndsWith(".shader") || fileName.EndsWith(".ttf")
-                || fileName.EndsWith(".bytes") || fileName.EndsWith(".png") || fileName.EndsWith(".jpg") || fileName.EndsWith(".txt"))
+            if (fileName.EndsWith(".meta"))
+            {
+                return false;
+            }
+            if (File.Exists(fileName))
             {
                 return true;
             }
