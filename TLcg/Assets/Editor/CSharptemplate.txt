@@ -1,0 +1,27 @@
+/*
+--------------------------------------------------------------------------------
+--  Copyright (c) #YEAR#  All rights reserved.
+--  FILE:  #FILE#.cs
+--  AUTHOR:  ***
+--  COMPANY:  LCG
+--  CREATED:  #DATE#
+--------------------------------------------------------------------------------
+ */
+
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class #FILE# : MonoBehaviour
+{
+
+    void Start()
+    {
+
+    }
+
+    void Update()
+    {
+
+    }
+}
