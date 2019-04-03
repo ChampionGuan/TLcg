@@ -139,7 +139,7 @@ namespace LCG
 
         private static bool IsNeedFileRes(string fileName)
         {
-            if (fileName.EndsWith(".meta"))
+            if (fileName.EndsWith(".meta") || fileName.EndsWith(".gitkeep") || fileName.EndsWith(".DS_Store"))
             {
                 return false;
             }
