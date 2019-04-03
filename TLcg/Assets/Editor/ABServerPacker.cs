@@ -60,12 +60,8 @@ namespace LCG
             DirectoryInfo[] dirs = dir.GetDirectories();
             foreach (DirectoryInfo d in dirs)
             {
-#if UNITY_IOS
-                int l2 = d.FullName.LastIndexOf(@"/");
-#else
-                int l2 = d.FullName.LastIndexOf(@"\");
-#endif
-                string folderName = d.FullName.Substring(l2 + 1);
+                string fname = d.FullName.Replace(@"/", @"\");
+                string folderName = fname.Substring(fname.LastIndexOf(@"\") + 1);
                 if (BundleFolderPath.Contains(folderName) || BundleScenePath.Contains(folderName) || BundleLuaPath.Contains(folderName))
                 {
                     continue;
