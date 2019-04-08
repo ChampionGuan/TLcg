@@ -214,7 +214,7 @@ local function HotfixHandle(value)
         -- end
 
         -- 测试用，搭建本地http服，使用hfs.exe测试
-        value.callBack("0.0.0.0" .. " " .. "http://192.168.1.110:100/ab_TLcg/")
+        value.callBack("0.0.1.0" .. " " .. "http://192.168.1.110:100/ab_TLcg/")
         return
     end
 

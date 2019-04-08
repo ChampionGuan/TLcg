@@ -28,7 +28,7 @@ local function BtnSwitchServer()
 end
 
 local function BtnAutofix()
-    UIManager.OpenController(UIConfig.ControllerName.Autofix)
+    UIManager.OpenController(UIConfig.ControllerName.Repair)
 end
 
 function _C:OnPreHandle()
