@@ -450,8 +450,8 @@ namespace LCG
                 CurVersionFileUrlMd5 = new Dictionary<string, string>();
             }
 
-            string fileUrl = fileName.Replace("/", "-").ToLower();
-            // string fileUrl = ABHelper.BuildMD5ByString(fileName);
+            // string fileUrl = fileName.Replace("/", "-").ToLower();
+            string fileUrl = ABHelper.BuildMD5ByString(fileName);
             if (!CurVersionFileUrlMd5.ContainsKey(fileUrl))
             {
                 CurVersionFileUrlMd5.Add(fileUrl, fileName);
@@ -533,7 +533,13 @@ namespace LCG
                 {
                     sb.AppendLine(pair);
                 }
-                if (EditorUtility.DisplayDialog("提示", "检测到有cs等脚本的更新！！\n “停止”则中断打包，“忽略”则继续。如下：\n" + sb, "停止", "忽略"))
+                string sbb = "";
+                if (sb.Length > 1500)
+                {
+                    sbb = sb.ToString().Substring(0, 1500);
+                    sbb = sbb + "......";
+                }
+                if (EditorUtility.DisplayDialog("提示", "检测到有cs等脚本的更新！！\n “停止”则中断打包，“忽略”则继续。如下：\n" + sbb, "停止", "忽略"))
                 {
                     throw new Exception("打包中断!!!!!!!!!!");
                 }
