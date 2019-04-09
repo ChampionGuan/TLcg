@@ -67,11 +67,8 @@ namespace LCG
     {
         private string abPath;
         private int referenceCount;
+        private List<string> abDependList;
 
-        public List<string> AbDependList
-        {
-            get; private set;
-        }
         public AssetBundle TheAB
         {
             get; private set;
@@ -82,26 +79,19 @@ namespace LCG
             referenceCount = 0;
             abPath = _abPath;
             TheAB = _ab;
-
-            List<string> dependList = null;
-            ABLoad.Instance.ABManifest.TryGetValue(_abPath, out dependList);
-            AbDependList = dependList;
+            ABLoad.Instance.ABManifest.TryGetValue(_abPath, out abDependList);
         }
         // 引用增加
         public void ReferenceAsc()
         {
-            if (null == TheAB)
-            {
-                return;
-            }
-            if (null != AbDependList && AbDependList.Count > 0)
+            if (null != abDependList && abDependList.Count > 0)
             {
                 ABReference abRef;
-                int length = AbDependList.Count;
+                int length = abDependList.Count;
                 for (int i = 0; i < length; i++)
                 {
                     abRef = null;
-                    ABLoad.Instance.ABReferenceMap.TryGetValue(AbDependList[i], out abRef);
+                    ABLoad.Instance.ABReferenceMap.TryGetValue(abDependList[i], out abRef);
                     if (null != abRef)
                     {
                         abRef.AddRefCount();
@@ -113,18 +103,14 @@ namespace LCG
         // 引用减少
         public void ReferenceDec()
         {
-            if (null == TheAB)
-            {
-                return;
-            }
-            if (null != AbDependList && AbDependList.Count > 0)
+            if (null != abDependList && abDependList.Count > 0)
             {
                 ABReference abRef;
-                int length = AbDependList.Count;
+                int length = abDependList.Count;
                 for (int i = 0; i < length; i++)
                 {
                     abRef = null;
-                    ABLoad.Instance.ABReferenceMap.TryGetValue(AbDependList[i], out abRef);
+                    ABLoad.Instance.ABReferenceMap.TryGetValue(abDependList[i], out abRef);
                     if (null != abRef)
                     {
                         abRef.SubRefCount();
@@ -143,8 +129,11 @@ namespace LCG
             if (referenceCount <= 0)
             {
                 ABLoad.Instance.ABReferenceMap.Remove(abPath);
-                TheAB.Unload(true);
-                TheAB = null;
+                if (null != TheAB)
+                {
+                    TheAB.Unload(true);
+                    TheAB = null;
+                }
             }
         }
     }
@@ -184,14 +173,14 @@ namespace LCG
             }
         }
         #region syncLoad
-        public UnityEngine.Object SyncLoad(string abPath, string abName, string abRealPath, Type type, bool isScene = false)
+        public UnityEngine.Object SyncLoad(string abPath, string abName, Type type, bool isScene = false)
         {
             if (!m_isInitialized)
             {
                 return null;
             }
             // 新建任务
-            ABLoadTask task = NewLoadTask(abPath, abName, abRealPath, type, null, null, isScene);
+            ABLoadTask task = NewLoadTask(abPath, abName, type, null, null, isScene);
             // 任务累加
             m_nowLoadTaskCount++;
             // 进行加载
@@ -229,25 +218,36 @@ namespace LCG
         }
         private UnityEngine.Object FirstSyncLoadAB(ABLoadTask task)
         {
-            LoadAllDependAb(task);
+            bool b = LoadAllDependAb(task);
             if (!task.IsScene)
             {
-                LoadAssetBundle(task.AbPath, task.AbRealPath);
-
-                ABReference abRef = ABReferenceMap[task.AbPath];
-                return SyncLoadAsset(abRef, task);
+                if (LoadAssetBundle(b, task.AbPath, task.AbRealPath))
+                {
+                    ABReference abRef = ABReferenceMap[task.AbPath];
+                    return SyncLoadAsset(abRef, task);
+                }
+                else
+                {
+                    return null;
+                }
             }
             else
             {
                 // 场景只加载ab
-                LoadAssetBundle(task.AbPath, task.AbRealPath);
+                LoadAssetBundle(b, task.AbPath, task.AbRealPath);
             }
             return null;
         }
         private UnityEngine.Object SyncLoadAsset(ABReference abRef, ABLoadTask task)
         {
-            UnityEngine.Object spawner = null;
+            if (null == abRef.TheAB)
+            {
+                abRef.ReferenceAsc();
+                LoadComplete(null, task);
+                return null;
+            }
 
+            UnityEngine.Object spawner = null;
             if (null != task.AbType)
             {
                 spawner = abRef.TheAB.LoadAsset(task.AbName, task.AbType);
@@ -256,23 +256,21 @@ namespace LCG
             {
                 spawner = abRef.TheAB.LoadAsset(task.AbName);
             }
-
             abRef.ReferenceAsc();
             LoadComplete(spawner, task);
-
             return spawner;
         }
         #endregion
 
         #region asyncLoad
-        public bool AsyncLoad(string abPath, string abName, string abRealPath, Type type, Action<string, UnityEngine.Object> complete, Action<float> progress = null, bool isScene = false)
+        public bool AsyncLoad(string abPath, string abName, Type type, Action<string, UnityEngine.Object> complete, Action<float> progress = null, bool isScene = false)
         {
             if (!m_isInitialized)
             {
                 return false;
             }
             // 新建任务
-            ABLoadTask task = NewLoadTask(abPath, abName, abRealPath, type, complete, progress, isScene);
+            ABLoadTask task = NewLoadTask(abPath, abName, type, complete, progress, isScene);
             // 进队列
             m_loadTaskList.Enqueue(task);
             // 开始load
@@ -309,21 +307,30 @@ namespace LCG
         }
         private void FirstAsyncLoadAB(ABLoadTask task)
         {
-            LoadAllDependAb(task);
+            bool b = LoadAllDependAb(task);
             if (!task.IsScene)
             {
-                LoadAssetBundle(task.AbPath, task.AbRealPath);
-
-                ABReference abRef = ABReferenceMap[task.AbPath];
-                LauncherEngine.Instance.StartCoroutine(AsyncLoadAsset(abRef, task));
+                if (LoadAssetBundle(b, task.AbPath, task.AbRealPath))
+                {
+                    ABReference abRef = ABReferenceMap[task.AbPath];
+                    LauncherEngine.Instance.StartCoroutine(AsyncLoadAsset(abRef, task));
+                }
             }
             else
             {
-                LoadAssetBundle(task.AbPath, task.AbRealPath);
+                // 场景只加载ab
+                LoadAssetBundle(b, task.AbPath, task.AbRealPath);
             }
         }
         private IEnumerator AsyncLoadAsset(ABReference abRef, ABLoadTask task)
         {
+            if (null == abRef.TheAB)
+            {
+                abRef.ReferenceAsc();
+                LoadComplete(null, task);
+                yield break;
+            }
+
             AssetBundleRequest request;
             if (null != task.AbType)
             {
@@ -342,7 +349,6 @@ namespace LCG
                 yield return null;
             }
             yield return request;
-
             // 加载完成
             if (request.isDone)
             {
@@ -392,7 +398,7 @@ namespace LCG
                 ABReferenceMap.Clear();
             }
         }
-        private void LoadAllDependAb(ABLoadTask task)
+        private bool LoadAllDependAb(ABLoadTask task)
         {
             List<string> dependAbs = null;
             ABManifest.TryGetValue(task.AbPath, out dependAbs);
@@ -422,29 +428,36 @@ namespace LCG
             // 加载ab
             foreach (string path in needABRef)
             {
-                LoadAssetBundle(path);
-            }
-        }
-        private void LoadAssetBundle(string abPath, string abRealPath = null)
-        {
-            if (null == abRealPath)
-            {
-                abRealPath = ABVersion.CurVersionInfo.GetABFullPath(abPath);
-                if (string.IsNullOrEmpty(abRealPath))
-                {
-                    return;
-                }
+                LoadAssetBundle(false, path);
             }
 
-            Debug.Log("加载热更ab:" + abPath);
-            AssetBundle ab = AssetBundle.LoadFromFile(abRealPath);
+            return length > 0;
+        }
+        private bool LoadAssetBundle(bool beDepend, string abPath, string abRealPath = null)
+        {
+            bool result = true;
+            abRealPath = null == abRealPath ? ABVersion.CurVersionInfo.GetABFullPath(abPath) : abRealPath;
+            if (string.IsNullOrEmpty(abRealPath))
+            {
+                result = false;
+            }
+
+            AssetBundle ab = null;
+            if (result)
+            {
+                Debug.Log("加载热更ab:" + abPath);
+                ab = AssetBundle.LoadFromFile(abRealPath);
+            }
             if (null == ab)
             {
-                Debug.LogError("ab load fail : path is :" + abRealPath);
+                result = false;
             }
 
-            ABReference abRef = new ABReference(ab, abPath);
-            ABReferenceMap.Add(abPath, abRef);
+            if (beDepend || null != ab)
+            {
+                ABReferenceMap.Add(abPath, new ABReference(ab, abPath));
+            }
+            return result;
         }
         private void LoadComplete(UnityEngine.Object obj, ABLoadTask task)
         {
@@ -473,8 +486,9 @@ namespace LCG
 
             ABManifest = ABHelper.ReadManifestFile(ABVersion.CurVersionInfo.ManifestFilePath);
         }
-        private ABLoadTask NewLoadTask(string abPath, string abName, string abRealPath, Type type, Action<string, UnityEngine.Object> complete = null, Action<float> progress = null, bool isScene = false)
+        private ABLoadTask NewLoadTask(string abPath, string abName, Type type, Action<string, UnityEngine.Object> complete = null, Action<float> progress = null, bool isScene = false)
         {
+            string abRealPath = ABVersion.CurVersionInfo.GetABFullPath(abPath);
             abPath = abPath.ToLower();
             abName = (null == abName) ? ABHelper.GetFileNameWithoutSuffix(abPath) : abName.ToLower();
 
@@ -630,12 +644,7 @@ namespace LCG
             obj = null;
             if (!string.IsNullOrEmpty(abPath))
             {
-                string abRealPath = ABVersion.CurVersionInfo.GetABFullPath(abPath);
-                if (string.IsNullOrEmpty(abRealPath))
-                {
-                    return false;
-                }
-                obj = ABLoad.Instance.SyncLoad(abPath, assetName, abRealPath, type, isScene);
+                obj = ABLoad.Instance.SyncLoad(abPath, assetName, type, isScene);
                 return null != obj;
             }
             return false;
@@ -644,12 +653,7 @@ namespace LCG
         {
             if (!string.IsNullOrEmpty(abPath))
             {
-                string abRealPath = ABVersion.CurVersionInfo.GetABFullPath(abPath);
-                if (string.IsNullOrEmpty(abRealPath))
-                {
-                    return false;
-                }
-                return ABLoad.Instance.AsyncLoad(abPath, assetName, abRealPath, type, complete, progress, isScene);
+                return ABLoad.Instance.AsyncLoad(abPath, assetName, type, complete, progress, isScene);
             }
             return false;
         }

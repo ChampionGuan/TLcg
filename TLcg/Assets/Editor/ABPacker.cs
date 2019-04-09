@@ -194,7 +194,7 @@ namespace LCG
 
         private static bool IsNeedFileRes(string fileName)
         {
-            if (fileName.EndsWith(".meta") || fileName.EndsWith(".gitkeep") || fileName.EndsWith(".DS_Store"))
+            if (fileName.EndsWith(".cs") || fileName.EndsWith(".meta") || fileName.EndsWith(".gitkeep") || fileName.EndsWith(".DS_Store"))
             {
                 return false;
             }
@@ -227,6 +227,83 @@ namespace LCG
             {
                 Directory.Delete(CurVersionABExportPath, true);
             }
+        }
+        private static void HandleScriptAssets(string path, string type)
+        {
+            string filePath = path.Replace("\\", "/");
+            if (!CurVersionMd5List.ContainsKey(filePath))
+            {
+                CurVersionMd5List.Add(filePath, ABHelper.BuildMD5ByFile(filePath));
+            }
+            if (!CurVersionDependenciesList.ContainsKey(filePath))
+            {
+                CurVersionDependenciesList.Add(filePath, new List<string>());
+                CurVersionFileType.Add(filePath, type);
+            }
+            CurVersionDependenciesList[filePath].Add(filePath);
+        }
+        public static void HandleFolderAssets(string path, string type)
+        {
+            string filePath = path.Replace("\\", "/");
+            if (!CurVersionMd5List.ContainsKey(filePath))
+            {
+                CurVersionMd5List.Add(filePath, ABHelper.BuildMD5ByFile(filePath));
+            }
+
+            string filePath2 = ABHelper.GetFileFolderPath(filePath);
+            if (!CurVersionDependenciesList.ContainsKey(filePath2))
+            {
+                CurVersionDependenciesList.Add(filePath2, new List<string>());
+                CurVersionFileType.Add(filePath2, type);
+            }
+            CurVersionDependenciesList[filePath2].Add(filePath);
+        }
+        public static void HandleLuaAssets(string path, string type)
+        {
+            string filePath = path.Replace("\\", "/");
+            if (!CurVersionMd5List.ContainsKey(filePath))
+            {
+                CurVersionMd5List.Add(filePath, ABHelper.BuildMD5ByFile(filePath));
+            }
+            if (!CurVersionDependenciesList.ContainsKey(filePath))
+            {
+                CurVersionDependenciesList.Add(filePath, new List<string>());
+                CurVersionFileType.Add(filePath, type);
+            }
+            CurVersionDependenciesList[filePath].Add(filePath);
+        }
+        public static void HandleFileAssets(string path, string type)
+        {
+            string filePath = path.Replace("\\", "/");
+            string[] dependPaths = AssetDatabase.GetDependencies(filePath);
+            if (dependPaths.Length > 0)
+            {
+                foreach (string path1 in dependPaths)
+                {
+                    if (!CurVersionMd5List.ContainsKey(path1))
+                    {
+                        CurVersionMd5List.Add(path1, ABHelper.BuildMD5ByFile(path1));
+                    }
+                    // resources文件夹下的资源入清单文件
+                    if (path1.Contains(ResFolder) && filePath != path1)
+                    {
+                        if (!CurVersionManifestList.ContainsKey(filePath))
+                        {
+                            CurVersionManifestList.Add(filePath, new List<string>());
+                        }
+                        CurVersionManifestList[filePath].Add(path1);
+                    }
+                }
+            }
+
+            if (!CurVersionDependenciesList.ContainsKey(filePath))
+            {
+                CurVersionDependenciesList.Add(filePath, new List<string>());
+                CurVersionFileType.Add(filePath, type);
+            }
+            CurVersionDependenciesList[filePath].Add(filePath);
+            // 依赖关系文件只存储非递归依赖
+            CurVersionDependenciesList[filePath].AddRange(AssetDatabase.GetDependencies(filePath, false));
         }
         private static void CeateVersionDir(BuildTarget platform)
         {
@@ -326,17 +403,7 @@ namespace LCG
                 {
                     continue;
                 }
-                string filePath = path.Replace("\\", "/");
-                if (!CurVersionMd5List.ContainsKey(filePath))
-                {
-                    CurVersionMd5List.Add(filePath, ABHelper.BuildMD5ByFile(filePath));
-                }
-                if (!CurVersionDependenciesList.ContainsKey(filePath))
-                {
-                    CurVersionDependenciesList.Add(filePath, new List<string>());
-                    CurVersionFileType.Add(filePath, "4");
-                }
-                CurVersionDependenciesList[filePath].Add(filePath);
+                HandleScriptAssets(path, "4");
             }
             foreach (string path in folderBundlePathList)
             {
@@ -344,19 +411,7 @@ namespace LCG
                 {
                     continue;
                 }
-                string filePath = path.Replace("\\", "/");
-                if (!CurVersionMd5List.ContainsKey(filePath))
-                {
-                    CurVersionMd5List.Add(filePath, ABHelper.BuildMD5ByFile(filePath));
-                }
-
-                string filePath2 = ABHelper.GetFileFolderPath(filePath);
-                if (!CurVersionDependenciesList.ContainsKey(filePath2))
-                {
-                    CurVersionDependenciesList.Add(filePath2, new List<string>());
-                    CurVersionFileType.Add(filePath2, "0");
-                }
-                CurVersionDependenciesList[filePath2].Add(filePath);
+                HandleFolderAssets(path, "0");
             }
             foreach (string path in luaPathList)
             {
@@ -364,17 +419,7 @@ namespace LCG
                 {
                     continue;
                 }
-                string filePath = path.Replace("\\", "/");
-                if (!CurVersionMd5List.ContainsKey(filePath))
-                {
-                    CurVersionMd5List.Add(filePath, ABHelper.BuildMD5ByFile(filePath));
-                }
-                if (!CurVersionDependenciesList.ContainsKey(filePath))
-                {
-                    CurVersionDependenciesList.Add(filePath, new List<string>());
-                    CurVersionFileType.Add(filePath, "1");
-                }
-                CurVersionDependenciesList[filePath].Add(filePath);
+                HandleLuaAssets(path, "1");
             }
             foreach (string path in fileBundlePathList)
             {
@@ -382,28 +427,7 @@ namespace LCG
                 {
                     continue;
                 }
-                string filePath = path.Replace("\\", "/");
-                string[] dependPaths = AssetDatabase.GetDependencies(filePath);
-                if (dependPaths.Length > 0)
-                {
-                    CurVersionDependenciesList.Add(filePath, new List<string>(dependPaths));
-                    CurVersionFileType.Add(filePath, "2");
-                    foreach (string path1 in dependPaths)
-                    {
-                        if (!CurVersionMd5List.ContainsKey(path1))
-                        {
-                            CurVersionMd5List.Add(path1, ABHelper.BuildMD5ByFile(path1));
-                        }
-                        if (path1.Contains(ResFolder) && filePath != path1)
-                        {
-                            if (!CurVersionManifestList.ContainsKey(filePath))
-                            {
-                                CurVersionManifestList.Add(filePath, new List<string>());
-                            }
-                            CurVersionManifestList[filePath].Add(path1);
-                        }
-                    }
-                }
+                HandleFileAssets(path, "2");
             }
             foreach (string path in sceneBundlePathList)
             {
@@ -411,33 +435,12 @@ namespace LCG
                 {
                     continue;
                 }
-                string filePath = path.Replace("\\", "/");
-                string[] dependPaths = AssetDatabase.GetDependencies(filePath);
-                if (dependPaths.Length > 0)
-                {
-                    CurVersionDependenciesList.Add(filePath, new List<string>(dependPaths));
-                    CurVersionFileType.Add(filePath, "3");
-                    foreach (string path1 in dependPaths)
-                    {
-                        if (!CurVersionMd5List.ContainsKey(path1))
-                        {
-                            CurVersionMd5List.Add(path1, ABHelper.BuildMD5ByFile(path1));
-                        }
-                        if (path1.Contains(ResFolder) && filePath != path1)
-                        {
-                            if (!CurVersionManifestList.ContainsKey(filePath))
-                            {
-                                CurVersionManifestList.Add(filePath, new List<string>());
-                            }
-                            CurVersionManifestList[filePath].Add(path1);
-                        }
-                    }
-                }
+                HandleFileAssets(path, "3");
             }
 
             // 版本所需资源的md5码保存
             ABHelper.WriteMd5File(CurVersionABExportPath + ABHelper.Md5FileName, CurVersionMd5List);
-            // 文件的依赖关系
+            // 版本所需资源的依赖关系
             ABHelper.WriteDependFile(CurVersionABExportPath + ABHelper.DependFileName, CurVersionDependenciesList);
         }
         private static string CreatFileUrlMd5(string fileName)
@@ -447,7 +450,8 @@ namespace LCG
                 CurVersionFileUrlMd5 = new Dictionary<string, string>();
             }
 
-            string fileUrl = ABHelper.BuildMD5ByString(fileName);
+            string fileUrl = fileName.Replace("/", "-").ToLower();
+            // string fileUrl = ABHelper.BuildMD5ByString(fileName);
             if (!CurVersionFileUrlMd5.ContainsKey(fileUrl))
             {
                 CurVersionFileUrlMd5.Add(fileUrl, fileName);
@@ -485,6 +489,7 @@ namespace LCG
             foreach (KeyValuePair<string, List<string>> pair in CurVersionDependenciesList)
             {
                 string pathName = pair.Key;
+                // 新资源时
                 if (!lastVersionDependenciesList.ContainsKey(pathName.ToLower()))
                 {
                     if (IsScriptFileRes(pathName))
@@ -495,6 +500,7 @@ namespace LCG
                 }
                 foreach (string depend in pair.Value)
                 {
+                    // 新增了依赖文件时
                     if (!lastVersionDependenciesList[pathName.ToLower()].Contains(depend.ToLower()))
                     {
                         if (IsScriptFileRes(pathName))
@@ -503,8 +509,13 @@ namespace LCG
                             updateFileList.Add(pathName);
                         break;
                     }
+                    // 老文件有更新时
                     else if (CurVersionMd5List[depend].ToLower() != lastVersionMd5List[depend.ToLower()])
                     {
+                        if (depend != pathName && depend.StartsWith(ResFolder))
+                        {
+                            continue;
+                        }
                         if (IsScriptFileRes(pathName))
                             updateScriptList.Add(pathName);
                         else

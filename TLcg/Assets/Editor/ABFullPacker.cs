@@ -6,7 +6,7 @@ using System.Text;
 
 namespace LCG
 {
-    public class ABServerPacker : EditorWindow
+    public class ABFullPacker : EditorWindow
     {
         #region 入口
         private static EditorWindow TheWindow = null;
@@ -18,14 +18,14 @@ namespace LCG
         private static List<string> BundleLuaPath = new List<string>(new string[] { "Lua" });
         private static List<string> BundleFilePath = new List<string>();
 
-        private static string TheRootFolderName = "ab_tlcg_server";
+        private static string TheRootFolderName = "ab_tlcg_full";
 
-        [MenuItem("Tools/资源打包服务器")]
+        [MenuItem("Tools/资源打包全包版")]
         public static void UnityPacker()
         {
             RootFolderName();
             FileBundleList();
-            TheWindow = EditorWindow.GetWindow(typeof(ABServerPacker), true, "资源打包服务器");
+            TheWindow = EditorWindow.GetWindow(typeof(ABFullPacker), true, "资源打包全包版");
         }
         public static bool AndroidPacker()
         {
@@ -139,7 +139,7 @@ namespace LCG
 
         private static bool IsNeedFileRes(string fileName)
         {
-            if (fileName.EndsWith(".meta") || fileName.EndsWith(".gitkeep") || fileName.EndsWith(".DS_Store"))
+            if (fileName.EndsWith(".cs") || fileName.EndsWith(".meta") || fileName.EndsWith(".gitkeep") || fileName.EndsWith(".DS_Store"))
             {
                 return false;
             }
@@ -338,7 +338,8 @@ namespace LCG
             }
 
             fileName = fileName.ToLower();
-            string fileUrl = ABHelper.BuildMD5ByString(fileName);
+            string fileUrl = fileName.Replace("/", "-").ToLower();
+            // string fileUrl = ABHelper.BuildMD5ByString(fileName);
             if (!CurVersionFileUrlMd5.ContainsKey(fileUrl))
             {
                 CurVersionFileUrlMd5.Add(fileUrl, fileName);
