@@ -138,11 +138,6 @@ namespace LCG
             {
                 versionId = new VersionNum(versionNum);
             }
-            // 初始版本
-            if (versionId.Id3rd == ABVersion.OriginalVersionId.Id3rd)
-            {
-                return false;
-            }
             // 本地已更新到服务器给到的版本号资源
             if (ABVersion.LocalVersionList.ContainsKey(versionId.Id3rd))
             {
@@ -157,7 +152,7 @@ namespace LCG
 
             while (true)
             {
-                if (id3rd <= ABVersion.OriginalVersionId.Id3rd)
+                if (id3rd < ABVersion.OriginalVersionId.Id3rd)
                 {
                     break;
                 }

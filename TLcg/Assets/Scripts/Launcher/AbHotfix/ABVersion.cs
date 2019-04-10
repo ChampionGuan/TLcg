@@ -275,7 +275,8 @@ namespace LCG
 
             // 初始时的版号
             OriginalVersionId = new VersionNum(resInfo.text.Replace("\r", ""));
-            CurVersionId = OriginalVersionId;
+            // 当前版号第三位在初始时-1（mini包）
+            CurVersionId = new VersionNum(OriginalVersionId.Id1st, OriginalVersionId.Id2nd, OriginalVersionId.Id3rd - 1, OriginalVersionId.Id4th);
 
             // 本地更新地址
             LocalStorgePath = string.Format("{0}/{1}", ABHelper.AppTempCachePath, OriginalVersionId.Id1A2);
