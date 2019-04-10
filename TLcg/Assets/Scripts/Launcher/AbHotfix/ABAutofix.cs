@@ -46,22 +46,13 @@ namespace LCG
             onHandleState = handleState;
             // 客户端版本
             onHandleState(new ABHelper.VersionArgs(ABHelper.EVersionState.ClientVersionId, ABVersion.CurVersionId.Id));
-            // 和本地发包时的版号一致，不许更新
-            if (ABVersion.CurVersionId.Id3rd == ABVersion.OriginalVersionId.Id3rd)
+            // 网络不可达检测
+            if (Application.internetReachability == NetworkReachability.NotReachable)
             {
-                // 检测完成
-                FixResult(true);
+                onHandleState(new ABHelper.VersionArgs(ABHelper.EVersionState.Unreachable));
+                return;
             }
-            else
-            {
-                // 网络不可达检测
-                if (Application.internetReachability == NetworkReachability.NotReachable)
-                {
-                    onHandleState(new ABHelper.VersionArgs(ABHelper.EVersionState.Unreachable));
-                    return;
-                }
-                LauncherEngine.Instance.StartCoroutine(DownloadVersion());
-            }
+            LauncherEngine.Instance.StartCoroutine(DownloadVersion());
         }
         private IEnumerator DownloadVersion()
         {
@@ -98,7 +89,7 @@ namespace LCG
             {
                 key = versionFileName[index];
                 List<string> value = ABVersion.CurVersionInfo.VersionInfoList[key];
-                if (int.Parse(value[1]) > ABVersion.OriginalVersionId.Id3rd)
+                if (int.Parse(value[1]) >= ABVersion.OriginalVersionId.Id3rd)
                 {
                     abFullPath = ABVersion.CurVersionInfo.GetABFullPath(key);
                     if (ABHelper.BuildMD5ByFile(abFullPath) != value[0])
@@ -204,7 +195,7 @@ namespace LCG
                 needFilePath.Add(ABVersion.CurVersionInfo.VersionFilePath);
                 foreach (var value in ABVersion.CurVersionInfo.VersionInfoList)
                 {
-                    if (int.Parse(value.Value[1]) <= ABVersion.OriginalVersionId.Id3rd)
+                    if (int.Parse(value.Value[1]) < ABVersion.OriginalVersionId.Id3rd)
                     {
                         continue;
                     }
