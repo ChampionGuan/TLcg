@@ -165,7 +165,7 @@ namespace LCG
 
             List<string> abVerInfo = null;
             VersionInfoList.TryGetValue(abPath, out abVerInfo);
-            if (null != abVerInfo && int.Parse(abVerInfo[1]) > ABVersion.OriginalVersionId.Id3rd)
+            if (null != abVerInfo && int.Parse(abVerInfo[1]) >= ABVersion.OriginalVersionId.Id3rd)
             {
                 abRelativePath = string.Format("{0}/{1}", abVerInfo[1], abVerInfo[3]);
             }
@@ -291,7 +291,11 @@ namespace LCG
             // 遍历本地所有版号
             foreach (DirectoryInfo info in dirInfos)
             {
-                int id3rd = int.Parse(info.Name);
+                int id3rd = 0;
+                if (!int.TryParse(info.Name, out id3rd))
+                {
+                    continue;
+                }
                 if (id3rd < OriginalVersionId.Id3rd)
                 {
                     continue;

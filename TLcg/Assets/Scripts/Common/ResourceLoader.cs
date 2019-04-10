@@ -20,6 +20,7 @@ namespace LCG
             }
             m_objDir.Clear();
             m_pkgDir.Clear();
+            m_abDir.Clear();
             ABLoader.UnloadAll();
             UIPackage.RemoveAllPackages();
             Resources.UnloadUnusedAssets();
@@ -62,15 +63,30 @@ namespace LCG
             m_objDir[resourcePath].Unload();
         }
         private static Dictionary<string, string> m_pkgDir = new Dictionary<string, string>();
+        private static Dictionary<string, AssetBundle> m_abDir = new Dictionary<string, AssetBundle>();
         public static void LoadUI(string uipath)
         {
-            AssetBundle ab = ABLoader.GetAssetBundle(uipath);
+            AssetBundle ab = null;
+            if (m_abDir.ContainsKey(uipath))
+            {
+                ab = m_abDir[uipath];
+            }
+            if (null == ab)
+            {
+                ab = ABLoader.GetUIAssetBundle(uipath);
+                m_abDir.Remove(uipath);
+                if (null != ab)
+                {
+                    m_abDir.Add(uipath, ab);
+                }
+            }
 
             string id = uipath;
             if (m_pkgDir.ContainsKey(uipath))
             {
                 id = m_pkgDir[uipath];
             }
+
             UIPackage pkg = UIPackage.GetById(id);
             if (null == pkg)
             {
@@ -105,6 +121,10 @@ namespace LCG
             if (m_pkgDir.ContainsKey(uipath))
             {
                 id = m_pkgDir[uipath];
+            }
+            if (m_abDir.ContainsKey(uipath))
+            {
+                m_abDir.Remove(uipath);
             }
             UIPackage pkg = UIPackage.GetById(id);
             if (null != pkg)
@@ -161,7 +181,7 @@ namespace LCG
                 luaFullPath = ABLoader.GetLuaPath(filePath);
                 if (!string.IsNullOrEmpty(luaFullPath))
                 {
-                    Debug.Log("加载热更lua:" + luaFullPath);
+                    Debug.Log("加载热更lua:" + filePath);
                     luaBytes = TryLoadLuaFromFile(luaFullPath, true);
                 }
 

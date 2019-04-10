@@ -605,7 +605,7 @@ namespace LCG
         /// </summary>
         /// <param name="path"></param>
         /// <returns></returns>
-        public static AssetBundle GetAssetBundle(string path)
+        public static AssetBundle GetUIAssetBundle(string path)
         {
             if (null == ABVersion.CurVersionInfo || !ABVersion.CurVersionInfo.IsValid)
             {
@@ -614,11 +614,12 @@ namespace LCG
             AssetBundle ab = null;
 
             // 检测是否存在ab
-            string abname = ABHelper.GetFileFolderPath(path) + ".ab";
+            string abname = ABHelper.GetFileFolderPath(path).ToLower() + ".ab";
             string uiFullPath = ABVersion.CurVersionInfo.GetABFullPath(abname);
 
             if (!string.IsNullOrEmpty(uiFullPath))
             {
+                Debug.Log("加载热更ab:" + abname);
                 ab = AssetBundle.LoadFromFile(uiFullPath);
             }
 
