@@ -57,7 +57,7 @@ end
 -- 初始化
 function LevelManager.Initialize()
     levelConfig = LuaHandle.Load("Game.Config.LevelConfig")
-    CSharp.ResourceLoader.ScenePathPrefix = "Scene"
+    CSharp.ResourceLoader.ScenePathPrefix = "Scenes/"
     CSharp.SceneLoader.Instance.LoadStart = OnSceneLoadStart
     CSharp.SceneLoader.Instance.LoadUpdate = OnSceneLoadUpdate
     CSharp.SceneLoader.Instance.LoadComplete = OnSceneLoadComplete

@@ -132,7 +132,7 @@ namespace LCG
                 pkg.UnloadAssets();
             }
         }
-        public static string ScenePathPrefix = "Scene/";
+        public static string ScenePathPrefix = "Scenes/";
         private static string lastSceneName = null;
         public static void LoadScene(string sname)
         {

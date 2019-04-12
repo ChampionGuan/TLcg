@@ -582,7 +582,7 @@ namespace LCG
                             AssetImporter.GetAtPath(path).assetBundleName = fileName;
                             break;
                         case "3":
-                            fileName = (ABHelper.GetFileFullPathWithoutFtype(path).Replace(ResFolder, "")) + ".ab";
+                            fileName = (ABHelper.GetFileFullPathWithoutFtype(path).Replace(AssetFolder, "")) + ".ab";
                             fileName = CreatFileUrlMd5(fileName);
                             AssetImporter.GetAtPath(path).assetBundleName = fileName;
                             break;
