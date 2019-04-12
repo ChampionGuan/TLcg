@@ -16,14 +16,15 @@ return {
         Tip_14 = "修复失败！\n异常:",
         Tip_15 = "客户端异常，请重启游戏！",
         Tip_16 = "正在删除冗余文件…",
+        Tip_17 = "正在准备资源，请稍候…",
         Tip_Error = "网络异常,请检查您的网络！"
     },
     Video = {
-        -- [1] = {
-        --     Id = 1,
-        --     VideoUrl = "Video/Splash",
-        --     Loop = false
-        -- },
+        [1] = {
+            Id = 1,
+            VideoUrl = "Video/Splash",
+            Loop = false
+        },
         [2] = {
             Id = 2,
             VideoUrl = "Video/Login",

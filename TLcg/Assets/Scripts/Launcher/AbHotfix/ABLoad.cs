@@ -445,7 +445,7 @@ namespace LCG
             AssetBundle ab = null;
             if (result)
             {
-                Debug.Log("加载热更ab:" + abPath);
+                Debug.Log("加载ab:" + abPath);
                 ab = AssetBundle.LoadFromFile(abRealPath);
             }
             if (null == ab)
@@ -619,7 +619,7 @@ namespace LCG
 
             if (!string.IsNullOrEmpty(uiFullPath))
             {
-                Debug.Log("加载热更ab:" + abname);
+                Debug.Log("加载ab:" + abname);
                 ab = AssetBundle.LoadFromFile(uiFullPath);
             }
 

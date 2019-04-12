@@ -15,79 +15,71 @@ namespace LCG
     {
         private string remoteUrl;
         private string localFolder;
-        private string fileSuffix;
         private string fileTempPath;
-        private int downloadSize;
+        private string fileLocalPath;
+        private long downloadSize;
+        private long fileSize;
+        private Action<float> downloadProcess;
+        private Action<string> downloadSpeed;
+        private Action<string> handleError;
+        private Action downloadComplete;
         private Thread downloadThread;
-        private Thread unzipThread;
         private HttpWebRequest httpWebRequest;
-        public string FileName
-        {
-            get; private set;
-        }
-        public string FilePath
-        {
-            get; private set;
-        }
-        public long FileWholeSize
-        {
-            get; private set;
-        }
-        public long? UnZipWholeSize
-        {
-            get; private set;
-        }
+        private UnzipTask unzipTask;
+
         public float DownloadProcess
         {
             get
             {
-                return (float)downloadSize / FileWholeSize;
+                return (float)downloadSize / fileSize;
             }
         }
-        public float UnzipProcess
+        public bool IsNeedUnzip
         {
-            get; private set;
+            get
+            {
+                if (null != unzipTask && unzipTask.UnzipProcess < 1)
+                {
+                    return true;
+                }
+                return false;
+            }
         }
-        public Action<float> OnUnzipProcess
+        public DownloadTask(string _remoteUrl, string _localFolder, string _fileName, string _fileSuffix, long _fileSize, bool _isZipFile = true, long? _unZipSize = null, bool _isDeleteZip = true)
         {
-            private get; set;
-        }
-        public Action<float> OnDownloadProcess
-        {
-            private get; set;
-        }
-        public Action<string> OnDownloadSpeed
-        {
-            private get; set;
-        }
-        public Action<string> OnHandleError
-        {
-            private get; set;
-        }
-        public Action OnDownloadComplete
-        {
-            private get; set;
-        }
-        public Action OnUnzipComplete
-        {
-            private get; set;
-        }
-        public bool IsZipFile
-        {
-            get; private set;
-        }
-        public DownloadTask(string _remoteUrl, string _localFolder, string _fileName, string _fileSuffix, long _fileSize, bool _isZipFile = true, long? _unZipSize = null)
-        {
-            downloadSize = 0;
-            IsZipFile = _isZipFile;
             remoteUrl = _remoteUrl;
             localFolder = _localFolder;
-            fileSuffix = _fileSuffix;
-            FileName = _fileName;
-            FileWholeSize = _fileSize;
-            UnZipWholeSize = _unZipSize;
-            fileTempPath = _localFolder + "/" + _fileName + ".temp";
-            FilePath = _localFolder + "/" + _fileName + _fileSuffix;
+            downloadSize = 0;
+            fileSize = _fileSize;
+            fileTempPath = string.Format("{0}/{1}{2}", _localFolder, _fileName, ".temp");
+            fileLocalPath = string.Format("{0}/{1}{2}", _localFolder, _fileName, _fileSuffix);
+
+            if (_isZipFile)
+            {
+                unzipTask = new UnzipTask(localFolder, fileLocalPath, _fileName, _fileSize, _unZipSize, _isDeleteZip);
+            }
+        }
+        public void SetAction(Action<string> _error, Action<float> _downloadProcess, Action<string> _downloadSpeed, Action _downloadComplete, Action<float> _unzipProcess, Action _unzipComplete)
+        {
+            handleError = _error;
+            downloadProcess = _downloadProcess;
+            downloadSpeed = _downloadSpeed;
+            downloadComplete = _downloadComplete;
+            SetUnzipAction(_error, _unzipProcess, _unzipComplete);
+        }
+        public void SetDownloadAction(Action<string> _error, Action<float> _downloadProcess, Action<string> _downloadSpeed, Action _downloadComplete)
+        {
+            handleError = _error;
+            downloadProcess = _downloadProcess;
+            downloadSpeed = _downloadSpeed;
+            downloadComplete = _downloadComplete;
+        }
+        public void SetUnzipAction(Action<string> _error, Action<float> _unzipProcess, Action _unzipComplete)
+        {
+            if (null != unzipTask)
+            {
+                unzipTask.SetAction(_error, _unzipProcess, _unzipComplete);
+            }
         }
         public void Start()
         {
@@ -101,16 +93,13 @@ namespace LCG
         }
         public void UnZip()
         {
-            unzipThread = new Thread(new ThreadStart(DoUnZip));
-            unzipThread.IsBackground = true;
-            unzipThread.Start();
+            if (null != unzipTask)
+            {
+                unzipTask.Start();
+            }
         }
         public void Abort()
         {
-            if (null != unzipThread)
-            {
-                unzipThread.Abort();
-            }
             if (null != httpWebRequest)
             {
                 httpWebRequest.Abort();
@@ -119,9 +108,9 @@ namespace LCG
             {
                 httpWebRequest.Abort();
             }
-            unzipThread = null;
             downloadThread = null;
             httpWebRequest = null;
+            unzipTask.Abort();
             FormatDownloadSpeed(0);
         }
         private void DoDownload()
@@ -132,7 +121,7 @@ namespace LCG
             {
                 fs = File.OpenWrite(fileTempPath);
                 downloadSize = (int)fs.Length;
-                if (downloadSize == FileWholeSize)
+                if (downloadSize == fileSize)
                 {
                     fs.Close();
                     fs.Dispose();
@@ -160,9 +149,9 @@ namespace LCG
             {
                 if (downloadSize > 0)
                 {
-                    if (null != OnDownloadProcess)
+                    if (null != downloadProcess)
                     {
-                        OnDownloadProcess(DownloadProcess);
+                        downloadProcess(DownloadProcess);
                     }
                     // 从制定位置获取，文件不大于2g（需服务器支持断点续传）
                     httpWebRequest.AddRange((int)downloadSize);
@@ -192,9 +181,9 @@ namespace LCG
                         pointOffset += receivedBytesCount;
                         downloadSize += receivedBytesCount;
                         receivedBytesCountPerSec += receivedBytesCount;
-                        if (null != OnDownloadProcess)
+                        if (null != downloadProcess)
                         {
-                            OnDownloadProcess(DownloadProcess);
+                            downloadProcess(DownloadProcess);
                         }
                     }
 
@@ -210,7 +199,7 @@ namespace LCG
                 while (receivedBytesCount != 0);
 
                 // 更新过程中网络断开，不会抛出异常，需要手动抛出异常
-                if (downloadSize != FileWholeSize)
+                if (downloadSize != fileSize)
                 {
                     throw new Exception("response length error");
                 }
@@ -218,9 +207,9 @@ namespace LCG
             catch (System.Exception e)
             {
                 downloadSuc = false;
-                if (null != OnHandleError)
+                if (null != handleError)
                 {
-                    OnHandleError("download error :" + e.Message);
+                    handleError("download error :" + e.Message);
                 }
             }
             finally
@@ -249,20 +238,20 @@ namespace LCG
             {
                 try
                 {
-                    if (File.Exists(FilePath))
+                    if (File.Exists(fileLocalPath))
                     {
-                        File.Delete(FilePath);
+                        File.Delete(fileLocalPath);
                     }
-                    File.Move(fileTempPath, FilePath);
+                    File.Move(fileTempPath, fileLocalPath);
                 }
                 catch (System.Exception e)
                 {
                     Debug.Log("文件移动异常：" + e.Message);
                 }
             }
-            if (null != OnDownloadComplete)
+            if (null != downloadComplete)
             {
-                OnDownloadComplete();
+                downloadComplete();
             }
         }
         private void FormatDownloadSpeed(long bytes)
@@ -294,144 +283,9 @@ namespace LCG
 
                 }
             }
-            if (null != OnDownloadSpeed)
+            if (null != downloadSpeed)
             {
-                OnDownloadSpeed(speed);
-            }
-        }
-        private void DoUnZip()
-        {
-            if (fileSuffix != ".zip")
-            {
-                Debug.Log("该文件不是zip文件，当前仅支持下载zip文件解压！！");
-                return;
-            }
-            if (!File.Exists(FilePath))
-            {
-                if (null != OnUnzipComplete)
-                {
-                    OnUnzipComplete();
-                }
-                return;
-            }
-            FileStream fs = File.OpenRead(FilePath);
-            ZipInputStream _zipInputStream = new ZipInputStream(fs);
-            ZipEntry theEntry = null;
-
-            bool unzipsuc = true;
-            long unzipSize = 0;
-            float zipfilesize = null == UnZipWholeSize ? (float)FileWholeSize : (float)UnZipWholeSize; // fs.Length;
-            string tempFolder = localFolder + "/Temp/";
-            string releaseFolder = localFolder + "/";
-            string errorMsg = "";
-            List<string> decompressfiles = new List<string>();
-
-            Debug.Log("<color=#20F856>" + "解压文件: " + FilePath + " ----- fileName:" + FileName + " ---- zipfie size:" + zipfilesize + "</color>");
-
-            while (true)
-            {
-                try
-                {
-                    theEntry = _zipInputStream.GetNextEntry();
-                }
-                catch (Exception e)
-                {
-                    errorMsg = e.Message;
-                    unzipsuc = false;
-                    break;
-                }
-                if (theEntry == null)
-                {
-                    break;
-                }
-                if (theEntry.Name.EndsWith("/"))
-                {
-                    continue;
-                }
-
-                // 文件存放位置
-                string fileName = tempFolder + theEntry.Name;
-                string directoryName = ABHelper.GetFileFolderPath(fileName);
-                decompressfiles.Add(fileName);
-                if (!Directory.Exists(directoryName))
-                {
-                    Directory.CreateDirectory(directoryName);
-                }
-                if (File.Exists(fileName))
-                {
-                    File.Delete(fileName);
-                }
-
-                // 写入文件
-                FileStream sw = File.Create(fileName);
-                int readSize = 0;
-                byte[] data = new byte[2048];
-                while (true)
-                {
-                    if (theEntry.Size == 0)
-                    {
-                        break;
-                    }
-                    readSize = _zipInputStream.Read(data, 0, data.Length);
-                    unzipSize += readSize;
-                    if (readSize > 0)
-                    {
-                        UnzipProcess = unzipSize / zipfilesize;
-                        if (null != OnUnzipProcess)
-                        {
-                            OnUnzipProcess(UnzipProcess);
-                        }
-                        sw.Write(data, 0, readSize);
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
-                sw.Close();
-                sw.Dispose();
-            }
-
-            fs.Close();
-            fs.Dispose();
-            if (File.Exists(FilePath))
-            {
-                File.Delete(FilePath);
-            }
-
-            // 解压成功
-            if (unzipsuc)
-            {
-                UnzipProcess = 1;
-                foreach (var upfile in decompressfiles)
-                {
-                    string newfile = upfile.Replace(tempFolder, releaseFolder);
-                    if (File.Exists(newfile))
-                    {
-                        File.Delete(newfile);
-                    }
-                    string dir = Path.GetDirectoryName(newfile);
-                    if (!Directory.Exists(dir))
-                    {
-                        Directory.CreateDirectory(dir);
-                    }
-                    File.Move(upfile, newfile);
-                }
-                if (Directory.Exists(tempFolder))
-                {
-                    Directory.Delete(tempFolder, true);
-                }
-                if (null != OnUnzipComplete)
-                {
-                    OnUnzipComplete();
-                }
-            }
-            else
-            {
-                if (null != OnHandleError)
-                {
-                    OnHandleError("unzip error :" + errorMsg);
-                }
+                downloadSpeed(speed);
             }
         }
         private bool RemoteCertificateValidationCallback(System.Object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
@@ -540,23 +394,17 @@ namespace LCG
             downloadedCount = 0;
             IsPause = false;
         }
-        public bool CreateDownloadTask(string _reomteUrl, string _localFolder, string _fileName, string _fileSuffix, long _fileSize, bool _isZipFile = true, long? _unZipSize = null)
+        public bool CreateDownloadTask(string _reomteUrl, string _localFolder, string _fileName, string _fileSuffix, long _fileSize, bool _isZipFile = true, long? _unZipSize = null, bool IsDeleteZip = true)
         {
             if (downloadTaskList.ContainsKey(_reomteUrl))
             {
                 return false;
             }
 
-            DownloadTask task = new DownloadTask(_reomteUrl, _localFolder, _fileName, _fileSuffix, _fileSize, _isZipFile, _unZipSize);
-            task.OnHandleError = HotterError;
-            task.OnDownloadComplete = BeginDownload;
-            task.OnUnzipComplete = BeginUnzip;
-            task.OnDownloadSpeed = DownloadSpeed;
-            task.OnDownloadProcess = DownloadProcess;
-            task.OnUnzipProcess = UnzipProcess;
+            DownloadTask task = new DownloadTask(_reomteUrl, _localFolder, _fileName, _fileSuffix, _fileSize, _isZipFile, _unZipSize, IsDeleteZip);
+            task.SetAction(DownloadError, DownloadProcess, DownloadSpeed, BeginDownload, UnzipProcess, BeginUnzip);
 
             downloadTaskList.Add(_reomteUrl, task);
-
             return true;
         }
         public void BeginDownload()
@@ -570,7 +418,7 @@ namespace LCG
 
                 downloadedCount++;
                 curDownloadTask = null;
-                foreach (DownloadTask task in downloadTaskList.Values)
+                foreach (var task in downloadTaskList.Values)
                 {
                     if (task.DownloadProcess < 1)
                     {
@@ -608,7 +456,7 @@ namespace LCG
                 curUnzipTask = null;
                 foreach (DownloadTask task in downloadTaskList.Values)
                 {
-                    if (task.IsZipFile && task.UnzipProcess < 1)
+                    if (task.IsNeedUnzip)
                     {
                         curUnzipTask = task;
                         curUnzipTask.UnZip();
@@ -655,7 +503,7 @@ namespace LCG
                 }
             });
         }
-        private void HotterError(string error)
+        private void DownloadError(string error)
         {
             ABCheck.Instance.EnterInvoke(() =>
             {

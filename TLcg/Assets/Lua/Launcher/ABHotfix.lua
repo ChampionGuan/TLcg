@@ -181,6 +181,22 @@ local function HotfixHandle(value)
         return
     end
 
+    -- 开始准备资源
+    if value.state == CSharp.EVersionState.PrepareAssets then
+        m_mainUI.Desc.text = Tips.Tip_17
+    end
+
+    -- 准备资源中
+    if value.state == CSharp.EVersionState.MovefileProcess then
+        ProgressBar(value.fValue * 100)
+    end
+
+    -- 准备资源完成
+    if value.state == CSharp.EVersionState.PrepareAssetsComplete then
+        ABHotfix.ReCheck()
+        return
+    end
+
     -- 服务器所需资源号检测
     if value.state == CSharp.EVersionState.AckServerVersionId then
         local ok, decode = pcall(json.decode, value.sValue)
@@ -214,7 +230,7 @@ local function HotfixHandle(value)
         -- end
 
         -- 测试用，搭建本地http服，使用hfs.exe测试
-        value.callBack("0.0.1.0" .. " " .. "http://192.168.1.110:100/ab_TLcg/")
+        value.callBack("0.0.0.0" .. " " .. "http://192.168.1.110:100/ab_TLcg/")
         return
     end
 
@@ -448,6 +464,9 @@ function ABHotfix.Check(over)
             m_hotfixComplete = over
             m_checkVersionId = Common.Version.CheckResVersion
 
+            if CSharp.LauncherEngine.Instance:PrepareAssets(HotfixHandle) then
+                return
+            end
             if nil == Common.LoginInfo.HotAddr then
                 CSharp.LauncherEngine.Instance:ABHotfix(nil, RemoteUrl(), nil, HotfixHandle)
             else
@@ -464,6 +483,9 @@ end
 
 function ABHotfix.ReCheck()
     ShowMainUI(true)
+    if CSharp.LauncherEngine.Instance:PrepareAssets(HotfixHandle) then
+        return
+    end
     if nil == Common.LoginInfo.HotAddr then
         CSharp.LauncherEngine.Instance:ABHotfix(nil, RemoteUrl(), nil, HotfixHandle)
     else

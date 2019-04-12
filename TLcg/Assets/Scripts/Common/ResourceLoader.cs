@@ -181,7 +181,7 @@ namespace LCG
                 luaFullPath = ABLoader.GetLuaPath(filePath);
                 if (!string.IsNullOrEmpty(luaFullPath))
                 {
-                    Debug.Log("加载热更lua:" + filePath);
+                    Debug.Log("加载lua:" + filePath);
                     luaBytes = TryLoadLuaFromFile(luaFullPath, true);
                 }
 
@@ -207,7 +207,6 @@ namespace LCG
                 }
 
                 return luaBytes;
-
             }
             catch
             {

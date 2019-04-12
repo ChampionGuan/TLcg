@@ -32,6 +32,7 @@ namespace LCG
         public void CustomDestroy()
         {
             onHandleState = null;
+            ABUnzip.Instance.PauseUnzip();
             ABDownload.Instance.PauseDownload();
         }
         public void EnterInvoke(Action action)
@@ -46,10 +47,46 @@ namespace LCG
             ABVersion.InitABVersion();
             LauncherEngine.Instance.StartCoroutine(ABLoad.Instance.Init(callback));
         }
-        // versionId：资源版号
-        // sresNumUrl：如果上值为空，则远端获取资源版号
-        // resRemoteUrl：资源的远端获取地址
-        // handleState：处理句柄
+        /// <summary>
+        /// 首次进入游戏
+        /// </summary>
+        public bool PrepareAssets(Action<ABHelper.VersionArgs> handleState)
+        {
+            if (ABVersion.CurVersionId.Id3rd >= ABVersion.OriginalVersionId.Id3rd)
+            {
+                return false;
+            }
+
+            // 处理状态
+            onHandleState = handleState;
+            // 开始
+            onHandleState(new ABHelper.VersionArgs(ABHelper.EVersionState.PrepareAssets));
+            // 当前版本
+            onHandleState(new ABHelper.VersionArgs(ABHelper.EVersionState.ClientVersionId, ABVersion.OriginalVersionId.Id));
+            // 移动文件
+            LauncherEngine.Instance.StartCoroutine(MoveNativeFile("native.zip", () =>
+            {
+                // 解压
+                string zipFileSuffix = ".zip";
+                string zipFileName = "native";
+                string zipFileRemoteUrl = string.Format("{0}/{1}{2}", ABVersion.LocalStorgePath, zipFileName, zipFileSuffix);
+                ABUnzip.Instance.InitUnzip();
+                ABUnzip.Instance.unzipResult = PrepareAssetsResult;
+                ABUnzip.Instance.unzipProcess = UnzipProcess;
+                ABUnzip.Instance.CreateUnzipTask(ABVersion.LocalStorgePath, zipFileRemoteUrl, zipFileName);
+                ABUnzip.Instance.BeginUnzip();
+            }));
+
+            return true;
+        }
+
+        /// <summary>
+        /// 检测更新
+        /// </summary>
+        /// <param name="versionId">资源版号</param>
+        /// <param name="versionIdUrl">如果上值为空，则远端获取资源版号</param>
+        /// <param name="resRemoteUrl">资源的远端获取地址</param>
+        /// <param name="handleState">处理句柄</param>
         public void CheckHotter(string versionId, string versionIdUrl, string resRemoteUrl, Action<ABHelper.VersionArgs> handleState)
         {
             // 处理状态
@@ -58,10 +95,17 @@ namespace LCG
             ABVersion.RemoteUrlPrefix = resRemoteUrl;
             // 客户端初始版号
             onHandleState(new ABHelper.VersionArgs(ABHelper.EVersionState.OriginalVersionId, ABVersion.OriginalVersionId.Id));
-            // 客户端版本
-            onHandleState(new ABHelper.VersionArgs(ABHelper.EVersionState.ClientVersionId, ABVersion.CurVersionId.Id));
             // 检测本地资源
             onHandleState(new ABHelper.VersionArgs(ABHelper.EVersionState.CheckLocalVersion));
+            // 客户端版本
+            if (ABVersion.CurVersionId.Id3rd < ABVersion.OriginalVersionId.Id3rd)
+            {
+                onHandleState(new ABHelper.VersionArgs(ABHelper.EVersionState.ClientVersionId, ABVersion.OriginalVersionId.Id));
+            }
+            else
+            {
+                onHandleState(new ABHelper.VersionArgs(ABHelper.EVersionState.ClientVersionId, ABVersion.CurVersionId.Id));
+            }
 
             if (!string.IsNullOrEmpty(versionId))
             {
@@ -255,6 +299,48 @@ namespace LCG
             HotfixComplete();
             yield return null;
         }
+        private IEnumerator MoveNativeFile(string name, Action action)
+        {
+            // 读
+            string from = ABHelper.StreamingAssetsPath() + name;
+            WWW www = new WWW(from);
+            while (!www.isDone)
+            {
+                if (!string.IsNullOrEmpty(www.error))
+                {
+                    HotterResult(false, www.error);
+                    yield break;
+                }
+                MovefileProcess(www.progress * 0.5f);
+                yield return null;
+            }
+
+            // 写
+            string to = ABVersion.LocalStorgePath + "/" + name;
+            FileStream fs = new FileStream(to, FileMode.OpenOrCreate);
+            int offset = (int)fs.Length;
+            int total = www.bytes.Length - 1;
+            int interval = 10000000;
+            fs.Seek(offset, SeekOrigin.Current);
+            while (offset < total)
+            {
+                if (total - offset < interval)
+                {
+                    interval = total - offset;
+                }
+                fs.Write(www.bytes, offset, interval);
+                offset += interval;
+                MovefileProcess((offset / (float)total) * 0.5f + 0.5f);
+                yield return null;
+            }
+            fs.Flush();
+            fs.Dispose();
+
+            if (null != action)
+            {
+                action.Invoke();
+            }
+        }
         private IEnumerator ShowDownloadInfo()
         {
             // 需要下载文件的大小
@@ -356,6 +442,25 @@ namespace LCG
                 onHandleState = null;
             }
         }
+        private void PrepareAssetsResult(bool result, string error = null)
+        {
+            if (result)
+            {
+                // 设置当前使用的版本
+                ABVersion.SetCursVersionNum(ABVersion.OriginalVersionId);
+                // 当前版本
+                onHandleState(new ABHelper.VersionArgs(ABHelper.EVersionState.ClientVersionId, ABVersion.CurVersionId.Id));
+                // 首次进入完成
+                onHandleState(new ABHelper.VersionArgs(ABHelper.EVersionState.PrepareAssetsComplete));
+            }
+            else
+            {
+                // Debug.Log("资源更新异常！！" + error);
+                // todo 异常，弹框再试一次，或者退出app
+                onHandleState(new ABHelper.VersionArgs(ABHelper.EVersionState.UnknowError, error));
+                onHandleState = null;
+            }
+        }
         private ABHelper.VersionArgs netSpeed = new ABHelper.VersionArgs(ABHelper.EVersionState.DownloadSpeed);
         private void DownloadSpeed(string s)
         {
@@ -377,6 +482,12 @@ namespace LCG
             unzipProgress.fValue = p;
             onHandleState(unzipProgress);
         }
-
+        private ABHelper.VersionArgs movefileProgress = new ABHelper.VersionArgs(ABHelper.EVersionState.MovefileProcess);
+        private void MovefileProcess(float p)
+        {
+            // Debug.Log("准备进度：" + p);
+            movefileProgress.fValue = p;
+            onHandleState(movefileProgress);
+        }
     }
 }

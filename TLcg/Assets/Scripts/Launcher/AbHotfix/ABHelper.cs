@@ -15,6 +15,9 @@ namespace LCG
         {
             None = -1,
             UnknowError,
+            PrepareAssets,
+            MovefileProcess,
+            PrepareAssetsComplete,
             ServerVersionId,
             AckServerVersionId,
             OriginalVersionId,
@@ -213,6 +216,23 @@ namespace LCG
             }
 
             return string.Format("{0}.{1}.{2}.{3}", v1, v2.ToString(), v3.ToString(), v4.ToString());
+        }
+        public static string StreamingAssetsPath()
+        {
+            string path = string.Empty;
+            switch (Application.platform)
+            {
+                case RuntimePlatform.Android:
+                    path = "jar:file://" + Application.dataPath + "!/assets/";
+                    break;
+                case RuntimePlatform.IPhonePlayer:
+                    path = Application.dataPath + "/Raw/";
+                    break;
+                default:
+                    path = "file:///" + Application.dataPath + "/StreamingAssets/";
+                    break;
+            }
+            return path;
         }
         public static string BuildMD5ByFile(string filePath)
         {

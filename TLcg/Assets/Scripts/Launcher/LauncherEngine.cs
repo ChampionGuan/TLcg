@@ -33,6 +33,15 @@ namespace LCG
         }
 
         /// <summary>
+        /// 准备资源
+        /// </summary>
+        /// <returns></returns>
+        public bool PrepareAssets(Action<ABHelper.VersionArgs> handleState)
+        {
+            return ABCheck.Instance.PrepareAssets(handleState);
+        }
+
+        /// <summary>
         /// ab更新
         /// </summary>
         /// <param name="versionId"></param>
