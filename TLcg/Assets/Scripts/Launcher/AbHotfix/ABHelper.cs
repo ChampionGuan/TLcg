@@ -349,6 +349,7 @@ namespace LCG
             }
 
             byte[] versionbytes = Encoding.UTF8.GetBytes(versionTxt.ToString().TrimEnd().ToLower());
+            ABHelper.WriteFileByBytes(filePath + "-VersionFile.txt", versionbytes);
             Encrypt(ref versionbytes); //RC4 加密文件
             ABHelper.WriteFileByBytes(filePath, versionbytes);
         }
@@ -487,6 +488,7 @@ namespace LCG
             }
 
             byte[] manifestbytes = Encoding.UTF8.GetBytes(manifestTxt.ToString().TrimEnd().ToLower());
+            ABHelper.WriteFileByBytes(filePath + "-Manifest.txt", manifestbytes);
             Encrypt(ref manifestbytes); //RC4 加密文件
             ABHelper.WriteFileByBytes(filePath, manifestbytes);
         }

@@ -620,7 +620,7 @@ namespace LCG
                     {
                         File.Delete(path);
                     }
-                    if (path.EndsWith(CurVersionNum.ToString()))
+                    if (ABHelper.GetFileNameWithoutSuffix(path.Replace("\\", "/")) == CurVersionNum.ToString())
                     {
                         File.Delete(path);
                     }
@@ -650,7 +650,10 @@ namespace LCG
                 {
                     continue;
                 }
-
+                if (!CurVersionFileUrlMd5.ContainsKey(path2))
+                {
+                    continue;
+                }
                 string value = CurVersionFileUrlMd5[path2].ToLower();
                 if (CurVersionList.ContainsKey(value))
                 {

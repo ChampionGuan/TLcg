@@ -337,7 +337,6 @@ namespace LCG
                 CurVersionFileUrlMd5 = new Dictionary<string, string>();
             }
 
-            fileName = fileName.ToLower();
             // string fileUrl = fileName.Replace("/", "-").ToLower();
             string fileUrl = ABHelper.BuildMD5ByString(fileName);
             if (!CurVersionFileUrlMd5.ContainsKey(fileUrl))
