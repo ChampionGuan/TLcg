@@ -42,7 +42,7 @@ function Video.Play(id, onPlay, onOver)
         VideoError()
         return
     end
-    if VideoCtrl:Play(config.VideoUrl, config.Loop, false) then
+    if VideoCtrl:Play(config.VideoUrl, config.Loop, false, true) then
         m_curVideoConfig = config
         VideoCtrl:SetActive(true)
     else

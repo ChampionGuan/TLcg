@@ -19,6 +19,8 @@ namespace LCG
         private static List<string> BundleFolderPath = new List<string>(new string[] { "UI" });
         private static List<string> BundleScenePath = new List<string>(new string[] { "Scenes" });
         private static List<string> BundleLuaPath = new List<string>(new string[] { "Lua" });
+        // 当前unity版本暂不支持视频资源的ab加载
+        private static List<string> BundleFileCullingPath = new List<string>(new string[] { "Video" });
         private static List<string> BundleFilePath = new List<string>();
 
         private static string[] TheVersionNum = new string[4] { "0", "0", "0", "0" };
@@ -73,6 +75,14 @@ namespace LCG
                 }
 
                 BundleFilePath.Add(folderName);
+            }
+
+            foreach (var v in BundleFileCullingPath)
+            {
+                if (BundleFilePath.Contains(v))
+                {
+                    BundleFilePath.Remove(v);
+                }
             }
         }
         void OnGUI()

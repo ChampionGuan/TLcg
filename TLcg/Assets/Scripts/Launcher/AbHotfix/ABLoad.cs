@@ -152,7 +152,7 @@ namespace LCG
         private int m_maxLoadTaskCount = 0;
         private bool m_isInitialized = false;
         private Queue<ABLoadTask> m_loadTaskList = new Queue<ABLoadTask>();
-        private Dictionary<string, List<ABLoadTask>> m_loadTaskRecycle = new Dictionary<string, List<ABLoadTask>>();
+        private List<ABLoadTask> m_loadTaskRecycle = new List<ABLoadTask>();
 
         public IEnumerator Init(Action finish = null)
         {
@@ -228,7 +228,7 @@ namespace LCG
                 }
                 else
                 {
-                    return null;
+                    return SyncLoadAsset(task);
                 }
             }
             else
@@ -260,6 +260,13 @@ namespace LCG
             LoadComplete(spawner, task);
             return spawner;
         }
+        private UnityEngine.Object SyncLoadAsset(ABLoadTask task)
+        {
+            UnityEngine.Object spawner = Resources.Load(ABHelper.GetFileFullPathWithoutFtype(task.AbPath), task.AbType);
+            LoadComplete(spawner, task);
+            return spawner;
+        }
+
         #endregion
 
         #region asyncLoad
@@ -315,6 +322,10 @@ namespace LCG
                     ABReference abRef = ABReferenceMap[task.AbPath];
                     LauncherEngine.Instance.StartCoroutine(AsyncLoadAsset(abRef, task));
                 }
+                else
+                {
+                    LauncherEngine.Instance.StartCoroutine(AsyncLoadAsset(task));
+                }
             }
             else
             {
@@ -352,10 +363,26 @@ namespace LCG
             // 加载完成
             if (request.isDone)
             {
-                UnityEngine.Object spawner = request.asset;
-
                 abRef.ReferenceAsc();
-                LoadComplete(spawner, task);
+                LoadComplete(request.asset, task);
+            }
+        }
+        private IEnumerator AsyncLoadAsset(ABLoadTask task)
+        {
+            ResourceRequest request = Resources.LoadAsync(ABHelper.GetFileFullPathWithoutFtype(task.AbPath));
+            while (!request.isDone)
+            {
+                if (null != task.Progress)
+                {
+                    task.Progress(request.progress);
+                }
+                yield return null;
+            }
+            yield return request;
+            // 加载完成
+            if (request.isDone)
+            {
+                LoadComplete(request.asset, task);
             }
         }
         private void NextLoadTask()
@@ -471,11 +498,10 @@ namespace LCG
             NextLoadTask();
 
             // 回收
-            if (!m_loadTaskRecycle.ContainsKey(task.AbPath))
+            if (!m_loadTaskRecycle.Contains(task))
             {
-                m_loadTaskRecycle.Add(task.AbPath, new List<ABLoadTask>());
+                m_loadTaskRecycle.Add(task);
             }
-            m_loadTaskRecycle[task.AbPath].Add(task);
         }
         private IEnumerator LoadManifest()
         {
@@ -494,10 +520,10 @@ namespace LCG
 
             // 新建任务
             ABLoadTask task = null;
-            if (m_loadTaskRecycle.ContainsKey(abPath) && m_loadTaskRecycle[abPath].Count > 0)
+            if (m_loadTaskRecycle.Count > 0)
             {
-                task = m_loadTaskRecycle[abPath][0];
-                m_loadTaskRecycle[abPath].RemoveAt(0);
+                task = m_loadTaskRecycle[0];
+                m_loadTaskRecycle.RemoveAt(0);
             }
             else
             {

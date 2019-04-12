@@ -6,6 +6,7 @@ local VideoCtrl = nil
 local m_videoRoot = nil
 local m_onPlayCallback = nil
 local m_onOverCallback = nil
+local m_onProcessCallback = nil
 local m_curVideoConfig = nil
 
 local function VideoPrepared()
@@ -27,6 +28,12 @@ local function VideoComplete()
 
     if nil ~= m_onOverCallback then
         m_onOverCallback()
+    end
+end
+
+local function VideoProcess(p)
+    if nil ~= m_onProcessCallback then
+        m_onProcessCallback(p)
     end
 end
 
@@ -71,6 +78,29 @@ function VideoManager.Play(id, onPlay, onOver)
     end
 end
 
+function VideoManager.AsyncPlay(id, onPlay, onProcess, onOver)
+    local config = VideoConfig[id]
+
+    m_onPlayCallback = onPlay
+    m_onOverCallback = onOver
+    m_onProcessCallback = onProcess
+
+    if nil == config then
+        VideoError()
+        return
+    end
+    if nil ~= m_curVideoConfig and config.VideoUrl == m_curVideoConfig.VideoUrl and VideoCtrl.IsPlaying then
+        VideoError()
+        return
+    end
+    if VideoCtrl:AsyncPlay(config.VideoUrl, config.Loop, config.Skip, config.AutoDestroy) then
+        m_curVideoConfig = config
+        VideoCtrl:SetActive(true)
+    else
+        VideoError()
+    end
+end
+
 function VideoManager.Stop()
     VideoCtrl:Stop()
     VideoCtrl:SetActive(false)
@@ -92,6 +122,7 @@ function VideoManager.Initialize()
     VideoCtrl = m_videoRoot:GetComponent(typeof(CSharp.Video))
     VideoCtrl.PreparedCallback = VideoPrepared
     VideoCtrl.CompleteCallback = VideoComplete
+    VideoCtrl.ProcessCallback = VideoProcess
 
     VideoManager.Stop()
 end

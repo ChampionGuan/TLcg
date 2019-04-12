@@ -25,6 +25,10 @@ namespace LCG
         {
             private get; set;
         }
+        public System.Action<float> ProcessCallback
+        {
+            private get; set;
+        }
         public bool IsPlaying
         {
             get { return m_videoPlayer.isPlaying; }
@@ -55,7 +59,20 @@ namespace LCG
             GameObject.DontDestroyOnLoad(m_root);
         }
 
-        public bool Play(string videoUrl, bool isLoop, bool isSkip, bool isAutoUnload)
+        public bool AsyncPlay(string videoUrl, bool isLoop, bool isSkip, bool isAutoUnload = true)
+        {
+            if (string.IsNullOrEmpty(videoUrl))
+            {
+                return false;
+            }
+
+            ResourceLoader.AsyncLoadObject(videoUrl, typeof(VideoClip), (clip) =>
+            {
+                Play(videoUrl, isLoop, isSkip, isAutoUnload, clip as VideoClip);
+            }, LoadProcess);
+            return true;
+        }
+        public bool Play(string videoUrl, bool isLoop, bool isSkip, bool isAutoUnload = true)
         {
             if (string.IsNullOrEmpty(videoUrl))
             {
@@ -68,33 +85,7 @@ namespace LCG
                 return false;
             }
 
-            // 停止所有协程
-            StopAllCoroutines();
-            // 上一自动销毁
-            UnloadThePreVideo();
-
-            // 有相同则移至队尾
-            if (m_videoList.Contains(videoUrl))
-            {
-                m_videoList.Remove(videoUrl);
-            }
-            m_videoList.Add(videoUrl);
-
-            // 允许缓存两个视频源
-            if (m_videoList.Count > 2)
-            {
-                string url = m_videoList[0];
-                ResourceLoader.UnloadObject(url);
-            }
-
-            m_isAutoUnload = isAutoUnload;
-            m_btnSkip.SetActive(isSkip);
-            m_videoPlayer.SetTargetAudioSource(0, m_audioSource);
-            m_videoPlayer.clip = clip;
-            m_videoPlayer.isLooping = isLoop;
-            m_videoPlayer.Prepare();
-
-            return true;
+            return Play(videoUrl, isLoop, isSkip, isAutoUnload, clip);
         }
 
         public void Stop()
@@ -166,6 +157,7 @@ namespace LCG
             // 清空回调
             CompleteCallback = null;
             PreparedCallback = null;
+            ProcessCallback = null;
             if (null != m_videoPlayer)
             {
                 m_videoPlayer.loopPointReached -= LoopPointReached;
@@ -180,7 +172,40 @@ namespace LCG
             m_videoPlayer = null;
             m_audioSource = null;
         }
+        private bool Play(string videoUrl, bool isLoop, bool isSkip, bool isAutoUnload, VideoClip clip)
+        {
+            if (null == clip)
+            {
+                return false;
+            }
+            // 停止所有协程
+            StopAllCoroutines();
+            // 上一自动销毁
+            UnloadThePreVideo();
 
+            // 有相同则移至队尾
+            if (m_videoList.Contains(videoUrl))
+            {
+                m_videoList.Remove(videoUrl);
+            }
+            m_videoList.Add(videoUrl);
+
+            // 允许缓存两个视频源
+            if (m_videoList.Count > 2)
+            {
+                string url = m_videoList[0];
+                ResourceLoader.UnloadObject(url);
+            }
+
+            m_isAutoUnload = isAutoUnload;
+            m_btnSkip.SetActive(isSkip);
+            m_videoPlayer.SetTargetAudioSource(0, m_audioSource);
+            m_videoPlayer.clip = clip as VideoClip;
+            m_videoPlayer.isLooping = isLoop;
+            m_videoPlayer.Prepare();
+
+            return true;
+        }
         private void UnloadThePreVideo()
         {
             if (!m_isAutoUnload || m_videoList.Count <= 0)
@@ -211,7 +236,13 @@ namespace LCG
             vp.Play();
             StartCoroutine(Wait(PreparedCallback));
         }
-
+        private void LoadProcess(float p)
+        {
+            if (null != ProcessCallback)
+            {
+                ProcessCallback.Invoke(p);
+            }
+        }
         private IEnumerator Wait(System.Action action)
         {
             yield return null;
