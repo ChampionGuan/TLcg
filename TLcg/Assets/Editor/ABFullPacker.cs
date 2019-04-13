@@ -14,10 +14,11 @@ namespace LCG
         private static string ResFolder = "Assets/Resources/";
 
         private static List<string> BundleFolderPath = new List<string>(new string[] { "UI" });
-        private static List<string> BundleScenePath = new List<string>(new string[] { "ScenesFinal" });
+        private static List<string> BundleScenePath = new List<string>(new string[] { "Scenes" });
         private static List<string> BundleLuaPath = new List<string>(new string[] { "Lua" });
+        // 当前unity版本暂不支持视频资源的ab加载
+        private static List<string> BundleFileCullingPath = new List<string>(new string[] { "Video" });
         private static List<string> BundleFilePath = new List<string>();
-
         private static string TheRootFolderName = "ab_tlcg_full";
 
         [MenuItem("Tools/资源打包全包版")]
@@ -49,7 +50,7 @@ namespace LCG
         {
             TheRootFolderName = Application.dataPath;
             TheRootFolderName = TheRootFolderName.Substring(0, TheRootFolderName.LastIndexOf("/"));
-            TheRootFolderName = "ab_" + TheRootFolderName.Substring(TheRootFolderName.LastIndexOf("/") + 1) + "_server";
+            TheRootFolderName = "ab_" + TheRootFolderName.Substring(TheRootFolderName.LastIndexOf("/") + 1) + "_full";
         }
 
         private static void FileBundleList()
@@ -68,6 +69,14 @@ namespace LCG
                 }
 
                 BundleFilePath.Add(folderName);
+            }
+
+            foreach (var v in BundleFileCullingPath)
+            {
+                if (BundleFilePath.Contains(v))
+                {
+                    BundleFilePath.Remove(v);
+                }
             }
         }
 
@@ -91,7 +100,7 @@ namespace LCG
             GUILayout.Label("需要场景打包的路径");
             for (int i = 0; i < BundleScenePath.Count; i++)
             {
-                EditorGUILayout.LabelField((i + 1).ToString() + ":" + ResFolder + BundleScenePath[i]);
+                EditorGUILayout.LabelField((i + 1).ToString() + ":" + AssetFolder + BundleScenePath[i]);
             }
             EditorGUILayout.Space();
 
@@ -215,7 +224,7 @@ namespace LCG
             }
             foreach (string path in BundleScenePath)
             {
-                string fullPath = ResFolder + path;
+                string fullPath = AssetFolder + path;
                 sceneBundlePathList.AddRange(ABHelper.GetAllFilesPathInDir(fullPath));
             }
             foreach (string path in BundleLuaPath)
