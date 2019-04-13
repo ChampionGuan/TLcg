@@ -1,13 +1,9 @@
 using System;
 using System.IO;
-using System.Net;
 using System.Threading;
-using System.Collections;
 using System.Collections.Generic;
 using ICSharpCode.SharpZipLib.Zip;
 using UnityEngine;
-using System.Security.Cryptography.X509Certificates;
-using System.Net.Security;
 
 namespace LCG
 {
