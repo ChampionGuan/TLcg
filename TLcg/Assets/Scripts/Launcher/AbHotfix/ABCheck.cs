@@ -56,6 +56,10 @@ namespace LCG
             {
                 return false;
             }
+            if (ABHelper.IngoreHotfix)
+            {
+                return false;
+            }
 
             // 处理状态
             onHandleState = handleState;
@@ -89,8 +93,14 @@ namespace LCG
         /// <param name="handleState">处理句柄</param>
         public void CheckHotter(string versionId, string versionIdUrl, string resRemoteUrl, Action<ABHelper.VersionArgs> handleState)
         {
-            // 处理状态
             onHandleState = handleState;
+            if (ABHelper.IngoreHotfix)
+            {
+                onHandleState(new ABHelper.VersionArgs(ABHelper.EVersionState.HotfixComplete));
+                onHandleState = null;
+                return;
+            }
+
             // 资源远端地址
             ABVersion.RemoteUrlPrefix = resRemoteUrl;
             // 客户端初始版号

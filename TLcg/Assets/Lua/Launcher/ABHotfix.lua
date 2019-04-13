@@ -1,6 +1,6 @@
 LuaHandle.Load("Common.json")
 LuaHandle.Load("Common.PlayerPrefs")
-local Tips = LuaHandle.Load("Launcher.Config").Hotfix
+local Config = LuaHandle.Load("Launcher.Config")
 local Video = LuaHandle.Load("Launcher.Video")
 
 local ABHotfix = {}
@@ -177,13 +177,13 @@ local function HotfixHandle(value)
     if value.state == CSharp.EVersionState.CheckLocalVersion then
         m_mainUI.ProgressBar.value = 0
         m_mainUI.ProgressBar:TweenValue(50, 2):SetEase(CSharp.EaseType.CubicOut)
-        m_mainUI.Desc.text = Tips.Tip_1
+        m_mainUI.Desc.text = Config.Tips.Tip_1
         return
     end
 
     -- 开始准备资源
     if value.state == CSharp.EVersionState.PrepareAssets then
-        m_mainUI.Desc.text = Tips.Tip_17
+        m_mainUI.Desc.text = Config.Tips.Tip_17
     end
 
     -- 准备资源中
@@ -204,7 +204,7 @@ local function HotfixHandle(value)
             ShowPopupUI(true)
             AddBtnEvent(m_popupUI.BtnConfirm, ABHotfix.ReCheck)
             AddBtnEvent(m_popupUI.BtnCancel, QuitApp)
-            m_popupUI.Desc.text = Tips.Tip_Error
+            m_popupUI.Desc.text = Config.Tips.Tip_Error
             m_popupUI.BtnState.selectedIndex = 2
             return
         end
@@ -250,7 +250,7 @@ local function HotfixHandle(value)
         ShowPopupUI(true)
         AddBtnEvent(m_popupUI.BtnConfirm, value.callBack)
         AddBtnEvent(m_popupUI.BtnCancel, QuitApp)
-        m_popupUI.Desc.text = string.format(Tips.Tip_3, m_downloadSize)
+        m_popupUI.Desc.text = string.format(Config.Tips.Tip_3, m_downloadSize)
         m_popupUI.BtnState.selectedIndex = 1
         return
     end
@@ -260,7 +260,7 @@ local function HotfixHandle(value)
         ShowPopupUI(true)
         AddBtnEvent(m_popupUI.BtnConfirm, value.callBack)
         AddBtnEvent(m_popupUI.BtnCancel, QuitApp)
-        m_popupUI.Desc.text = Tips.Tip_4
+        m_popupUI.Desc.text = Config.Tips.Tip_4
         m_popupUI.BtnState.selectedIndex = 1
         return
     end
@@ -275,9 +275,9 @@ local function HotfixHandle(value)
     if value.state == CSharp.EVersionState.DownloadProgress then
         ProgressBar(value.fValue * 100)
         if nil ~= m_downloadSpeed then
-            m_mainUI.Desc.text = string.format(Tips.Tip_5, m_downloadSize, m_downloadSpeed)
+            m_mainUI.Desc.text = string.format(Config.Tips.Tip_5, m_downloadSize, m_downloadSpeed)
         else
-            m_mainUI.Desc.text = string.format(Tips.Tip_6, m_downloadSize)
+            m_mainUI.Desc.text = string.format(Config.Tips.Tip_6, m_downloadSize)
         end
         return
     end
@@ -285,7 +285,7 @@ local function HotfixHandle(value)
     -- 解压进度
     if value.state == CSharp.EVersionState.UnzipProgress then
         ProgressBar(value.fValue * 100)
-        m_mainUI.Desc.text = Tips.Tip_7
+        m_mainUI.Desc.text = Config.Tips.Tip_7
         return
     end
 
@@ -294,7 +294,7 @@ local function HotfixHandle(value)
         ShowPopupUI(true)
         AddBtnEvent(m_popupUI.BtnConfirm, ABHotfix.ReCheck)
         AddBtnEvent(m_popupUI.BtnCancel, QuitApp)
-        m_popupUI.Desc.text = Tips.Tip_8
+        m_popupUI.Desc.text = Config.Tips.Tip_8
         m_popupUI.BtnState.selectedIndex = 1
         return
     end
@@ -304,7 +304,7 @@ local function HotfixHandle(value)
         ShowPopupUI(true)
         AddBtnEvent(m_popupUI.BtnConfirm, ABHotfix.ReCheck)
         AddBtnEvent(m_popupUI.BtnCancel, QuitApp)
-        m_popupUI.Desc.text = Tips.Tip_9 .. value.sValue
+        m_popupUI.Desc.text = Config.Tips.Tip_9 .. value.sValue
         m_popupUI.BtnState.selectedIndex = 2
         print("更新时网络异常！！", value.sValue)
         return
@@ -321,7 +321,7 @@ local function HotfixHandle(value)
             end
         )
         AddBtnEvent(m_popupUI.BtnCancel, QuitApp)
-        m_popupUI.Desc.text = Tips.Tip_11
+        m_popupUI.Desc.text = Config.Tips.Tip_11
         m_popupUI.BtnState.selectedIndex = 3
         return
     end
@@ -363,7 +363,7 @@ local function AutofixHandle(value)
         ShowPopupUI(true)
         AddBtnEvent(m_popupUI.BtnConfirm, ABHotfix.ReRepair)
         AddBtnEvent(m_popupUI.BtnCancel, QuitApp)
-        m_popupUI.Desc.text = Tips.Tip_14 .. value.sValue
+        m_popupUI.Desc.text = Config.Tips.Tip_14 .. value.sValue
         m_popupUI.BtnState.selectedIndex = 2
         print("更新时网络异常！！", value.sValue)
         return
@@ -385,7 +385,7 @@ local function AutofixHandle(value)
         ShowPopupUI(true)
         AddBtnEvent(m_popupUI.BtnConfirm, value.callBack)
         AddBtnEvent(m_popupUI.BtnCancel, QuitApp)
-        m_popupUI.Desc.text = string.format(Tips.Hotfix_3, m_downloadSize)
+        m_popupUI.Desc.text = string.format(Config.Tips.Hotfix_3, m_downloadSize)
         m_popupUI.BtnState.selectedIndex = 1
         return
     end
@@ -395,7 +395,7 @@ local function AutofixHandle(value)
         ShowPopupUI(true)
         AddBtnEvent(m_popupUI.BtnConfirm, value.callBack)
         AddBtnEvent(m_popupUI.BtnCancel, QuitApp)
-        m_popupUI.Desc.text = Tips.Tip_4
+        m_popupUI.Desc.text = Config.Tips.Tip_4
         m_popupUI.BtnState.selectedIndex = 1
         return
     end
@@ -403,21 +403,21 @@ local function AutofixHandle(value)
     -- 下载修复进度
     if value.state == CSharp.EVersionState.AutofixProgress then
         ProgressBar(value.fValue * 100)
-        m_mainUI.Desc.text = Tips.Tip_13
+        m_mainUI.Desc.text = Config.Tips.Tip_13
         return
     end
 
     -- 检测文件进度
     if value.state == CSharp.EVersionState.CheckFileProgress then
         ProgressBar(value.fValue * 100)
-        m_mainUI.Desc.text = Tips.Tip_12
+        m_mainUI.Desc.text = Config.Tips.Tip_12
         return
     end
 
     -- 删除文件进度
     if value.state == CSharp.EVersionState.AutofixDeleteFile then
         ProgressBar(value.fValue * 100)
-        m_mainUI.Desc.text = Tips.Tip_16
+        m_mainUI.Desc.text = Config.Tips.Tip_16
         return
     end
 
@@ -440,6 +440,8 @@ local function AutofixHandle(value)
 end
 
 function ABHotfix.Bootup(over)
+    CSharp.ABHelper.IngoreHotfix = Config.IngoreHotfix
+    -- 初始化
     ABHotfix.Initialize()
     -- 播放闪屏
     Video.Play(

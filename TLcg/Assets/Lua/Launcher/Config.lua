@@ -1,5 +1,5 @@
 return {
-    Hotfix = {
+    Tips = {
         Tip_1 = "正在检测版本…",
         Tip_2 = "正在进行资源初始化……",
         Tip_3 = "需先完成更新才能继续游戏\n本次更新大小为：%s\n（建议使用wifi下载）",
@@ -30,5 +30,6 @@ return {
             VideoUrl = "Video/Login",
             Loop = true
         }
-    }
+    },
+    IngoreHotfix = false,
 }

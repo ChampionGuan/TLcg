@@ -316,7 +316,7 @@ namespace LCG
                 {
                     File.Delete(path);
                 }
-                if (path.EndsWith(PlatformName))
+                if (ABHelper.GetFileNameWithoutSuffix(path.Replace("\\", "/")) == PlatformName)
                 {
                     File.Delete(path);
                 }

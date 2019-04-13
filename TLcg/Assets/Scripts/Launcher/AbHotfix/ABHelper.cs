@@ -79,6 +79,10 @@ namespace LCG
                 callBack = c;
             }
         }
+        public static bool IngoreHotfix
+        {
+            get; set;
+        }
         public static string AndroidPlatform
         {
             get

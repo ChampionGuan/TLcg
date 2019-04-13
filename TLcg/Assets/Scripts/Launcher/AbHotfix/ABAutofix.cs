@@ -40,10 +40,16 @@ namespace LCG
         // handleState：处理句柄
         public void Repair(bool isDeep, Action<ABHelper.VersionArgs> handleState)
         {
+            onHandleState = handleState;
+            if (ABHelper.IngoreHotfix)
+            {
+                onHandleState(new ABHelper.VersionArgs(ABHelper.EVersionState.AutofixComplete));
+                onHandleState = null;
+                return;
+            }
+
             // 保存修复类型
             isDeepFix = isDeep;
-            // 处理状态
-            onHandleState = handleState;
             // 客户端版本
             onHandleState(new ABHelper.VersionArgs(ABHelper.EVersionState.ClientVersionId, ABVersion.CurVersionId.Id));
             // 网络不可达检测
