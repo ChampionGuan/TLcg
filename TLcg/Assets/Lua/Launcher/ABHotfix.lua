@@ -232,7 +232,36 @@ local function HotfixHandle(value)
         -- end
 
         -- 测试用，搭建本地http服，使用hfs.exe测试
-        value.callBack("0.0.0.0" .. " " .. "http://192.168.1.110:100/ab_TLcg/")
+        value.callBack("0.1.0.0" .. " " .. "http://192.168.1.110:100/ab_TLcg/")
+        return
+    end
+
+    -- apk下载完成
+    if value.state == CSharp.EVersionState.APKDownloadComplete then
+        -- 拉起安装
+        -- 成功后，清理一波内存
+        print("apk下载完成！拉起安装面板！！")
+        CSharp.LauncherEngine.Instance:ABClear()
+        return
+    end
+
+    -- 需要更新大版本
+    if value.state == CSharp.EVersionState.NeedGoStore then
+        ShowPopupUI(true)
+        AddBtnEvent(
+            m_popupUI.BtnConfirm,
+            function()
+                m_downloadSize = DownloadSize(1061080537)
+                CSharp.LauncherEngine.Instance:APKDownload(
+                    "http://192.168.1.110:100/com_zgm.apk",
+                    "com_zgm.apk",
+                    1061080537
+                )
+            end
+        )
+        AddBtnEvent(m_popupUI.BtnCancel, QuitApp)
+        m_popupUI.Desc.text = Config.Tips.Tip_11
+        m_popupUI.BtnState.selectedIndex = 3
         return
     end
 
@@ -309,22 +338,6 @@ local function HotfixHandle(value)
         m_popupUI.Desc.text = Config.Tips.Tip_9 .. value.sValue
         m_popupUI.BtnState.selectedIndex = 2
         print("更新时网络异常！！", value.sValue)
-        return
-    end
-
-    -- 需要更新大版本
-    if value.state == CSharp.EVersionState.NeedGoStore then
-        ShowPopupUI(true)
-        AddBtnEvent(
-            m_popupUI.BtnConfirm,
-            function()
-                print("需要store网址！！前往下载了！！！")
-                QuitApp()
-            end
-        )
-        AddBtnEvent(m_popupUI.BtnCancel, QuitApp)
-        m_popupUI.Desc.text = Config.Tips.Tip_11
-        m_popupUI.BtnState.selectedIndex = 3
         return
     end
 

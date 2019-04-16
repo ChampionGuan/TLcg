@@ -136,16 +136,16 @@ namespace LCG
         private static string lastSceneName = null;
         public static void LoadScene(string sname)
         {
+            //  加载新场景
+            bool r = ABLoader.LoadScene(ScenePathPrefix + sname, sname);
+
             // 卸载上一个场景
             if (!string.IsNullOrEmpty(lastSceneName))
             {
                 ABLoader.UnloadScene(ScenePathPrefix + lastSceneName);
                 lastSceneName = null;
             }
-
-            //  加载新场景
-            string scenePath = ScenePathPrefix + sname;
-            if (ABLoader.LoadScene(scenePath, sname))
+            if (r)
             {
                 lastSceneName = sname;
             }

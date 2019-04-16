@@ -107,9 +107,12 @@ namespace LCG
             {
                 httpWebRequest.Abort();
             }
+            if (null != unzipTask)
+            {
+                unzipTask.Abort();
+            }
             downloadThread = null;
             httpWebRequest = null;
-            unzipTask.Abort();
             FormatDownloadSpeed(0);
         }
         private void DoDownload()
@@ -491,6 +494,7 @@ namespace LCG
         private void DownloadProcess(float process)
         {
             process = (int)(process * 100) * 0.01f;
+            if (downloadprocess == process)
             {
                 return;
             }
@@ -507,6 +511,7 @@ namespace LCG
         private void UnzipProcess(float process)
         {
             process = (int)(process * 100) * 0.01f;
+            if (unzipprocess == process)
             {
                 return;
             }

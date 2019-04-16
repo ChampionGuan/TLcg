@@ -18,6 +18,7 @@ namespace LCG
             PrepareAssets,
             MovefileProcess,
             PrepareAssetsComplete,
+            APKDownloadComplete,
             ServerVersionId,
             AckServerVersionId,
             OriginalVersionId,

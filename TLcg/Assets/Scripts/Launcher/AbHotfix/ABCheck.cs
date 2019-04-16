@@ -51,6 +51,23 @@ namespace LCG
             LauncherEngine.Instance.StartCoroutine(ABLoad.Instance.Init(callback));
         }
         /// <summary>
+        /// 下载apk
+        /// </summary>
+        /// <param name="remoteUrl"></param>
+        /// <param name="apkName"></param>
+        /// <param name="apkSize"></param>
+        public void APKDownload(string remoteUrl, string apkName, int apkSize)
+        {
+            ABDownload.Instance.InitDownload();
+            ABDownload.Instance.downloadProcess = DownloadProcess;
+            ABDownload.Instance.downloadSpeed = DownloadSpeed;
+            ABDownload.Instance.downloadResult = APKDownloadResult;
+            string fileSuffix = apkName.Substring(apkName.LastIndexOf("."));
+            string fileName = apkName.Substring(0, apkName.LastIndexOf("."));
+            ABDownload.Instance.CreateDownloadTask(remoteUrl, ABVersion.LocalStorgePath, fileName, fileSuffix, apkSize, false);
+            ABDownload.Instance.BeginDownload();
+        }
+        /// <summary>
         /// 首次进入游戏
         /// </summary>
         public bool PrepareAssets(Action<ABHelper.VersionArgs> handleState)
@@ -476,6 +493,21 @@ namespace LCG
                 onHandleState(new ABHelper.VersionArgs(ABHelper.EVersionState.ClientVersionId, ABVersion.CurVersionId.Id));
                 // 首次进入完成
                 onHandleState(new ABHelper.VersionArgs(ABHelper.EVersionState.PrepareAssetsComplete));
+            }
+            else
+            {
+                // Debug.Log("资源更新异常！！" + error);
+                // todo 异常，弹框再试一次，或者退出app
+                onHandleState(new ABHelper.VersionArgs(ABHelper.EVersionState.UnknowError, error));
+                onHandleState = null;
+            }
+        }
+        private void APKDownloadResult(bool result, string error = null)
+        {
+            if (result)
+            {
+                // apk下载成功
+                onHandleState(new ABHelper.VersionArgs(ABHelper.EVersionState.APKDownloadComplete));
             }
             else
             {

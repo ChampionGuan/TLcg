@@ -42,6 +42,15 @@ namespace LCG
         }
 
         /// <summary>
+        /// 下载apk
+        /// </summary>
+        /// <returns></returns>
+        public void APKDownload(string remoteUrl, string apkName, int apkSize)
+        {
+            ABCheck.Instance.APKDownload(remoteUrl, apkName, apkSize);
+        }
+
+        /// <summary>
         /// ab更新
         /// </summary>
         /// <param name="versionId"></param>
@@ -61,6 +70,14 @@ namespace LCG
         public void ABRepair(bool isDeep, Action<ABHelper.VersionArgs> handleState)
         {
             ABAutofix.Instance.Repair(isDeep, handleState);
+        }
+
+        /// <summary>
+        /// ab清除
+        /// </summary>
+        public void ABClear()
+        {
+            ABHelper.ClearVersionAb();
         }
 
         /// <summary>
