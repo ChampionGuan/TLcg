@@ -64,7 +64,7 @@ namespace LCG
             ABDownload.Instance.downloadResult = APKDownloadResult;
             string fileSuffix = apkName.Substring(apkName.LastIndexOf("."));
             string fileName = apkName.Substring(0, apkName.LastIndexOf("."));
-            ABDownload.Instance.CreateDownloadTask(remoteUrl, ABVersion.LocalStorgePath, fileName, fileSuffix, apkSize, false);
+            ABDownload.Instance.CreateDownloadTask(remoteUrl, Application.persistentDataPath, fileName, fileSuffix, apkSize, false);
             ABDownload.Instance.BeginDownload();
         }
         /// <summary>
