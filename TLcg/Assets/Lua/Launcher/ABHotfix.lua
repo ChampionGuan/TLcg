@@ -232,7 +232,7 @@ local function HotfixHandle(value)
         -- end
 
         -- 测试用，搭建本地http服，使用hfs.exe测试
-        value.callBack("0.1.0.0" .. " " .. "http://192.168.1.110:100/ab_TLcg/")
+        value.callBack("0.0.0.0" .. " " .. "http://192.168.1.110:100/ab_TLcg/")
         return
     end
 
@@ -251,12 +251,8 @@ local function HotfixHandle(value)
         AddBtnEvent(
             m_popupUI.BtnConfirm,
             function()
-                m_downloadSize = DownloadSize(1061080537)
-                CSharp.LauncherEngine.Instance:APKDownload(
-                    "http://192.168.1.110:100/com_zgm.apk",
-                    "com_zgm.apk",
-                    1061080537
-                )
+                m_downloadSize = DownloadSize(100)
+                CSharp.LauncherEngine.Instance:APKDownload("http://192.168.1.110:100/test.apk", "test.apk", 100)
             end
         )
         AddBtnEvent(m_popupUI.BtnCancel, QuitApp)
