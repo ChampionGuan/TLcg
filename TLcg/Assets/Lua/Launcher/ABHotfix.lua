@@ -184,11 +184,13 @@ local function HotfixHandle(value)
     -- 开始准备资源
     if value.state == CSharp.EVersionState.PrepareAssets then
         m_mainUI.Desc.text = Config.Tips.Tip_17
+        return
     end
 
     -- 准备资源中
     if value.state == CSharp.EVersionState.MovefileProcess then
         ProgressBar(value.fValue * 100)
+        return
     end
 
     -- 准备资源完成

@@ -215,7 +215,7 @@ namespace LCG
         }
 
         // 解压个数进度
-        public Action<float> unzipCountProcess = null;
+        public Action<float, int> unzipCountProcess = null;
         // 解压进度
         public Action<float> unzipProcess = null;
         // 处理结果
@@ -228,6 +228,11 @@ namespace LCG
 
         // 已解压个数
         private int unzipCount = 0;
+        // 压缩文件个数
+        private int zipCount = 0;
+        // 压缩区间
+        private float zipZone = 0;
+
 
         // 是否正在解压中
         public bool IsUnziping
@@ -246,6 +251,7 @@ namespace LCG
             unzipResult = null;
             curUnzipTask = null;
             unzipCount = 0;
+            zipCount = 0;
         }
         public bool CreateUnzipTask(string _localFolder, string _zipFilePath, string _zipFileName, long? _zipFileSize = null, long? _unZipFileSize = null, bool _isDeleteZip = true)
         {
@@ -256,27 +262,27 @@ namespace LCG
 
             UnzipTask task = new UnzipTask(_localFolder, _zipFilePath, _zipFileName, _zipFileSize, _unZipFileSize, _isDeleteZip);
             task.SetAction(UnzipError, UnzipProcess, BeginUnzip);
-
             unzipTaskList.Add(_zipFilePath, task);
+            zipCount = unzipTaskList.Count;
+            zipZone = (int)(1 / (float)zipCount * 10000) * 0.0001f;
+            
             return true;
         }
         public void BeginUnzip()
         {
             ABCheck.Instance.EnterInvoke(() =>
             {
-                if (null != unzipCountProcess)
-                {
-                    unzipCountProcess(unzipCount / (float)unzipTaskList.Count);
-                }
-
                 unzipCount++;
                 curUnzipTask = null;
+                unzipprocess = -1;
+                UnzipCountProcess(unzipCount);
                 foreach (var task in unzipTaskList.Values)
                 {
                     if (task.UnzipProcess < 1)
                     {
                         curUnzipTask = task;
                         curUnzipTask.Start();
+                        break;
                     }
                 }
                 // 解压完成
@@ -303,13 +309,27 @@ namespace LCG
                 curUnzipTask.Start();
             }
         }
+        private void UnzipCountProcess(int process)
+        {
+            if (null != unzipCountProcess)
+            {
+                unzipCountProcess(process * zipZone, zipCount);
+            }
+        }
+        private float unzipprocess = 0;
         private void UnzipProcess(float process)
         {
+            process = (int)(process * 100) * 0.01f;
+            if (unzipprocess == process)
+            {
+                return;
+            }
+            unzipprocess = process;
             ABCheck.Instance.EnterInvoke(() =>
             {
                 if (null != unzipProcess)
                 {
-                    unzipProcess(process);
+                    unzipProcess((unzipCount + unzipprocess - 1) * zipZone);
                 }
             });
         }

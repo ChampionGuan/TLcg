@@ -754,7 +754,9 @@ namespace LCG
                 }
                 FastZip fz;
                 if (zipevent != null)
-                { fz = new FastZip(zipevent); }
+                {
+                    fz = new FastZip(zipevent);
+                }
                 else
                 {
                     fz = new FastZip();
@@ -766,6 +768,26 @@ namespace LCG
             catch (Exception e)
             {
                 Debug.LogError(e.Message + "  " + e.StackTrace);
+            }
+        }
+        /// <summary>
+        /// 压缩多个文件
+        /// </summary>
+        /// <param name="filespath"></param>
+        /// <param name="sourcedpath"></param>
+        public static void ZipFile(List<string> filespath, string sourcedpath, string entrnameprefix = "")
+        {
+            using (ZipFile zip = ICSharpCode.SharpZipLib.Zip.ZipFile.Create(sourcedpath))
+            {
+                zip.BeginUpdate();
+                foreach (var v in filespath)
+                {
+                    string p = v.Replace("\\", "/");
+                    string p1 = ABHelper.GetFileName(p);
+                    ZipEntry e = new ZipEntry(p1);
+                    zip.Add(p, entrnameprefix + p1);
+                }
+                zip.CommitUpdate();
             }
         }
         /// <summary>

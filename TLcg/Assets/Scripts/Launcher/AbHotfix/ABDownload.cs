@@ -410,13 +410,11 @@ namespace LCG
         {
             ABCheck.Instance.EnterInvoke(() =>
             {
-                if (null != downloadCountProcess)
-                {
-                    downloadCountProcess(downloadedCount / (float)downloadTaskList.Count);
-                }
-
                 downloadedCount++;
                 curDownloadTask = null;
+                downloadprocess = -1;
+                unzipprocess = -1;
+                DownloadCountProcess(downloadedCount);
                 foreach (var task in downloadTaskList.Values)
                 {
                     if (task.DownloadProcess < 1)
@@ -472,6 +470,13 @@ namespace LCG
                 }
             });
         }
+        private void DownloadCountProcess(int process)
+        {
+            if (null != downloadCountProcess)
+            {
+                downloadCountProcess(process);
+            }
+        }
         private void DownloadSpeed(string netSpeed)
         {
             ABCheck.Instance.EnterInvoke(() =>
@@ -482,23 +487,35 @@ namespace LCG
                 }
             });
         }
+        private float downloadprocess = 0;
         private void DownloadProcess(float process)
         {
+            process = (int)(process * 100) * 0.01f;
+            {
+                return;
+            }
+            downloadprocess = process;
             ABCheck.Instance.EnterInvoke(() =>
             {
                 if (null != downloadProcess)
                 {
-                    downloadProcess(process);
+                    downloadProcess(downloadprocess);
                 }
             });
         }
+        private float unzipprocess = 0;
         private void UnzipProcess(float process)
         {
+            process = (int)(process * 100) * 0.01f;
+            {
+                return;
+            }
+            unzipprocess = process;
             ABCheck.Instance.EnterInvoke(() =>
             {
                 if (null != unzipProcess)
                 {
-                    unzipProcess(process);
+                    unzipProcess(unzipprocess);
                 }
             });
         }

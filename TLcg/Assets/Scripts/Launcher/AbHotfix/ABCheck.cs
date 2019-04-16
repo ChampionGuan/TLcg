@@ -22,7 +22,10 @@ namespace LCG
         {
             for (int i = 0; i < waitInvoke.Count; i++)
             {
-                waitInvoke[i]();
+                if (null != waitInvoke[i])
+                {
+                    waitInvoke[i]();
+                }
             }
             waitInvoke.Clear();
         }
@@ -68,19 +71,7 @@ namespace LCG
             // 当前版本
             onHandleState(new ABHelper.VersionArgs(ABHelper.EVersionState.ClientVersionId, ABVersion.OriginalVersionId.Id));
             // 移动文件
-            LauncherEngine.Instance.StartCoroutine(MoveNativeFile("native.zip", () =>
-            {
-                // 解压
-                string zipFileSuffix = ".zip";
-                string zipFileName = "native";
-                string zipFileRemoteUrl = string.Format("{0}/{1}{2}", ABVersion.LocalStorgePath, zipFileName, zipFileSuffix);
-                ABUnzip.Instance.InitUnzip();
-                ABUnzip.Instance.unzipResult = PrepareAssetsResult;
-                ABUnzip.Instance.unzipProcess = UnzipProcess;
-                ABUnzip.Instance.CreateUnzipTask(ABVersion.LocalStorgePath, zipFileRemoteUrl, zipFileName);
-                ABUnzip.Instance.BeginUnzip();
-            }));
-
+            LauncherEngine.Instance.StartCoroutine(MoveNativeFile());
             return true;
         }
 
@@ -93,14 +84,8 @@ namespace LCG
         /// <param name="handleState">处理句柄</param>
         public void CheckHotter(string versionId, string versionIdUrl, string resRemoteUrl, Action<ABHelper.VersionArgs> handleState)
         {
+            // 处理状态
             onHandleState = handleState;
-            if (ABHelper.IngoreHotfix)
-            {
-                onHandleState(new ABHelper.VersionArgs(ABHelper.EVersionState.HotfixComplete));
-                onHandleState = null;
-                return;
-            }
-
             // 资源远端地址
             ABVersion.RemoteUrlPrefix = resRemoteUrl;
             // 客户端初始版号
@@ -155,6 +140,10 @@ namespace LCG
         /// <returns></returns>
         public bool IsNeedGoStore(string versionNum = null)
         {
+            if (ABHelper.IngoreHotfix)
+            {
+                return false;
+            }
             VersionNum versionId;
             if (null == versionNum)
             {
@@ -183,6 +172,10 @@ namespace LCG
         /// <returns></returns>
         public bool IsNeedHotter(string versionNum = null)
         {
+            if (ABHelper.IngoreHotfix)
+            {
+                return false;
+            }
             VersionNum versionId;
             if (null == versionNum)
             {
@@ -309,47 +302,69 @@ namespace LCG
             HotfixComplete();
             yield return null;
         }
-        private IEnumerator MoveNativeFile(string name, Action action)
+        private IEnumerator MoveNativeFile()
         {
-            // 读
-            string from = ABHelper.StreamingAssetsPath() + name;
-            WWW www = new WWW(from);
-            while (!www.isDone)
-            {
-                if (!string.IsNullOrEmpty(www.error))
-                {
-                    HotterResult(false, www.error);
-                    yield break;
-                }
-                MovefileProcess(www.progress * 0.5f);
-                yield return null;
-            }
+            WWW native = new WWW(ABHelper.StreamingAssetsPath() + "native.txt");
+            yield return native;
 
-            // 写
-            string to = ABVersion.LocalStorgePath + "/" + name;
-            FileStream fs = new FileStream(to, FileMode.OpenOrCreate);
-            int offset = (int)fs.Length;
-            int total = www.bytes.Length - 1;
-            int interval = 10000000;
-            fs.Seek(offset, SeekOrigin.Current);
-            while (offset < total)
+            ABUnzip.Instance.InitUnzip();
+            ABUnzip.Instance.unzipResult = PrepareAssetsResult;
+            ABUnzip.Instance.unzipProcess = UnzipProcess;
+            string[] zipFiles = native.text.Replace("\n", "").Split('\r');
+            float length = zipFiles.Length;
+            float index = 0;
+            foreach (var v in zipFiles)
             {
-                if (total - offset < interval)
+                if (string.IsNullOrEmpty(v))
                 {
-                    interval = total - offset;
+                    continue;
                 }
-                fs.Write(www.bytes, offset, interval);
-                offset += interval;
-                MovefileProcess((offset / (float)total) * 0.5f + 0.5f);
-                yield return null;
-            }
-            fs.Flush();
-            fs.Dispose();
+                string[] zipInfo = v.Split(':');
 
-            if (null != action)
-            {
-                action.Invoke();
+                // 读
+                string from = ABHelper.StreamingAssetsPath() + zipInfo[0];
+                WWW zip = new WWW(from);
+                while (!zip.isDone)
+                {
+                    if (!string.IsNullOrEmpty(zip.error))
+                    {
+                        HotterResult(false, zip.error);
+                        yield break;
+                    }
+                    ;
+                    MovefileProcess((zip.progress * 0.5f + index) / length);
+                    yield return null;
+                }
+
+                // 写
+                string to = ABVersion.LocalStorgePath + "/" + zipInfo[0];
+                FileStream fs = new FileStream(to, FileMode.OpenOrCreate);
+                int offset = (int)fs.Length;
+                int total = zip.bytes.Length - 1;
+                int interval = 10000000;
+                fs.Seek(offset, SeekOrigin.Current);
+                while (offset < total)
+                {
+                    if (total - offset < interval)
+                    {
+                        interval = total - offset;
+                    }
+                    fs.Write(zip.bytes, offset, interval);
+                    offset += interval;
+                    MovefileProcess((((offset / (float)total) * 0.5f + 0.5f) + index) / length);
+                    yield return null;
+                }
+                index += 1;
+                fs.Flush();
+                fs.Dispose();
+
+                // 解压
+                string zipFileSuffix = zipInfo[0].Substring(zipInfo[0].LastIndexOf("."));
+                string zipFileName = zipInfo[0].Substring(0, zipInfo[0].LastIndexOf("."));
+                string zipFileRemoteUrl = string.Format("{0}/{1}{2}", ABVersion.LocalStorgePath, zipFileName, zipFileSuffix);
+                ABUnzip.Instance.CreateUnzipTask(ABVersion.LocalStorgePath, zipFileRemoteUrl, zipFileName, null, long.Parse(zipInfo[1]));
             }
+            ABUnzip.Instance.BeginUnzip();
         }
         private IEnumerator ShowDownloadInfo()
         {
@@ -370,9 +385,8 @@ namespace LCG
 
             // zipsize:10670:11727
             string[] split = www.text.Split(':');
-            int zipFileSize = int.Parse(split[1]);
-
-            //int unzipFileSize = int.Parse(split[2]);
+            long zipFileSize = long.Parse(split[1]);
+            long unzipFileSize = long.Parse(split[2]);
             // Debug.LogFormat("需要下载文件的大小:{0}，原文件大小:{1}", zipFileSize, unzipFileSize);
 
             // 下载弹框确认
@@ -402,7 +416,7 @@ namespace LCG
                     //"0-1"
                     //".zip"
                     //"0"
-                    ABDownload.Instance.CreateDownloadTask(zipFileRemoteUrl, ABVersion.LocalStorgePath, zipFileName, zipFileSuffix, zipFileSize, true);
+                    ABDownload.Instance.CreateDownloadTask(zipFileRemoteUrl, ABVersion.LocalStorgePath, zipFileName, zipFileSuffix, zipFileSize, true, unzipFileSize);
                     ABDownload.Instance.BeginDownload();
                 };
 
