@@ -51,23 +51,6 @@ namespace LCG
             LauncherEngine.Instance.StartCoroutine(ABLoad.Instance.Init(callback));
         }
         /// <summary>
-        /// 下载apk
-        /// </summary>
-        /// <param name="remoteUrl"></param>
-        /// <param name="apkName"></param>
-        /// <param name="apkSize"></param>
-        public void APKDownload(string remoteUrl, string apkName, int apkSize)
-        {
-            ABDownload.Instance.InitDownload();
-            ABDownload.Instance.downloadProcess = DownloadProcess;
-            ABDownload.Instance.downloadSpeed = DownloadSpeed;
-            ABDownload.Instance.downloadResult = APKDownloadResult;
-            string fileSuffix = apkName.Substring(apkName.LastIndexOf("."));
-            string fileName = apkName.Substring(0, apkName.LastIndexOf("."));
-            ABDownload.Instance.CreateDownloadTask(remoteUrl, Application.persistentDataPath, fileName, fileSuffix, apkSize, false);
-            ABDownload.Instance.BeginDownload();
-        }
-        /// <summary>
         /// 首次进入游戏
         /// </summary>
         public bool PrepareAssets(Action<ABHelper.VersionArgs> handleState)
@@ -88,10 +71,9 @@ namespace LCG
             // 当前版本
             onHandleState(new ABHelper.VersionArgs(ABHelper.EVersionState.ClientVersionId, ABVersion.OriginalVersionId.Id));
             // 移动文件
-            LauncherEngine.Instance.StartCoroutine(MoveNativeFile());
+            LauncherEngine.Instance.StartCoroutine(MoveNativeZipFile());
             return true;
         }
-
         /// <summary>
         /// 检测更新
         /// </summary>
@@ -149,6 +131,25 @@ namespace LCG
                     HotterResult(false, str);
                 }));
             }
+        }
+        /// <summary>
+        /// 下载apk
+        /// </summary>
+        /// <param name="remoteUrl"></param>
+        /// <param name="apkName"></param>
+        /// <param name="apkSize"></param>
+        public void APKDownload(string remoteUrl, string apkName, int apkSize)
+        {
+            string fileSuffix = apkName.Substring(apkName.LastIndexOf("."));
+            string fileName = apkName.Substring(0, apkName.LastIndexOf("."));
+            // 初始化下载
+            ABDownload.Instance.InitDownload();
+            ABDownload.Instance.downloadProcess = DownloadProcess;
+            ABDownload.Instance.downloadSpeed = DownloadSpeed;
+            ABDownload.Instance.downloadResult = APKDownloadResult;
+            ABDownload.Instance.CreateDownloadTask(remoteUrl, Application.persistentDataPath, fileName, fileSuffix, apkSize, false);
+            // 开始下载
+            ABDownload.Instance.BeginDownload();
         }
         /// <summary>
         /// 是否需要去商店更新
@@ -320,6 +321,38 @@ namespace LCG
             yield return null;
         }
         private IEnumerator MoveNativeFile()
+        {
+            WWW native = new WWW(ABHelper.StreamingAssetsPath() + "native.txt");
+            yield return native;
+
+            string[] files = native.text.Replace("\n", "").Split('\r');
+            float length = files.Length;
+            float index = 0;
+            foreach (var v in files)
+            {
+                if (string.IsNullOrEmpty(v))
+                {
+                    continue;
+                }
+                index++;
+
+                // 读
+                WWW file = new WWW(ABHelper.StreamingAssetsPath() + v);
+                yield return file;
+                if (!string.IsNullOrEmpty(file.error))
+                {
+                    PrepareAssetsResult(false, file.error);
+                    yield break;
+                }
+
+                // 写
+                ABHelper.WriteFileByBytes(ABVersion.LocalStorgePath + "/" + ABVersion.OriginalVersionId.Id3rd + "/" + v, file.bytes);
+                MovefileProcess(index / length);
+            }
+
+            PrepareAssetsResult(true);
+        }
+        private IEnumerator MoveNativeZipFile()
         {
             WWW native = new WWW(ABHelper.StreamingAssetsPath() + "native.txt");
             yield return native;
