@@ -81,7 +81,6 @@ namespace LCG
             bool unzipsuc = true;
             long unzipSize = 0;
             float zipfilesize = null == unzipFileSize ? (float)zipFileSize : (float)unzipFileSize; // fileStream.Length;
-            string tempFolder = localFolder + "/Temp/";
             string releaseFolder = localFolder + "/";
             string errorMsg = "";
             List<string> decompressfiles = new List<string>();
@@ -110,7 +109,7 @@ namespace LCG
                 }
 
                 // 文件存放位置
-                string fileName = tempFolder + theEntry.Name;
+                string fileName = releaseFolder + theEntry.Name;
                 string directoryName = ABHelper.GetFileFolderPath(fileName);
                 decompressfiles.Add(fileName);
                 if (!Directory.Exists(directoryName))
@@ -166,24 +165,6 @@ namespace LCG
             if (unzipsuc)
             {
                 UnzipProcess = 1;
-                foreach (var upfile in decompressfiles)
-                {
-                    string newfile = upfile.Replace(tempFolder, releaseFolder);
-                    if (File.Exists(newfile))
-                    {
-                        File.Delete(newfile);
-                    }
-                    string dir = Path.GetDirectoryName(newfile);
-                    if (!Directory.Exists(dir))
-                    {
-                        Directory.CreateDirectory(dir);
-                    }
-                    File.Move(upfile, newfile);
-                }
-                if (Directory.Exists(tempFolder))
-                {
-                    Directory.Delete(tempFolder, true);
-                }
                 if (null != unzipComplete)
                 {
                     unzipComplete();
@@ -265,7 +246,7 @@ namespace LCG
             unzipTaskList.Add(_zipFilePath, task);
             zipCount = unzipTaskList.Count;
             zipZone = (int)(1 / (float)zipCount * 10000) * 0.0001f;
-            
+
             return true;
         }
         public void BeginUnzip()
