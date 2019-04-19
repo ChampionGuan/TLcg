@@ -42,12 +42,12 @@ namespace LCG
         }
 
         /// <summary>
-        /// 下载apk
+        /// 检测apk
         /// </summary>
         /// <returns></returns>
-        public void APKDownload(string remoteUrl, string apkName, int apkSize)
+        public void CheckApk(string remoteUrl, string apkName)
         {
-            ABCheck.Instance.APKDownload(remoteUrl, apkName, apkSize);
+            ABCheck.Instance.CheckApk(remoteUrl, apkName);
         }
 
         /// <summary>

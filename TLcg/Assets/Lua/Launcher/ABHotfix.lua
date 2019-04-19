@@ -135,6 +135,25 @@ local function RemoteUrl()
     return url
 end
 
+local function ApkName(str)
+    local list = {}
+    string.gsub(
+        str,
+        "[^.]+",
+        function(w)
+            table.insert(list, w)
+        end
+    )
+
+    if #list > 1 then
+        return "tlcg_v" .. list[1] .. "." .. list[2]
+    elseif #list > 0 then
+        return "tlcg_v" .. list[1] .. ".0"
+    elseif #list > 0 then
+        return "tlcg_v0.0"
+    end
+end
+
 local function DownloadSize(value)
     if value <= 0 then
         return "0K"
@@ -211,12 +230,18 @@ local function HotfixHandle(value)
             return
         end
 
-        -- 登陆服地址
-        Common.LoginInfo.LoginAddr = decode.LoginAddr
-        -- 热更新地址
-        Common.LoginInfo.HotAddr = decode.HotAddr .. "/"
         -- 客户端版本号
         Common.LoginInfo.ResVersion = decode.ClientVersion
+        -- 登陆服地址
+        Common.LoginInfo.LoginAddr = decode.LoginAddr
+        -- 客户端地址
+        Common.LoginInfo.ClientAddr = decode.ClientAddr .. "/"
+        -- 热更新地址
+        Common.LoginInfo.HotAddr = decode.ClientAddr .. "/hot/"
+        -- apk地址
+        Common.LoginInfo.ApkAddr = decode.ClientAddr .. "/release/"
+        -- apkName
+        Common.LoginInfo.ApkName = ApkName(decode.ClientVersion)
         -- true表示没有注册
         Common.LoginInfo.HaveNotRegister = decode.HaveNotRegister
         -- true表示有ip输入框
@@ -225,14 +250,11 @@ local function HotfixHandle(value)
         Common.LoginInfo.LoginMode = decode.LoginMode
 
         -- 此服需要的版号
-        -- if not CSharp.ABHelper.VersionNumMatch(Common.LoginInfo.ResVersion) then
-        --     value.callBack(Common.Version.OriginalResVersion .. " " .. Common.LoginInfo.HotAddr)
-        -- else
-        --     value.callBack(Common.LoginInfo.ResVersion .. " " .. Common.LoginInfo.HotAddr)
-        -- end
-
-        -- 测试用，搭建本地http服，使用hfs.exe测试
-        value.callBack("0.0.0.0" .. " " .. "http://192.168.1.110:100/ab_TLcg/")
+        if not CSharp.ABHelper.VersionNumMatch(Common.LoginInfo.ResVersion) then
+            value.callBack(Common.Version.OriginalResVersion .. " " .. Common.LoginInfo.HotAddr)
+        else
+            value.callBack(Common.LoginInfo.ResVersion .. " " .. Common.LoginInfo.HotAddr)
+        end
         return
     end
 
@@ -240,24 +262,17 @@ local function HotfixHandle(value)
     if value.state == CSharp.EVersionState.APKDownloadComplete then
         -- 拉起安装
         -- 成功后，清理一波内存
+        -- apk本地路径
+        -- CSharp.ABHelper.ApkLocalPath .. Common.LoginInfo.ApkName .. ".apk"
         print("apk下载完成！拉起安装面板！！")
-        CSharp.LauncherEngine.Instance:ABClear()
         return
     end
 
     -- 需要更新大版本
     if value.state == CSharp.EVersionState.NeedGoStore then
-        ShowPopupUI(true)
-        AddBtnEvent(
-            m_popupUI.BtnConfirm,
-            function()
-                m_downloadSize = DownloadSize(100)
-                CSharp.LauncherEngine.Instance:APKDownload("http://192.168.1.110:100/test.apk", "test.apk", 100)
-            end
-        )
-        AddBtnEvent(m_popupUI.BtnCancel, QuitApp)
-        m_popupUI.Desc.text = Config.Tips.Tip_11
-        m_popupUI.BtnState.selectedIndex = 3
+        -- 如果是安卓，直接下载
+        CSharp.LauncherEngine.Instance:CheckApk(Common.LoginInfo.ApkAddr, Common.LoginInfo.ApkName)
+        -- 如果是ios，拉起appstore
         return
     end
 

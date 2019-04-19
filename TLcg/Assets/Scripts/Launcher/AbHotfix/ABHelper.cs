@@ -156,6 +156,14 @@ namespace LCG
                 return Application.persistentDataPath + "/version";
             }
         }
+        public static string ApkLocalPath
+        {
+            get
+            {
+                // return Application.persistentDataPath;
+                return Application.persistentDataPath + "/";
+            }
+        }
         public static string EncryptKey
         {
             get

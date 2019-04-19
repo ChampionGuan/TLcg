@@ -133,23 +133,18 @@ namespace LCG
             }
         }
         /// <summary>
-        /// 下载apk
+        /// 检测apk
         /// </summary>
         /// <param name="remoteUrl"></param>
-        /// <param name="apkName"></param>
-        /// <param name="apkSize"></param>
-        public void APKDownload(string remoteUrl, string apkName, int apkSize)
+        public void CheckApk(string remoteUrl, string apkName)
         {
-            string fileSuffix = apkName.Substring(apkName.LastIndexOf("."));
-            string fileName = apkName.Substring(0, apkName.LastIndexOf("."));
-            // 初始化下载
-            ABDownload.Instance.InitDownload();
-            ABDownload.Instance.downloadProcess = DownloadProcess;
-            ABDownload.Instance.downloadSpeed = DownloadSpeed;
-            ABDownload.Instance.downloadResult = APKDownloadResult;
-            ABDownload.Instance.CreateDownloadTask(remoteUrl, Application.persistentDataPath, fileName, fileSuffix, apkSize, false);
-            // 开始下载
-            ABDownload.Instance.BeginDownload();
+            // 网络不可达检测
+            if (Application.internetReachability == NetworkReachability.NotReachable)
+            {
+                onHandleState(new ABHelper.VersionArgs(ABHelper.EVersionState.Unreachable));
+                return;
+            }
+            LauncherEngine.Instance.StartCoroutine(ShowApkDownloadInfo(remoteUrl, apkName));
         }
         /// <summary>
         /// 是否需要去商店更新
@@ -313,7 +308,7 @@ namespace LCG
                 // 客户端最新版本
                 HotterVersionNum();
                 // 开始热更
-                LauncherEngine.Instance.StartCoroutine(ShowDownloadInfo());
+                LauncherEngine.Instance.StartCoroutine(ShowHotterDownloadInfo());
                 yield break;
             }
 
@@ -416,7 +411,68 @@ namespace LCG
             }
             ABUnzip.Instance.BeginUnzip();
         }
-        private IEnumerator ShowDownloadInfo()
+        private IEnumerator ShowApkDownloadInfo(string remoteUrl, string apkName)
+        {
+            Debug.Log("路径：" + remoteUrl + apkName + ".ini");
+            WWW www = new WWW(remoteUrl + apkName + ".ini");
+            yield return www;
+
+            // 下载异常处理
+            if (!string.IsNullOrEmpty(www.error))
+            {
+                APKDownloadResult(false, www.error);
+                yield break;
+            }
+
+            long fileSize = long.Parse(www.text.Replace("\n", "").Replace("\r", ""));
+            // Debug.LogFormat("需要下载文件的大小:{0}", fileSize);
+
+            // 文件已下载
+            if (File.Exists(ABHelper.ApkLocalPath + apkName + ".apk"))
+            {
+                FileInfo file = new FileInfo(ABHelper.ApkLocalPath + apkName + ".apk");
+                if (file.Length == fileSize)
+                {
+                    APKDownloadResult(true);
+                    yield break;
+                }
+            }
+
+            // 下载弹框确认
+            onHandleState(new ABHelper.VersionArgs(ABHelper.EVersionState.DownloadConfirm, fileSize, (str) =>
+            {
+                Action download = () =>
+                {
+                    // 初始进度
+                    DownloadProcess(0);
+
+                    // 初始化
+                    ABDownload.Instance.InitDownload();
+                    // 注册下载事件
+                    ABDownload.Instance.downloadProcess = DownloadProcess;
+                    ABDownload.Instance.downloadSpeed = DownloadSpeed;
+                    ABDownload.Instance.downloadResult = APKDownloadResult;
+                    ABDownload.Instance.CreateDownloadTask(remoteUrl + apkName + ".apk", ABHelper.ApkLocalPath, apkName, ".apk", fileSize, false);
+                    ABDownload.Instance.BeginDownload();
+                };
+
+                // 检测是否为移动数据
+                if (Application.internetReachability != NetworkReachability.ReachableViaLocalAreaNetwork)
+                {
+                    // wifi状态检测
+                    onHandleState(new ABHelper.VersionArgs(ABHelper.EVersionState.DownloadWifi, (str2) =>
+                    {
+                        download();
+                    }
+                    ));
+                }
+                else
+                {
+                    download();
+                }
+            }));
+        }
+        private IEnumerator ShowHotterDownloadInfo()
         {
             // 需要下载文件的大小
             string httpFileName = string.Format("{0}-{1}", id3rd, ABVersion.ServerVersionId.Id3rd);
@@ -426,7 +482,7 @@ namespace LCG
             yield return www;
 
             // 下载异常处理
-            if (null != www.error)
+            if (!string.IsNullOrEmpty(www.error))
             {
                 // Debug.LogFormat("sizeInfo 文件下载失败：", www.error);
                 HotterResult(false, www.error);
