@@ -17,7 +17,6 @@ namespace LCG
         static string m_productName = "tlcg";
         static string m_companyName = "champion";
         static string m_appIdentifier = "com.champion.tlcg";
-        static string m_versionNum = "0.0.0.0";
         static string m_scriptingDefineSymbols = "HOTFIX_ENABLE;";
         static string m_dataPathPrefix = Application.dataPath + "/";
         static string m_luaResourceFolderPath = m_dataPathPrefix + "Lua/";
@@ -48,16 +47,6 @@ namespace LCG
 #elif UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX
             m_luajitExePath = m_luajitWorkingPath + "luajit";
 #endif
-
-            m_versionNum = Resources.Load<TextAsset>("versionId").text.Replace("\r", "");
-            if (!ABHelper.VersionNumMatch(m_versionNum))
-            {
-                Debug.LogError("请检查版号文件是否异常！！");
-                return;
-            }
-            string[] version = ABHelper.VersionNumSplit(m_versionNum);
-            m_versionNum = ABHelper.VersionNumCombine(version[0], (int.Parse(version[1]) + 1).ToString(), version[2], version[3]);
-
             m_editorWindow = EditorWindow.GetWindow(typeof(BuildAppSteps), true, "打包");
         }
 
@@ -97,9 +86,6 @@ namespace LCG
             }
             EditorGUILayout.Space();
 
-            m_versionNum = GUILayout.TextField(m_versionNum);
-            EditorGUILayout.Space();
-
             if (GUILayout.Button("Build"))
             {
                 switch (platform)
@@ -120,15 +106,6 @@ namespace LCG
             try
             {
                 Debug.Log("开始预处理过程...");
-
-                if (!ABHelper.VersionNumMatch(m_versionNum))
-                {
-                    throw new Exception("版号异常！！");
-                }
-                else
-                {
-                    ABHelper.WriteFile(Application.dataPath + "/Resources/" + ABHelper.OriginalVersionName, m_versionNum);
-                }
                 AssetDatabase.Refresh();
 
                 // 场景
@@ -248,6 +225,9 @@ namespace LCG
             PlayerSettings.applicationIdentifier = m_appIdentifier;
             PlayerSettings.SetScriptingDefineSymbolsForGroup(m_buildTargetGroup, m_scriptingDefineSymbols);
             PlayerSettings.SetArchitecture(m_buildTargetGroup, 2);
+
+            VersionNum versionNum = new VersionNum(ABHelper.ReadVersionIdFile()[0]);
+            PlayerSettings.bundleVersion = versionNum.Id;
 
             if (isDebug)
             {

@@ -192,11 +192,11 @@ namespace LCG
             get
             {
 #if UNITY_ANDROID
-                return string.Format("{0}{1}/{2}/", RemoteUrlPrefix, ABHelper.AndroidPlatform, ServerVersionId.Id1A2);
+                return string.Format("{0}{1}/{2}/{3}/", RemoteUrlPrefix, ABHelper.ABFolderRoot, ABHelper.AndroidPlatform, ServerVersionId.Id1A2);
 #elif UNITY_IPHONE || UNITY_IOS
-                return string.Format("{0}{1}/{2}/", RemoteUrlPrefix, ABHelper.IosPlatform, ServerVersionId.Id1A2);
+                return string.Format("{0}{1}/{2}/{3}/", RemoteUrlPrefix, ABHelper.ABFolderRoot, ABHelper.IosPlatform, ServerVersionId.Id1A2);
 #else
-                return string.Format("{0}{1}/{2}/", RemoteUrlPrefix, ABHelper.WinPlatform, ServerVersionId.Id1A2);
+                return string.Format("{0}{1}/{2}/{3}/", RemoteUrlPrefix, ABHelper.ABFolderRoot, ABHelper.WinPlatform, ServerVersionId.Id1A2);
 #endif
             }
         }
@@ -204,7 +204,7 @@ namespace LCG
         {
             get
             {
-                return string.Format("{0}/{1}/", RemoteUrlPlatform, "HotterZip");
+                return string.Format("{0}{1}/", RemoteUrlPlatform, "HotterZip");
             }
         }
         // 保存地址
@@ -212,7 +212,6 @@ namespace LCG
         {
             get; private set;
         }
-
         // 初始的版本号
         public static VersionNum OriginalVersionId
         {
@@ -266,15 +265,12 @@ namespace LCG
                 Directory.CreateDirectory(ABHelper.AppTempCachePath);
             }
 
-            // 本地发包时的版本号
-            TextAsset resInfo = Resources.Load<TextAsset>(ABHelper.GetFileNameWithoutSuffix(ABHelper.OriginalVersionName));
-            if (null == resInfo)
-            {
-                throw new Exception("本地资源版本号不可为空！！！");
-            }
+            // 版号信息
+            List<string> version = ABHelper.ReadVersionIdFile();
+            OriginalVersionId = new VersionNum(version[0]);
+            ABHelper.ABFolderRoot = version[1];
+            ABHelper.ApkFolderRoot = version[2];
 
-            // 初始时的版号
-            OriginalVersionId = new VersionNum(resInfo.text.Replace("\r", ""));
             // 当前版号第三位在初始时-1（mini包）
             CurVersionId = new VersionNum(OriginalVersionId.Id1st, OriginalVersionId.Id2nd, OriginalVersionId.Id3rd - 1, OriginalVersionId.Id4th);
 

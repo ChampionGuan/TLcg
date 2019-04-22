@@ -40,20 +40,13 @@ namespace LCG
         }
         private static string RootFolderNmae()
         {
-            string path = Application.dataPath;
-            path = path.Substring(0, path.LastIndexOf("/"));
-            path = "ab_" + path.Substring(path.LastIndexOf("/") + 1);
-            return path;
+            List<string> version = ABHelper.ReadVersionIdFile();
+            return version[1];
         }
         private static string[] ParseTheVersion()
         {
-            TextAsset resInfo = Resources.Load<TextAsset>("versionId");
-            string[] versionNum = new string[4] { "0", "0", "0", "0" };
-            if (null != resInfo)
-            {
-                versionNum = ABHelper.VersionNumSplit(resInfo.text.Replace("\r", ""));
-            }
-            return versionNum;
+            List<string> version = ABHelper.ReadVersionIdFile();
+            return ABHelper.VersionNumSplit(version[0]);
         }
         private static void BuildZip(string platformName)
         {
@@ -77,8 +70,7 @@ namespace LCG
             // 增
             string rootPath = RootFolderNmae();
             string[] versionNum = ParseTheVersion();
-            int versionNum2nd = int.Parse(versionNum[2]);
-            string path = string.Format("{0}/../{1}/{2}/{3}.{4}/HotterZip/{5}-{6}/{7}", Application.dataPath, rootPath, platformName, versionNum[0], versionNum[1], (versionNum2nd - 1), versionNum2nd, versionNum2nd);
+            string path = string.Format("{0}/../../../assetBundle/{1}/{2}/{3}.{4}/HotterZip/{5}-{6}/{7}", Application.dataPath, rootPath, platformName, versionNum[0], versionNum[1], -1, versionNum[2], versionNum[2]);
             if (!Directory.Exists(path))
             {
                 Debug.LogError("路径不存在：" + path);
@@ -94,10 +86,32 @@ namespace LCG
             string versionpath = null;
             List<string> zipList = new List<string>();
             List<string> files = ABHelper.GetAllFilesPathInDir(path);
+            Dictionary<string, string> versionInfo = ReadVersionFile(path + "/version.ini");
             StringBuilder zipTxt = new StringBuilder();
             int length = files.Count;
+            string name1 = "";
+            string path1 = "";
             for (int i = 0; i < length; i++)
             {
+                // 过滤 ui，lua和audio文件
+                path1 = files[i].Replace("\\", "/");
+                name1 = ABHelper.GetFileName(path1);
+                if (versionInfo.ContainsKey(name1))
+                {
+                    if (versionInfo[name1].StartsWith("lua/"))
+                    {
+                        continue;
+                    }
+                    if (versionInfo[name1].StartsWith("ui/"))
+                    {
+                        continue;
+                    }
+                    if (versionInfo[name1].StartsWith("audio/"))
+                    {
+                        continue;
+                    }
+                }
+
                 // version.ini 放置尾包！！
                 if (i != length - 1 && files[i].EndsWith("version.ini"))
                 {
@@ -117,12 +131,12 @@ namespace LCG
                     zipList.Add(versionpath);
                 }
 
-                // 50m
+                // 50m一个压缩包
                 if (bytesLen > 50 * 1024 * 1024 || i == length - 1)
                 {
-                    string name = "native_" + index + ".zip";
-                    zipTxt.AppendLine(name + ":" + bytesLen);
-                    ABHelper.ZipFile(zipList, Application.streamingAssetsPath + "/" + name, versionNum2nd.ToString() + "/");
+                    string zip = "native_" + index + ".zip";
+                    zipTxt.AppendLine(zip + ":" + bytesLen);
+                    ABHelper.ZipFile(zipList, Application.streamingAssetsPath + "/" + zip, versionNum[2] + "/");
                     index++;
                     bytesLen = 0;
                     zipList.Clear();
@@ -156,8 +170,7 @@ namespace LCG
             // 增
             string rootPath = RootFolderNmae();
             string[] versionNum = ParseTheVersion();
-            int versionNum2nd = int.Parse(versionNum[2]);
-            string path = string.Format("{0}/../{1}/{2}/{3}.{4}/HotterZip/{5}-{6}/{7}", Application.dataPath, rootPath, platformName, versionNum[0], versionNum[1], (versionNum2nd - 1), versionNum2nd, versionNum2nd);
+            string path = string.Format("{0}/../../../assetBundle/{1}/{2}/{3}.{4}/HotterZip/{5}-{6}/{7}", Application.dataPath, rootPath, platformName, versionNum[0], versionNum[1], -1, versionNum[2], versionNum[2]);
             if (!Directory.Exists(path))
             {
                 Debug.LogError("路径不存在：" + path);
@@ -167,7 +180,7 @@ namespace LCG
             {
                 Directory.CreateDirectory(Application.streamingAssetsPath);
             }
-
+            Dictionary<string, string> versionInfo = ReadVersionFile(path + "/version.ini");
             List<string> files = ABHelper.GetAllFilesPathInDir(path);
             StringBuilder txt = new StringBuilder();
             string name1 = "";
@@ -175,8 +188,25 @@ namespace LCG
             string path2 = "";
             foreach (var v in files)
             {
+                // 过滤 ui，lua和audio文件
                 path1 = v.Replace("\\", "/");
                 name1 = ABHelper.GetFileName(path1);
+                if (versionInfo.ContainsKey(name1))
+                {
+                    if (versionInfo[name1].StartsWith("lua/"))
+                    {
+                        continue;
+                    }
+                    if (versionInfo[name1].StartsWith("ui/"))
+                    {
+                        continue;
+                    }
+                    if (versionInfo[name1].StartsWith("audio/"))
+                    {
+                        continue;
+                    }
+                }
+
                 path2 = Application.streamingAssetsPath + "/" + name1;
                 File.Copy(path1, path2, true);
 
@@ -193,6 +223,36 @@ namespace LCG
             AssetDatabase.Refresh();
 
             Debug.Log("streamingAssets文件生成成功！！文件源路径：" + path);
+        }
+        private static Dictionary<string, string> ReadVersionFile(string filePath)
+        {
+            Dictionary<string, string> versionInfo = new Dictionary<string, string>();
+
+            // 暂时不过滤文件！！
+            return versionInfo;
+
+            byte[] versionbytes = ABHelper.ReadFileToBytes(filePath);
+            if (null == versionbytes)
+            {
+                return versionInfo;
+            }
+
+            ABHelper.Encrypt(ref versionbytes); //RC4 加密文件
+            string versionTxt = Encoding.UTF8.GetString(versionbytes);
+
+            if (!string.IsNullOrEmpty(versionTxt))
+            {
+                //ui/tips.ab:ba2de82e3fc42e750d317b133096dfea:0:22455:fa7917d4974436b1214dc313fccda2a5
+                //路径：内容md5：版号：size：路径md5
+                string[] split = versionTxt.Split('\r');
+                foreach (string k in split)
+                {
+                    string[] split2 = k.Split(':');
+                    versionInfo.Add(split2[4], split2[0]);
+                }
+            }
+
+            return versionInfo;
         }
     }
 }

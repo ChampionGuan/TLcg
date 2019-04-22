@@ -24,29 +24,50 @@ namespace LCG
         private static List<string> BundleFilePath = new List<string>();
 
         private static string[] TheVersionNum = new string[4] { "0", "0", "0", "0" };
-        private static string TheRootFolderName = "ab_tlcg";
+        private static string TheRootFolderName = "tlcg";
+        private static string TheApkFolderName = "tlcg";
 
         [MenuItem("Tools/资源打包优化版")]
-        public static void OpenBundlePackerWindow()
+        public static void Build()
         {
             RootFolderNmae();
             ParseTheVersion();
             FileBundleList();
             TheWindow = EditorWindow.GetWindow(typeof(ABPacker), true, "资源打包优化版");
         }
+        public static void BuildWinPacker()
+        {
+            RootFolderNmae();
+            ParseTheVersion();
+            FileBundleList();
+            BuildPacker(BuildTarget.StandaloneWindows);
+        }
+        public static void BuildIosPacker()
+        {
+            RootFolderNmae();
+            ParseTheVersion();
+            FileBundleList();
+            BuildPacker(BuildTarget.iOS);
+        }
+        public static void BuildAndroidPacker()
+        {
+            RootFolderNmae();
+            ParseTheVersion();
+            FileBundleList();
+            BuildPacker(BuildTarget.Android);
+        }
         private static void RootFolderNmae()
         {
-            TheRootFolderName = Application.dataPath;
-            TheRootFolderName = TheRootFolderName.Substring(0, TheRootFolderName.LastIndexOf("/"));
-            TheRootFolderName = "ab_" + TheRootFolderName.Substring(TheRootFolderName.LastIndexOf("/") + 1);
+            // TheRootFolderName = Application.dataPath;
+            // TheRootFolderName = TheRootFolderName.Substring(0, TheRootFolderName.LastIndexOf("/"));
+            // TheRootFolderName = TheRootFolderName.Substring(TheRootFolderName.LastIndexOf("/") + 1);
         }
         private static void ParseTheVersion()
         {
-            TextAsset resInfo = Resources.Load<TextAsset>("versionId");
-            if (null != resInfo)
-            {
-                TheVersionNum = ABHelper.VersionNumSplit(resInfo.text.Replace("\r", ""));
-            }
+            List<string> version = ABHelper.ReadVersionIdFile();
+            TheVersionNum = ABHelper.VersionNumSplit(version[0]);
+            TheRootFolderName = version[1];
+            TheApkFolderName = version[2];
         }
         private static void SaveTheVersion()
         {
@@ -56,7 +77,7 @@ namespace LCG
                 Debug.LogError("资源单号错误！！！！！");
             }
             string version = ABHelper.VersionNumCombine(TheVersionNum[0], TheVersionNum[1], TheVersionNum[2], TheVersionNum[3]);
-            ABHelper.WriteFile(Application.dataPath + "/Resources/" + ABHelper.OriginalVersionName, version);
+            ABHelper.WriteVersionIdFile(version, TheRootFolderName, TheApkFolderName);
         }
 
         private static void FileBundleList()
@@ -145,15 +166,15 @@ namespace LCG
 
             if (GUILayout.Button("生成 Win 资源包"))
             {
-                BuildWinPacker();
+                BuildPacker(BuildTarget.StandaloneWindows);
             }
             if (GUILayout.Button("生成 ios 资源包"))
             {
-                BuildIosPacker();
+                BuildPacker(BuildTarget.iOS);
             }
             if (GUILayout.Button("生成 android 资源包"))
             {
-                BuildAndroidPacker();
+                BuildPacker(BuildTarget.Android);
             }
         }
         #endregion
@@ -336,7 +357,7 @@ namespace LCG
             }
 
             // 创建平台文件夹
-            PlatformABExportPath = string.Format("{0}/../{1}/{2}/{3}.{4}", Application.dataPath, TheRootFolderName, platformName, TheVersionNum[0], TheVersionNum[1]);
+            PlatformABExportPath = string.Format("{0}/../../../assetBundle/{1}/{2}/{3}.{4}", Application.dataPath, TheRootFolderName, platformName, TheVersionNum[0], TheVersionNum[1]);
             if (!Directory.Exists(PlatformABExportPath))
             {
                 Directory.CreateDirectory(PlatformABExportPath);
@@ -548,6 +569,10 @@ namespace LCG
                 {
                     sbb = sb.ToString().Substring(0, 1500);
                     sbb = sbb + "......";
+                }
+                else
+                {
+                    sbb = sb.ToString();
                 }
                 if (EditorUtility.DisplayDialog("提示", "检测到有cs等脚本的更新！！\n “停止”则中断打包，“忽略”则继续。如下：\n" + sbb, "停止", "忽略"))
                 {
@@ -813,18 +838,7 @@ namespace LCG
             Debug.Log("处理结束：" + System.DateTime.Now.ToString());
             EditorUtility.DisplayDialog("提示", "打包已完成！！", "ok");
         }
-        private static void BuildWinPacker()
-        {
-            BuildPacker(BuildTarget.StandaloneWindows);
-        }
-        private static void BuildIosPacker()
-        {
-            BuildPacker(BuildTarget.iOS);
-        }
-        private static void BuildAndroidPacker()
-        {
-            BuildPacker(BuildTarget.Android);
-        }
+
         #endregion
     }
 }

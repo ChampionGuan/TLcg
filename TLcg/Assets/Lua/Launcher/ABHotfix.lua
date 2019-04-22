@@ -135,25 +135,6 @@ local function RemoteUrl()
     return url
 end
 
-local function ApkName(str)
-    local list = {}
-    string.gsub(
-        str,
-        "[^.]+",
-        function(w)
-            table.insert(list, w)
-        end
-    )
-
-    if #list > 1 then
-        return "tlcg_v" .. list[1] .. "." .. list[2]
-    elseif #list > 0 then
-        return "tlcg_v" .. list[1] .. ".0"
-    elseif #list > 0 then
-        return "tlcg_v0.0"
-    end
-end
-
 local function DownloadSize(value)
     if value <= 0 then
         return "0K"
@@ -230,6 +211,10 @@ local function HotfixHandle(value)
             return
         end
 
+        -- -- 测试代码！！
+        -- decode.ClientVersion = "0.0.1"
+        -- decode.ClientAddr = "http://192.168.1.110:100/2_champion/"
+
         -- 客户端版本号
         Common.LoginInfo.ResVersion = decode.ClientVersion
         -- 登陆服地址
@@ -237,11 +222,11 @@ local function HotfixHandle(value)
         -- 客户端地址
         Common.LoginInfo.ClientAddr = decode.ClientAddr .. "/"
         -- 热更新地址
-        Common.LoginInfo.HotAddr = decode.ClientAddr .. "/hot/"
+        Common.LoginInfo.HotAddr = decode.ClientAddr .. "/assetBundle/"
         -- apk地址
-        Common.LoginInfo.ApkAddr = decode.ClientAddr .. "/release/"
+        Common.LoginInfo.ApkAddr = decode.ClientAddr .. "/release/" .. CSharp.ABHelper.ApkFolderRoot .. "/"
         -- apkName
-        Common.LoginInfo.ApkName = ApkName(Common.LoginInfo.ResVersion)
+        Common.LoginInfo.ApkName = "tlcg_v" .. decode.ClientVersion
         -- true表示没有注册
         Common.LoginInfo.HaveNotRegister = decode.HaveNotRegister
         -- true表示有ip输入框

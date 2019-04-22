@@ -85,6 +85,14 @@ namespace LCG
         {
             get; set;
         }
+        public static string ABFolderRoot
+        {
+            get; set;
+        }
+        public static string ApkFolderRoot
+        {
+            get; set;
+        }
         public static string AndroidPlatform
         {
             get
@@ -142,13 +150,6 @@ namespace LCG
             }
 
         }
-        public static string OriginalVersionName
-        {
-            get
-            {
-                return "versionId.bytes";
-            }
-        }
         public static string AppTempCachePath
         {
             get
@@ -174,8 +175,14 @@ namespace LCG
         }
         public static bool VersionNumMatch(string value)
         {
-            // 1.1.1.1
-            return System.Text.RegularExpressions.Regex.IsMatch(value, @"\S+\.\d+\.\d+\.\d{1,}$");
+            // v1.1.1
+            bool result = System.Text.RegularExpressions.Regex.IsMatch(value, @"\S+\.\d+\.\d+\.\d{1,}$");
+            if (!result)
+            {
+                // v1.1.1.1
+                result = System.Text.RegularExpressions.Regex.IsMatch(value, @"\S+\.\d+\.\d{1,}$");
+            }
+            return result;
         }
         public static string[] VersionNumSplit(string value)
         {
@@ -310,6 +317,35 @@ namespace LCG
             byte[] data = Encoding.UTF8.GetBytes(value);
 
             return BuildMD5ByBytes(data);
+        }
+        public static List<string> ReadVersionIdFile()
+        {
+            List<string> list = new List<string>();
+            TextAsset resInfo = Resources.Load<TextAsset>("versionId");
+            string[] sb = resInfo.text.Replace("\r", "").Split('\n');
+            string[] sb1;
+            for (int i = 0; i < sb.Length; i++)
+            {
+                sb1 = sb[i].Split('=');
+                if (sb1[0] == "ResVersion" || sb1[0] == "ABFolderRoot" || sb1[0] == "ApkFolderRoot")
+                {
+                    list.Add(sb1[1]);
+                }
+            }
+            if (list.Count < 3)
+            {
+                Debug.LogError("versionId.bytes error!!");
+            }
+            return list;
+        }
+        public static void WriteVersionIdFile(string version, string abRoot, string apkRoot)
+        {
+            string path = Application.dataPath + "/Resources/versionId.bytes";
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine("ResVersion=" + version);
+            sb.AppendLine("ABFolderRoot=" + abRoot);
+            sb.AppendLine("ApkFolderRoot=" + apkRoot);
+            ABHelper.WriteFile(path, sb.ToString().TrimEnd());
         }
         public static void WriteVersionNumFile(string filePath, string num)
         {
