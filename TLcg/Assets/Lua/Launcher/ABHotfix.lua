@@ -241,7 +241,7 @@ local function HotfixHandle(value)
         -- apk地址
         Common.LoginInfo.ApkAddr = decode.ClientAddr .. "/release/"
         -- apkName
-        Common.LoginInfo.ApkName = ApkName(decode.ClientVersion)
+        Common.LoginInfo.ApkName = ApkName(Common.LoginInfo.ResVersion)
         -- true表示没有注册
         Common.LoginInfo.HaveNotRegister = decode.HaveNotRegister
         -- true表示有ip输入框
@@ -273,6 +273,17 @@ local function HotfixHandle(value)
         -- 如果是安卓，直接下载
         CSharp.LauncherEngine.Instance:CheckApk(Common.LoginInfo.ApkAddr, Common.LoginInfo.ApkName)
         -- 如果是ios，拉起appstore
+        return
+    end
+
+    -- 下载apk文件大小确认
+    if value.state == CSharp.EVersionState.DownloadAPKConfirm then
+        m_downloadSize = DownloadSize(value.fValue)
+        ShowPopupUI(true)
+        AddBtnEvent(m_popupUI.BtnConfirm, value.callBack)
+        AddBtnEvent(m_popupUI.BtnCancel, QuitApp)
+        m_popupUI.Desc.text = string.format(Config.Tips.Tip_3, m_downloadSize)
+        m_popupUI.BtnState.selectedIndex = 1
         return
     end
 

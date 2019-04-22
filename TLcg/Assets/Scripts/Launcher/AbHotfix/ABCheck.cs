@@ -439,7 +439,7 @@ namespace LCG
             }
 
             // 下载弹框确认
-            onHandleState(new ABHelper.VersionArgs(ABHelper.EVersionState.DownloadConfirm, fileSize, (str) =>
+            onHandleState(new ABHelper.VersionArgs(ABHelper.EVersionState.DownloadAPKConfirm, fileSize, (str) =>
             {
                 Action download = () =>
                 {

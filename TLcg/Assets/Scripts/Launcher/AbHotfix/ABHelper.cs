@@ -25,6 +25,7 @@ namespace LCG
             ClientVersionId,
             CheckLocalVersion,
             CheckLocalVersionOver,
+            DownloadAPKConfirm,
             DownloadConfirm,
             DownloadWifi,
             DownloadSpeed,
@@ -246,6 +247,16 @@ namespace LCG
                     break;
             }
             return path;
+        }
+        public static bool InstallApk(string path)
+        {
+#if UNITY_ANDROID
+            AndroidJavaObject m_javaObject = new AndroidJavaObject("com.client.ClientClass");
+            m_javaObject.Call("InstallApk", path);
+            return true;
+#else
+            return false;
+#endif
         }
         public static string BuildMD5ByFile(string filePath)
         {
