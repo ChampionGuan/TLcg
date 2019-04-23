@@ -8,48 +8,189 @@ namespace LCG
 {
     public class ABOriginal : EditorWindow
     {
-        [MenuItem("Tools/生成StreamingAssets路径下资源包/android")]
-        public static void BuildAndroid()
+        private static EditorWindow TheWindow = null;
+        private static string AssetFolder = "Assets/";
+        private static string ResFolder = "Assets/Resources/";
+        private static List<string> DoNotRemove = new List<string>(new string[] { "Lua", "UI", "Audio", "Video" });
+        private static List<string> AssetFilePath = new List<string>(new string[] { "Scenes", "Lua" });
+        private static List<string> ResourcesFilePath = new List<string>();
+
+        private static string[] TheVersionNum = new string[4] { "0", "0", "0", "0" };
+        private static string TheRootFolderName = "tlcg";
+        private static string TheApkFolderName = "tlcg";
+
+        [MenuItem("Tools/资源打包前处理")]
+        public static void Build()
         {
-            Build(ABHelper.AndroidPlatform);
+            RootFolderNmae();
+            ParseTheVersion();
+            FilesFilter();
+            TheWindow = EditorWindow.GetWindow(typeof(ABOriginal), true, "打包前的资源处理");
         }
-        [MenuItem("Tools/生成StreamingAssets路径下资源包/ios")]
-        public static void BuildIos()
+        void OnGUI()
         {
-            Build(ABHelper.IosPlatform);
+            EditorGUILayout.Space();
+            GUILayout.Label("打包前，生成ab 资源包 至streamingAssets", EditorStyles.boldLabel);
+            if (GUILayout.Button("android"))
+            {
+                BuildAB(ABHelper.AndroidPlatform);
+                TheWindow.Close();
+            }
+            if (GUILayout.Button("ios"))
+            {
+                BuildAB(ABHelper.IosPlatform);
+                TheWindow.Close();
+            }
+            if (GUILayout.Button("win"))
+            {
+                BuildAB(ABHelper.WinPlatform);
+                TheWindow.Close();
+            }
+
+            EditorGUILayout.Space();
+            GUILayout.Label("打包前，生成ab zip资源包 至streamingAssets", EditorStyles.boldLabel);
+            if (GUILayout.Button("android-zip"))
+            {
+                BuildABZip(ABHelper.AndroidPlatform);
+                TheWindow.Close();
+            }
+            if (GUILayout.Button("ios-zip"))
+            {
+                BuildABZip(ABHelper.IosPlatform);
+                TheWindow.Close();
+            }
+            if (GUILayout.Button("win-zip"))
+            {
+                BuildABZip(ABHelper.WinPlatform);
+                TheWindow.Close();
+            }
+
+            EditorGUILayout.Space();
+            GUILayout.Label("打包前，移除非必要资源，减小包体", EditorStyles.boldLabel);
+            for (int i = 0; i < ResourcesFilePath.Count; i++)
+            {
+                EditorGUILayout.LabelField(ResFolder + ResourcesFilePath[i]);
+            }
+            for (int i = 0; i < AssetFilePath.Count; i++)
+            {
+                EditorGUILayout.LabelField(AssetFolder + AssetFilePath[i]);
+            }
+            if (GUILayout.Button("移出"))
+            {
+                AssetMoveout();
+                TheWindow.Close();
+            }
+            if (GUILayout.Button("移入"))
+            {
+                AssetMovein();
+                TheWindow.Close();
+            }
         }
-        [MenuItem("Tools/生成StreamingAssets路径下资源包/win")]
-        public static void BuildWin()
+        private static void RootFolderNmae()
         {
-            Build(ABHelper.WinPlatform);
+            // TheRootFolderName = Application.dataPath;
+            // TheRootFolderName = TheRootFolderName.Substring(0, TheRootFolderName.LastIndexOf("/"));
+            // TheRootFolderName = TheRootFolderName.Substring(TheRootFolderName.LastIndexOf("/") + 1);
         }
-        [MenuItem("Tools/生成StreamingAssets路径下资源包/android-zip")]
-        public static void BuildZipAndroid()
-        {
-            BuildZip(ABHelper.AndroidPlatform);
-        }
-        [MenuItem("Tools/生成StreamingAssets路径下资源包/ios-zip")]
-        public static void BuildZipIos()
-        {
-            BuildZip(ABHelper.IosPlatform);
-        }
-        [MenuItem("Tools/生成StreamingAssets路径下资源包/win-zip")]
-        public static void BuildZipWin()
-        {
-            BuildZip(ABHelper.WinPlatform);
-        }
-        private static string RootFolderNmae()
+        private static void ParseTheVersion()
         {
             List<string> version = ABHelper.ReadVersionIdFile();
-            return version[1];
+            TheVersionNum = ABHelper.VersionNumSplit(version[0]);
+            TheRootFolderName = version[1];
+            TheApkFolderName = version[2];
         }
-        private static string[] ParseTheVersion()
+        private static void FilesFilter()
         {
-            List<string> version = ABHelper.ReadVersionIdFile();
-            return ABHelper.VersionNumSplit(version[0]);
+            ResourcesFilePath = new List<string>();
+
+            DirectoryInfo dir = new DirectoryInfo(ResFolder);
+            DirectoryInfo[] dirs = dir.GetDirectories();
+            foreach (DirectoryInfo d in dirs)
+            {
+                string fname = d.FullName.Replace(@"/", @"\");
+                string folderName = fname.Substring(fname.LastIndexOf(@"\") + 1);
+
+                ResourcesFilePath.Add(folderName);
+            }
+
+            foreach (var v in DoNotRemove)
+            {
+                if (ResourcesFilePath.Contains(v))
+                {
+                    ResourcesFilePath.Remove(v);
+                }
+                if (AssetFilePath.Contains(v))
+                {
+                    AssetFilePath.Remove(v);
+                }
+            }
         }
-        private static void BuildZip(string platformName)
+        private static Dictionary<string, string> ReadVersionFile(string filePath)
         {
+            Dictionary<string, string> versionInfo = new Dictionary<string, string>();
+
+            byte[] versionbytes = ABHelper.ReadFileToBytes(filePath);
+            if (null == versionbytes)
+            {
+                return versionInfo;
+            }
+
+            ABHelper.Encrypt(ref versionbytes); //RC4 加密文件
+            string versionTxt = Encoding.UTF8.GetString(versionbytes);
+
+            if (!string.IsNullOrEmpty(versionTxt))
+            {
+                //ui/tips.ab:ba2de82e3fc42e750d317b133096dfea:0:22455:fa7917d4974436b1214dc313fccda2a5
+                //路径：内容md5：版号：size：路径md5
+                string[] split = versionTxt.Split('\r');
+                foreach (string k in split)
+                {
+                    string[] split2 = k.Split(':');
+                    versionInfo.Add(split2[4], split2[0]);
+                }
+            }
+
+            return versionInfo;
+        }
+        private static bool CheckRemove(string name)
+        {
+            foreach (var v1 in DoNotRemove)
+            {
+                if (name.StartsWith(v1.ToLower() + "/"))
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+        private static void FileMove(string path)
+        {
+            List<string> files = new List<string>();
+            string path1;
+            string path2;
+            string path3;
+            string path4 = string.Format("{0}/../../../temp/", Application.dataPath);
+
+            files = ABHelper.GetAllFilesPathInDir(Application.dataPath + path);
+            foreach (var v1 in files)
+            {
+                path1 = v1.Replace("\\", "/");
+                path2 = path1.Replace(Application.dataPath, path4);
+                path3 = ABHelper.GetFileFolderPath(path1);
+
+                if (!Directory.Exists(path3))
+                {
+                    Directory.CreateDirectory(path3);
+                }
+                File.Move(path1, path2);
+            }
+        }
+        private static void BuildABZip(string platformName)
+        {
+            RootFolderNmae();
+            ParseTheVersion();
+            FilesFilter();
+
             // 删
             string native = ABHelper.ReadFile(Application.streamingAssetsPath + "/native.txt");
             if (!string.IsNullOrEmpty(native))
@@ -68,9 +209,7 @@ namespace LCG
             }
 
             // 增
-            string rootPath = RootFolderNmae();
-            string[] versionNum = ParseTheVersion();
-            string path = string.Format("{0}/../../../assetBundle/{1}/{2}/{3}.{4}/HotterZip/{5}-{6}/{7}", Application.dataPath, rootPath, platformName, versionNum[0], versionNum[1], -1, versionNum[2], versionNum[2]);
+            string path = string.Format("{0}/../../../assetBundle/{1}/{2}/{3}.{4}/HotterZip/{5}-{6}/{7}", Application.dataPath, TheRootFolderName, platformName, TheVersionNum[0], TheVersionNum[1], -1, TheVersionNum[2], TheVersionNum[2]);
             if (!Directory.Exists(path))
             {
                 Debug.LogError("路径不存在：" + path);
@@ -98,15 +237,7 @@ namespace LCG
                 name1 = ABHelper.GetFileName(path1);
                 if (versionInfo.ContainsKey(name1))
                 {
-                    if (versionInfo[name1].StartsWith("lua/"))
-                    {
-                        continue;
-                    }
-                    if (versionInfo[name1].StartsWith("ui/"))
-                    {
-                        continue;
-                    }
-                    if (versionInfo[name1].StartsWith("audio/"))
+                    if (CheckRemove(versionInfo[name1]))
                     {
                         continue;
                     }
@@ -136,7 +267,7 @@ namespace LCG
                 {
                     string zip = "native_" + index + ".zip";
                     zipTxt.AppendLine(zip + ":" + bytesLen);
-                    ABHelper.ZipFile(zipList, Application.streamingAssetsPath + "/" + zip, versionNum[2] + "/");
+                    ABHelper.ZipFile(zipList, Application.streamingAssetsPath + "/" + zip, TheVersionNum[2] + "/");
                     index++;
                     bytesLen = 0;
                     zipList.Clear();
@@ -149,8 +280,12 @@ namespace LCG
 
             Debug.Log("streamingAssets压缩文件生成成功！！压缩文件源路径：" + path);
         }
-        private static void Build(string platformName)
+        private static void BuildAB(string platformName)
         {
+            RootFolderNmae();
+            ParseTheVersion();
+            FilesFilter();
+
             // 删
             string native = ABHelper.ReadFile(Application.streamingAssetsPath + "/native.txt");
             if (!string.IsNullOrEmpty(native))
@@ -168,9 +303,7 @@ namespace LCG
             }
 
             // 增
-            string rootPath = RootFolderNmae();
-            string[] versionNum = ParseTheVersion();
-            string path = string.Format("{0}/../../../assetBundle/{1}/{2}/{3}.{4}/HotterZip/{5}-{6}/{7}", Application.dataPath, rootPath, platformName, versionNum[0], versionNum[1], -1, versionNum[2], versionNum[2]);
+            string path = string.Format("{0}/../../../assetBundle/{1}/{2}/{3}.{4}/HotterZip/{5}-{6}/{7}", Application.dataPath, TheRootFolderName, platformName, TheVersionNum[0], TheVersionNum[1], -1, TheVersionNum[2], TheVersionNum[2]);
             if (!Directory.Exists(path))
             {
                 Debug.LogError("路径不存在：" + path);
@@ -193,15 +326,7 @@ namespace LCG
                 name1 = ABHelper.GetFileName(path1);
                 if (versionInfo.ContainsKey(name1))
                 {
-                    if (versionInfo[name1].StartsWith("lua/"))
-                    {
-                        continue;
-                    }
-                    if (versionInfo[name1].StartsWith("ui/"))
-                    {
-                        continue;
-                    }
-                    if (versionInfo[name1].StartsWith("audio/"))
+                    if (CheckRemove(versionInfo[name1]))
                     {
                         continue;
                     }
@@ -224,35 +349,50 @@ namespace LCG
 
             Debug.Log("streamingAssets文件生成成功！！文件源路径：" + path);
         }
-        private static Dictionary<string, string> ReadVersionFile(string filePath)
+        private void AssetMoveout()
         {
-            Dictionary<string, string> versionInfo = new Dictionary<string, string>();
+            RootFolderNmae();
+            ParseTheVersion();
+            FilesFilter();
 
-            // 暂时不过滤文件！！
-            return versionInfo;
-
-            byte[] versionbytes = ABHelper.ReadFileToBytes(filePath);
-            if (null == versionbytes)
+            string path = string.Format("{0}/../../../temp/", Application.dataPath);
+            if (Directory.Exists(path))
             {
-                return versionInfo;
+                Directory.Delete(path, true);
+            }
+            Directory.CreateDirectory(path);
+
+            string path1;
+            foreach (var v in ResourcesFilePath)
+            {
+                path1 = ResFolder.Replace("Assets", "") + v;
+                ABHelper.DirectoryMove(Application.dataPath + path1, path + path1);
+            }
+            foreach (var v in AssetFilePath)
+            {
+                path1 = AssetFolder.Replace("Assets", "") + v;
+                ABHelper.DirectoryMove(Application.dataPath + path1, path + path1);
             }
 
-            ABHelper.Encrypt(ref versionbytes); //RC4 加密文件
-            string versionTxt = Encoding.UTF8.GetString(versionbytes);
+            AssetDatabase.Refresh();
+            Debug.Log("资源移出成功！！");
+        }
+        public void AssetMovein()
+        {
+            RootFolderNmae();
+            ParseTheVersion();
+            FilesFilter();
 
-            if (!string.IsNullOrEmpty(versionTxt))
+            string path = string.Format("{0}/../../../temp/", Application.dataPath);
+            if (!Directory.Exists(path))
             {
-                //ui/tips.ab:ba2de82e3fc42e750d317b133096dfea:0:22455:fa7917d4974436b1214dc313fccda2a5
-                //路径：内容md5：版号：size：路径md5
-                string[] split = versionTxt.Split('\r');
-                foreach (string k in split)
-                {
-                    string[] split2 = k.Split(':');
-                    versionInfo.Add(split2[4], split2[0]);
-                }
+                return;
             }
 
-            return versionInfo;
+            ABHelper.DirectoryMove(path, Application.dataPath + "/");
+
+            AssetDatabase.Refresh();
+            Debug.Log("资源移入成功！！");
         }
     }
 }

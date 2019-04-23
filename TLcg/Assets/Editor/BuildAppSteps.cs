@@ -21,6 +21,7 @@ namespace LCG
         static string m_dataPathPrefix = Application.dataPath + "/";
         static string m_luaResourceFolderPath = m_dataPathPrefix + "Lua/";
         static string m_luaTempFolderPath = m_dataPathPrefix + "Resources/Lua/";
+        static VersionNum m_versionNum;
         static string[] m_buildScenes = null;
         static string m_buildPath = string.Empty;
         static BuildTarget m_buildTarget = BuildTarget.Android;
@@ -29,7 +30,7 @@ namespace LCG
         static string m_luajitWorkingPath = "/Luajit/luajit-2.1.0b2/src/";
         static string m_luajitExePath = "luajit.exe";
 
-        [MenuItem("版本/打包")]
+        [MenuItem("Tools/版本打包工具")]
         private static void Build()
         {
             m_process = new System.Diagnostics.Process();
@@ -47,6 +48,8 @@ namespace LCG
 #elif UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX
             m_luajitExePath = m_luajitWorkingPath + "luajit";
 #endif
+            m_versionNum = new VersionNum(ABHelper.ReadVersionIdFile()[0]);
+
             m_editorWindow = EditorWindow.GetWindow(typeof(BuildAppSteps), true, "打包");
         }
 
@@ -84,6 +87,10 @@ namespace LCG
             {
                 platform = t;
             }
+            EditorGUILayout.Space();
+
+            GUILayout.Label("资源版号", EditorStyles.boldLabel);
+            GUILayout.TextArea(m_versionNum.Id);
             EditorGUILayout.Space();
 
             if (GUILayout.Button("Build"))
@@ -223,11 +230,9 @@ namespace LCG
             PlayerSettings.companyName = m_companyName;
             PlayerSettings.productName = m_productName;
             PlayerSettings.applicationIdentifier = m_appIdentifier;
+            PlayerSettings.bundleVersion = m_versionNum.Id;
             PlayerSettings.SetScriptingDefineSymbolsForGroup(m_buildTargetGroup, m_scriptingDefineSymbols);
             PlayerSettings.SetArchitecture(m_buildTargetGroup, 2);
-
-            VersionNum versionNum = new VersionNum(ABHelper.ReadVersionIdFile()[0]);
-            PlayerSettings.bundleVersion = versionNum.Id;
 
             if (isDebug)
             {

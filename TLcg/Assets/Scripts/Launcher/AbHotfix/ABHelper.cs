@@ -775,6 +775,38 @@ namespace LCG
             }
         }
         /// <summary>
+        /// 文件夹移动
+        /// </summary>
+        /// <param name="sourcePath"></param>
+        /// <param name="targetPath"></param>
+        public static void DirectoryMove(string sourcePath, string targetPath)
+        {
+            if (!Directory.Exists(sourcePath))
+            {
+                return;
+            }
+            string sfilePath;
+            string tfilePath;
+            string tdirPath;
+            List<string> filesPath = GetAllFilesPathInDir(sourcePath);
+            foreach (string path in filesPath)
+            {
+                sfilePath = path.Replace("\\", "/");
+                tfilePath = sfilePath.Replace(sourcePath, targetPath);
+                tdirPath = GetFileFolderPath(tfilePath);
+
+                if (!Directory.Exists(tdirPath))
+                {
+                    Directory.CreateDirectory(tdirPath);
+                }
+                if (File.Exists(tfilePath))
+                {
+                    File.Delete(tfilePath);
+                }
+                File.Move(sfilePath, tfilePath);
+            }
+        }
+        /// <summary>
         /// 文件夹删除
         /// </summary>
         public static void DirectoryRemove(string dir)
