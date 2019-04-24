@@ -616,6 +616,8 @@ namespace LCG
                 }
                 try
                 {
+                    // 收集内存
+                    System.GC.Collect();
                     // 生成ab文件
                     BuildPipeline.BuildAssetBundles(CurVersionABExportPath, BuildAssetBundleOptions.ChunkBasedCompression | BuildAssetBundleOptions.DeterministicAssetBundle, platform);
                 }
@@ -784,6 +786,8 @@ namespace LCG
             // 1-2.ini
             FileInfo zipfile = new FileInfo(zipFullName);
             ABHelper.WriteFile(zipFolder + ".ini", ("zipsize:" + zipfile.Length + ":" + filePreSize));
+
+            System.GC.Collect();
         }
         private static void BuildPacker(BuildTarget platform, bool onlyLua = false)
         {

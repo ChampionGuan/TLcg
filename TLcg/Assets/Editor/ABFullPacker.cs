@@ -311,6 +311,7 @@ namespace LCG
                 CopyLuaFiles(filePath);
             }
 
+            System.GC.Collect();
             BuildPipeline.BuildAssetBundles(PlatformABExportPath, BuildAssetBundleOptions.ChunkBasedCompression | BuildAssetBundleOptions.DeterministicAssetBundle, platform);
 
             ClearAssetBundlesName();
