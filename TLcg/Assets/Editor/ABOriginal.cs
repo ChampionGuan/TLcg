@@ -342,6 +342,8 @@ namespace LCG
             Directory.CreateDirectory(path);
 
             string path1;
+            // ProjectSettings
+            ABHelper.DirectoryCopy(string.Format("{0}/../{1}", Application.dataPath, "ProjectSettings"), path + "ProjectSettings");
             foreach (var v in ResourcesFilePath)
             {
                 path1 = ResFolder.Replace("Assets", "") + v;
@@ -370,6 +372,8 @@ namespace LCG
             }
 
             AssetDatabase.Refresh();
+            AssetDatabase.SaveAssets();
+
             Debug.Log("资源移出成功！！");
         }
         public void AssetMovein()
@@ -383,10 +387,13 @@ namespace LCG
             {
                 return;
             }
-
             ABHelper.DirectoryMove(path, Application.dataPath + "/");
+            ABHelper.DirectoryMove(string.Format("{0}/{1}", Application.dataPath, "ProjectSettings"), string.Format("{0}/../{1}", Application.dataPath, "ProjectSettings"));
+            Directory.Delete(string.Format("{0}/{1}", Application.dataPath, "ProjectSettings"), true);
 
             AssetDatabase.Refresh();
+            AssetDatabase.SaveAssets();
+
             Debug.Log("资源移入成功！！");
         }
     }
