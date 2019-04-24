@@ -19,7 +19,7 @@ namespace LCG
         // 当前unity版本暂不支持视频资源的ab加载
         private static List<string> BundleFileCullingPath = new List<string>(new string[] { "Video" });
         private static List<string> BundleFilePath = new List<string>();
-        private static string TheRootFolderName = "ab_tlcg_full";
+        private static string TheRootFolderName = "tlcg";
 
         [MenuItem("Tools/资源打包全包版")]
         public static void UnityPacker()
@@ -48,9 +48,12 @@ namespace LCG
         }
         private static void RootFolderName()
         {
-            TheRootFolderName = Application.dataPath;
-            TheRootFolderName = TheRootFolderName.Substring(0, TheRootFolderName.LastIndexOf("/"));
-            TheRootFolderName = "ab_" + TheRootFolderName.Substring(TheRootFolderName.LastIndexOf("/") + 1) + "_full";
+            // TheRootFolderName = Application.dataPath;
+            // TheRootFolderName = TheRootFolderName.Substring(0, TheRootFolderName.LastIndexOf("/"));
+            // TheRootFolderName = "ab_" + TheRootFolderName.Substring(TheRootFolderName.LastIndexOf("/") + 1) + "_full";
+
+            List<string> version = ABHelper.ReadVersionIdFile();
+            TheRootFolderName = version[1];
         }
 
         private static void FileBundleList()
@@ -195,7 +198,7 @@ namespace LCG
             }
 
             // 创建平台文件夹
-            PlatformABExportPath = string.Format("{0}/../{1}/{2}", Application.dataPath, TheRootFolderName, PlatformName);
+            PlatformABExportPath = string.Format("{0}/../../../assetBundleFull/{1}/{2}", Application.dataPath, TheRootFolderName, PlatformName);
             if (Directory.Exists(PlatformABExportPath))
             {
                 Directory.Delete(PlatformABExportPath, true);
