@@ -11,7 +11,8 @@ namespace LCG
         private static EditorWindow TheWindow = null;
         private static string AssetFolder = "Assets/";
         private static string ResFolder = "Assets/Resources/";
-        private static List<string> DoNotRemove = new List<string>(new string[] { "Lua", "UI", "Audio", "Video" });
+        private static List<string> DoNotRemoveDir = new List<string>(new string[] { "Lua", "UI", "Audio", "Video" });
+        private static List<string> DoNotRemoveFile = new List<string>(new string[] { "Resources/Prefabs/Misc/VideoPlayer.prefab", "Scenes/Bootup.unity" });
         private static List<string> AssetFilePath = new List<string>(new string[] { "Scenes", "Lua" });
         private static List<string> ResourcesFilePath = new List<string>();
 
@@ -113,7 +114,7 @@ namespace LCG
                 ResourcesFilePath.Add(folderName);
             }
 
-            foreach (var v in DoNotRemove)
+            foreach (var v in DoNotRemoveDir)
             {
                 if (ResourcesFilePath.Contains(v))
                 {
@@ -152,9 +153,9 @@ namespace LCG
 
             return versionInfo;
         }
-        private static bool CheckRemove(string name)
+        private static bool CheckRemoveDir(string name)
         {
-            foreach (var v1 in DoNotRemove)
+            foreach (var v1 in DoNotRemoveDir)
             {
                 if (name.StartsWith(v1.ToLower() + "/"))
                 {
@@ -162,28 +163,6 @@ namespace LCG
                 }
             }
             return true;
-        }
-        private static void FileMove(string path)
-        {
-            List<string> files = new List<string>();
-            string path1;
-            string path2;
-            string path3;
-            string path4 = string.Format("{0}/../../../temp/", Application.dataPath);
-
-            files = ABHelper.GetAllFilesPathInDir(Application.dataPath + path);
-            foreach (var v1 in files)
-            {
-                path1 = v1.Replace("\\", "/");
-                path2 = path1.Replace(Application.dataPath, path4);
-                path3 = ABHelper.GetFileFolderPath(path1);
-
-                if (!Directory.Exists(path3))
-                {
-                    Directory.CreateDirectory(path3);
-                }
-                File.Move(path1, path2);
-            }
         }
         private static void BuildABZip(string platformName)
         {
@@ -237,7 +216,7 @@ namespace LCG
                 name1 = ABHelper.GetFileName(path1);
                 if (versionInfo.ContainsKey(name1))
                 {
-                    if (CheckRemove(versionInfo[name1]))
+                    if (!CheckRemoveDir(versionInfo[name1]))
                     {
                         continue;
                     }
@@ -326,7 +305,7 @@ namespace LCG
                 name1 = ABHelper.GetFileName(path1);
                 if (versionInfo.ContainsKey(name1))
                 {
-                    if (CheckRemove(versionInfo[name1]))
+                    if (!CheckRemoveDir(versionInfo[name1]))
                     {
                         continue;
                     }
@@ -372,6 +351,22 @@ namespace LCG
             {
                 path1 = AssetFolder.Replace("Assets", "") + v;
                 ABHelper.DirectoryMove(Application.dataPath + path1, path + path1);
+            }
+
+            string path2;
+            foreach (var v in DoNotRemoveFile)
+            {
+                path1 = string.Format("{0}/../../temp/{1}", Application.dataPath, v).Replace("Assets", "");
+                if (!File.Exists(path1))
+                {
+                    continue;
+                }
+                path2 = Application.dataPath + "/" + v;
+                if (File.Exists(path2))
+                {
+                    File.Delete(path2);
+                }
+                File.Move(path1, path2);
             }
 
             AssetDatabase.Refresh();
