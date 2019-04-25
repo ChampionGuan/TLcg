@@ -653,6 +653,8 @@ namespace LCG
                     }
                 }
             }
+            System.GC.Collect();
+            
             return result;
         }
         private static void CreatVersionTxt()
@@ -689,6 +691,8 @@ namespace LCG
                 CurVersionList.Add(value, new List<string>() { ABHelper.BuildMD5ByFile(path), CurVersionNum.ToString(), ABHelper.FileSize(path).ToString(), path2 });
             }
             ABHelper.WriteVersionFile(CurVersionABExportPath + ABHelper.VersionFileName, CurVersionList);
+
+            System.GC.Collect();
         }
         private static void CreatHotterZip(int preVersionNum)
         {

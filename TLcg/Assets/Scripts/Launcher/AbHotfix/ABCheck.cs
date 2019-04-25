@@ -317,6 +317,16 @@ namespace LCG
         }
         private IEnumerator MoveNativeFile()
         {
+            if (Directory.Exists(ABHelper.AppTempCachePath))
+            {
+                Directory.Delete(ABHelper.AppTempCachePath, true);
+            }
+            if (!Directory.Exists(ABVersion.LocalStorgePath))
+            {
+                Directory.CreateDirectory(ABVersion.LocalStorgePath);
+            }
+            ABVersion.LoadAllVersionInfo();
+
             WWW native = new WWW(ABHelper.StreamingAssetsPath() + "native.txt");
             yield return native;
 
@@ -349,6 +359,16 @@ namespace LCG
         }
         private IEnumerator MoveNativeZipFile()
         {
+            if (Directory.Exists(ABHelper.AppTempCachePath))
+            {
+                Directory.Delete(ABHelper.AppTempCachePath, true);
+            }
+            if (!Directory.Exists(ABVersion.LocalStorgePath))
+            {
+                Directory.CreateDirectory(ABVersion.LocalStorgePath);
+            }
+            ABVersion.LoadAllVersionInfo();
+
             WWW native = new WWW(ABHelper.StreamingAssetsPath() + "native.txt");
             yield return native;
 

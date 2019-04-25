@@ -24,6 +24,7 @@ namespace LCG
         static VersionNum m_versionNum;
         static string[] m_buildScenes = null;
         static string m_buildPath = string.Empty;
+        static string m_apkFolderPath = string.Empty;
         static BuildTarget m_buildTarget = BuildTarget.Android;
         static BuildTargetGroup m_buildTargetGroup = BuildTargetGroup.Android;
         static BuildOptions m_buildOptions = BuildOptions.None;
@@ -49,12 +50,13 @@ namespace LCG
             m_luajitExePath = m_luajitWorkingPath + "luajit";
 #endif
             m_versionNum = new VersionNum(ABHelper.ReadVersionIdFile()[0]);
+            m_apkFolderPath = ABHelper.ReadVersionIdFile()[2];
 
             m_editorWindow = EditorWindow.GetWindow(typeof(BuildAppSteps), true, "打包");
         }
 
         private static string mode = "debug";
-        private static string platform = "android";
+        private static string platform = ABHelper.AndroidPlatform;
         private void OnGUI()
         {
             GUILayout.Label("自动打包工具", EditorStyles.boldLabel);
@@ -72,18 +74,18 @@ namespace LCG
             }
             EditorGUILayout.Space();
 
-            t = "android";
-            if (EditorGUILayout.Toggle(t, platform == "android"))
+            t = ABHelper.AndroidPlatform;
+            if (EditorGUILayout.Toggle(t, platform == ABHelper.AndroidPlatform))
             {
                 platform = t;
             }
-            t = "ios";
-            if (EditorGUILayout.Toggle(t, platform == "ios"))
+            t = ABHelper.IosPlatform;
+            if (EditorGUILayout.Toggle(t, platform == ABHelper.IosPlatform))
             {
                 platform = t;
             }
-            t = "window";
-            if (EditorGUILayout.Toggle(t, platform == "window"))
+            t = ABHelper.WinPlatform;
+            if (EditorGUILayout.Toggle(t, platform == ABHelper.WinPlatform))
             {
                 platform = t;
             }
@@ -93,14 +95,78 @@ namespace LCG
             GUILayout.TextArea(m_versionNum.Id);
             EditorGUILayout.Space();
 
-            if (GUILayout.Button("Build"))
+            if (GUILayout.Button("Build正式版本"))
             {
-                switch (platform)
+                if (platform == ABHelper.AndroidPlatform)
                 {
-                    case "android": m_buildTarget = BuildTarget.Android; break;
-                    case "ios": m_buildTarget = BuildTarget.iOS; break;
-                    case "window": m_buildTarget = BuildTarget.StandaloneWindows; break;
-                    default: m_buildTarget = BuildTarget.NoTarget; break;
+                    m_buildTarget = BuildTarget.Android;
+                }
+                else if (platform == ABHelper.IosPlatform)
+                {
+                    m_buildTarget = BuildTarget.iOS;
+                }
+                else if (platform == ABHelper.WinPlatform)
+                {
+                    m_buildTarget = BuildTarget.StandaloneWindows;
+                }
+                else
+                {
+                    m_buildTarget = BuildTarget.NoTarget;
+                }
+
+                if (m_buildTarget != BuildTarget.Android)
+                {
+                    BulidTarget(mode == "debug");
+                }
+                else
+                {
+                    // 移入ab
+                    ABStreaming.BuildABZip(ABHelper.AndroidPlatform);
+                    // 移出资源
+                    ABStreaming.AssetMoveout();
+                    // 将文件移至指定位置！！！
+                    if (BulidTarget(mode == "debug"))
+                    {
+                        string apkpath1;
+                        string apkpath2;
+                        string apkpathS;
+
+                        apkpathS = string.Format("{0}/../../../release/{1}", Application.dataPath, m_apkFolderPath);
+                        if (!Directory.Exists(apkpathS))
+                        {
+                            Directory.CreateDirectory(apkpathS);
+                        }
+
+                        apkpath1 = string.Format("{0}/male7_v{1}.apk", apkpathS, m_versionNum.Id);
+                        File.Copy(m_buildPath, apkpath1, true);
+                        FileInfo file = new FileInfo(apkpath1);
+
+                        apkpath2 = string.Format("{0}/male7_v{1}.ini", apkpathS, m_versionNum.Id);
+                        ABHelper.WriteFile(apkpath2, file.Length.ToString().TrimEnd());
+
+                        Debug.Log("成功生成版本！！！！" + apkpath1);
+                    }
+                    // 移入资源
+                    ABStreaming.AssetMovein();
+                }
+            }
+            if (GUILayout.Button("Build内网版本"))
+            {
+                if (platform == ABHelper.AndroidPlatform)
+                {
+                    m_buildTarget = BuildTarget.Android;
+                }
+                else if (platform == ABHelper.IosPlatform)
+                {
+                    m_buildTarget = BuildTarget.iOS;
+                }
+                else if (platform == ABHelper.WinPlatform)
+                {
+                    m_buildTarget = BuildTarget.StandaloneWindows;
+                }
+                else
+                {
+                    m_buildTarget = BuildTarget.NoTarget;
                 }
 
                 BulidTarget(mode == "debug");
@@ -108,8 +174,9 @@ namespace LCG
         }
 
         //目标平台
-        private static void BulidTarget(bool isDebug = false)
+        private static bool BulidTarget(bool isDebug = false)
         {
+            bool result = true;
             try
             {
                 Debug.Log("开始预处理过程...");
@@ -143,12 +210,11 @@ namespace LCG
                 // 开始Build,等待吧～
                 if (m_buildTarget == BuildTarget.NoTarget)
                 {
-                    Debug.LogError("未选择打包平台！！！");
-                    return;
+                    throw new Exception("未选择打包平台！！！");
                 }
                 EditorUserBuildSettings.SwitchActiveBuildTarget(m_buildTargetGroup, m_buildTarget);
                 string res = BuildPipeline.BuildPlayer(m_buildScenes, m_buildPath, m_buildTarget, m_buildOptions);
-                if (res.Length > 0)
+                if (!String.IsNullOrEmpty(res))
                 {
                     throw new Exception("BuildPlayer failure: " + res);
                 }
@@ -160,6 +226,7 @@ namespace LCG
             catch (System.Exception e)
             {
                 Debug.LogError("[BuildingStepError]: " + e);
+                result = false;
                 throw;
             }
             finally
@@ -178,6 +245,7 @@ namespace LCG
 
                 m_editorWindow.Close();
             }
+            return result;
         }
         private static void BuildEnv(bool isDebug = false)
         {
@@ -335,7 +403,14 @@ namespace LCG
             List<string> EditorScenes = new List<string>();
             foreach (EditorBuildSettingsScene scene in EditorBuildSettings.scenes)
             {
-                if (!scene.enabled) continue;
+                if (!scene.enabled)
+                {
+                    continue;
+                }
+                if (!File.Exists(scene.path))
+                {
+                    continue;
+                }
                 EditorScenes.Add(scene.path);
             }
 

@@ -6,7 +6,7 @@ using System.Text;
 
 namespace LCG
 {
-    public class ABOriginal : EditorWindow
+    public class ABStreaming : EditorWindow
     {
         private static EditorWindow TheWindow = null;
         private static string AssetFolder = "Assets/";
@@ -26,7 +26,7 @@ namespace LCG
             RootFolderNmae();
             ParseTheVersion();
             FilesFilter();
-            TheWindow = EditorWindow.GetWindow(typeof(ABOriginal), true, "打包前的资源处理");
+            TheWindow = EditorWindow.GetWindow(typeof(ABStreaming), true, "打包前的资源处理");
         }
         void OnGUI()
         {
@@ -164,7 +164,7 @@ namespace LCG
             }
             return true;
         }
-        private static void BuildABZip(string platformName)
+        public static void BuildABZip(string platformName)
         {
             RootFolderNmae();
             ParseTheVersion();
@@ -259,7 +259,7 @@ namespace LCG
 
             Debug.Log("streamingAssets压缩文件生成成功！！压缩文件源路径：" + path);
         }
-        private static void BuildAB(string platformName)
+        public static void BuildAB(string platformName)
         {
             RootFolderNmae();
             ParseTheVersion();
@@ -328,7 +328,7 @@ namespace LCG
 
             Debug.Log("streamingAssets文件生成成功！！文件源路径：" + path);
         }
-        private void AssetMoveout()
+        public static void AssetMoveout()
         {
             RootFolderNmae();
             ParseTheVersion();
@@ -358,7 +358,7 @@ namespace LCG
             string path2;
             foreach (var v in DoNotRemoveFile)
             {
-                path1 = string.Format("{0}/../../temp/{1}", Application.dataPath, v).Replace("Assets", "");
+                path1 = string.Format("{0}/../../../temp/{1}", Application.dataPath, v);
                 if (!File.Exists(path1))
                 {
                     continue;
@@ -376,7 +376,7 @@ namespace LCG
 
             Debug.Log("资源移出成功！！");
         }
-        public void AssetMovein()
+        public static void AssetMovein()
         {
             RootFolderNmae();
             ParseTheVersion();

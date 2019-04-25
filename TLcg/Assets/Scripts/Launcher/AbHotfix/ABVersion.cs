@@ -282,11 +282,27 @@ namespace LCG
             }
 
             // 获取本地的所有版本
-            DirectoryInfo dirInfo = new DirectoryInfo(LocalStorgePath);
-            DirectoryInfo[] dirInfos = dirInfo.GetDirectories();
+            LoadAllVersionInfo();
+            // 现在在用的版本号
+            SetCursVersionNum(CurVersionId);
+        }
+        // 设置当前版号资源
+        public static void SetCursVersionNum(VersionNum curVersion)
+        {
+            // 设置为当前使用版号
+            CurVersionId = curVersion;
+            // 将更新下的版本加载进来
+            LoadVersionInfo(curVersion);
+            Debug.Log("当前使用版本：" + curVersion.Id);
+        }
+        // 加载本地所有版本
+        public static void LoadAllVersionInfo()
+        {
+            LocalVersionList.Clear();
 
-            // 遍历本地所有版号
-            foreach (DirectoryInfo info in dirInfos)
+            // 获取本地的所有版本
+            DirectoryInfo dirInfo = new DirectoryInfo(LocalStorgePath);
+            foreach (DirectoryInfo info in dirInfo.GetDirectories())
             {
                 int id3rd = 0;
                 if (!int.TryParse(info.Name, out id3rd))
@@ -307,18 +323,6 @@ namespace LCG
                     CurVersionId = LocalVersionList[versionId.Id3rd].VersionId;
                 }
             }
-
-            // 现在在用的版本号
-            SetCursVersionNum(CurVersionId);
-        }
-        // 设置当前版号资源
-        public static void SetCursVersionNum(VersionNum curVersion)
-        {
-            // 设置为当前使用版号
-            CurVersionId = curVersion;
-            // 将更新下的版本加载进来
-            LoadVersionInfo(curVersion);
-            Debug.Log("当前使用版本：" + curVersion.Id);
         }
         // 加载指定版本信息
         public static bool LoadVersionInfo(VersionNum version)
