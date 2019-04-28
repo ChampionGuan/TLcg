@@ -457,7 +457,7 @@ namespace LCG
                 path1 = ResFolder.Replace("Assets", "") + v;
                 ABHelper.DirectoryMove(Application.dataPath + path1, path + path1);
             }
-            foreach (var v in UseAssetsDir)
+            foreach (var v in RemoveAssetsDir)
             {
                 path1 = AssetsFolder.Replace("Assets", "") + v;
                 ABHelper.DirectoryMove(Application.dataPath + path1, path + path1);
