@@ -12,15 +12,25 @@ namespace LCG
     {
         #region 入口
         private static EditorWindow TheWindow = null;
-        private static string AssetFolder = "Assets/";
+        private static string AssetsFolder = "Assets/";
         private static string ResFolder = "Assets/Resources/";
 
-        private static List<string> ScriptFolderPath = new List<string>(new string[] { "Scripts", "3rdLibs" });
-        private static List<string> BundleFolderPath = new List<string>(new string[] { "UI" });
-        private static List<string> BundleScenePath = new List<string>(new string[] { "Scenes" });
-        private static List<string> BundleLuaPath = new List<string>(new string[] { "Lua" });
-        // 当前unity版本暂不支持视频资源的ab加载
-        private static List<string> BundleFileCullingPath = new List<string>(new string[] { "Video" });
+        private static string ScriptDirStr = "Scripts;3rdLibs";
+        private static string ScriptDirStr2;
+        private static string BundleFolderDirStr = "UI";
+        private static string BundleFolderDirStr2;
+        private static string BundleSceneDirStr = "Scenes";
+        private static string BundleSceneDirStr2;
+        private static string BundleLuaDirStr = "Lua";
+        private static string BundleLuaDirStr2;
+        private static string BundleFileCullingDirStr = "Video;Ignore";
+        private static string BundleFileCullingDirStr2;
+
+        private static List<string> ScriptFolderPath = new List<string>(new string[] { });
+        private static List<string> BundleFolderPath = new List<string>(new string[] { });
+        private static List<string> BundleScenePath = new List<string>(new string[] { });
+        private static List<string> BundleLuaPath = new List<string>(new string[] { });
+        private static List<string> BundleFileCullingPath = new List<string>(new string[] { });
         private static List<string> BundleFilePath = new List<string>();
 
         private static string[] TheVersionNum = new string[4] { "0", "0", "0", "0" };
@@ -30,30 +40,34 @@ namespace LCG
         [MenuItem("Tools/资源打包优化版")]
         public static void Build()
         {
+            ReadFile();
             RootFolderNmae();
             ParseTheVersion();
-            FileBundleList();
+            ParseAllDir();
             TheWindow = EditorWindow.GetWindow(typeof(ABPacker), true, "资源打包优化版");
         }
         public static void BuildWinPacker()
         {
+            ReadFile();
             RootFolderNmae();
             ParseTheVersion();
-            FileBundleList();
+            ParseAllDir();
             BuildPacker(BuildTarget.StandaloneWindows);
         }
         public static void BuildIosPacker()
         {
+            ReadFile();
             RootFolderNmae();
             ParseTheVersion();
-            FileBundleList();
+            ParseAllDir();
             BuildPacker(BuildTarget.iOS);
         }
         public static void BuildAndroidPacker()
         {
+            ReadFile();
             RootFolderNmae();
             ParseTheVersion();
-            FileBundleList();
+            ParseAllDir();
             BuildPacker(BuildTarget.Android);
         }
         private static void RootFolderNmae()
@@ -61,6 +75,63 @@ namespace LCG
             // TheRootFolderName = Application.dataPath;
             // TheRootFolderName = TheRootFolderName.Substring(0, TheRootFolderName.LastIndexOf("/"));
             // TheRootFolderName = TheRootFolderName.Substring(TheRootFolderName.LastIndexOf("/") + 1);
+        }
+        private static void ReadFile()
+        {
+            string s = ABHelper.ReadFile(Application.dataPath + "/Editor/ABPacker.txt");
+            string[] sp = s.TrimEnd().Replace("\r", "").Split('\n');
+            string[] sp1;
+            foreach (var v in sp)
+            {
+                if (string.IsNullOrEmpty(v))
+                {
+                    continue;
+                }
+                sp1 = v.Split('=');
+
+                switch (sp1[0])
+                {
+                    case "ScriptDir": ScriptDirStr = sp1[1]; break;
+                    case "BundleFolderDir": BundleFolderDirStr = sp1[1]; break;
+                    case "BundleSceneDir": BundleSceneDirStr = sp1[1]; break;
+                    case "BundleLuaDir": BundleLuaDirStr = sp1[1]; break;
+                    case "BundleFileCullingDir": BundleFileCullingDirStr = sp1[1]; break;
+                    default: break;
+                }
+            }
+        }
+        private static void WriteFile()
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append("ScriptDir=" + ScriptDirStr + "\n");
+            sb.Append("BundleFolderDir=" + BundleFolderDirStr + "\n");
+            sb.Append("BundleSceneDir=" + BundleSceneDirStr + "\n");
+            sb.Append("BundleLuaDir=" + BundleLuaDirStr + "\n");
+            sb.Append("BundleFileCullingDir=" + BundleFileCullingDirStr + "\n");
+            ABHelper.WriteFile(Application.dataPath + "/Editor/ABPacker.txt", sb.ToString().TrimEnd());
+        }
+        private static void ParseAllDir()
+        {
+            ParseDir(ScriptDirStr, ScriptFolderPath);
+            ParseDir(BundleFolderDirStr, BundleFolderPath);
+            ParseDir(BundleSceneDirStr, BundleScenePath);
+            ParseDir(BundleLuaDirStr, BundleLuaPath);
+            ParseDir(BundleFileCullingDirStr, BundleFileCullingPath);
+            FileBundleList();
+        }
+        private static void ParseDir(string s, List<string> l)
+        {
+            string[] sp = s.Split(';');
+
+            l.Clear();
+            foreach (var v in sp)
+            {
+                if (string.IsNullOrEmpty(v))
+                {
+                    continue;
+                }
+                l.Add(v);
+            }
         }
         private static void ParseTheVersion()
         {
@@ -82,7 +153,11 @@ namespace LCG
 
         private static void FileBundleList()
         {
-            BundleFilePath = new List<string>();
+            if (null == BundleFilePath)
+            {
+                BundleFilePath = new List<string>();
+            }
+            BundleFilePath.Clear();
 
             DirectoryInfo dir = new DirectoryInfo(ResFolder);
             DirectoryInfo[] dirs = dir.GetDirectories();
@@ -111,6 +186,56 @@ namespace LCG
             GUILayout.Label("AssetBundle自动打包工具", EditorStyles.boldLabel);
             EditorGUILayout.Space();
 
+            EditorGUILayout.Space();
+            GUILayout.Label("检测cs、dll的文件夹（以半角分号隔开）");
+            ScriptDirStr = GUILayout.TextField(ScriptDirStr);
+            if (ScriptDirStr2 != ScriptDirStr)
+            {
+                ScriptDirStr2 = ScriptDirStr;
+                WriteFile();
+                ParseAllDir();
+            }
+            GUILayout.Label("需要文件夹打包的文件夹（以半角分号隔开）");
+            BundleFolderDirStr = GUILayout.TextField(BundleFolderDirStr);
+            if (BundleFolderDirStr2 != BundleFolderDirStr)
+            {
+                BundleFolderDirStr2 = BundleFolderDirStr;
+                WriteFile();
+                ParseAllDir();
+            }
+            GUILayout.Label("需要场景打包的文件夹（以半角分号隔开）");
+            BundleSceneDirStr = GUILayout.TextField(BundleSceneDirStr);
+            if (BundleSceneDirStr2 != BundleSceneDirStr)
+            {
+                BundleSceneDirStr2 = BundleSceneDirStr;
+                WriteFile();
+                ParseAllDir();
+            }
+            GUILayout.Label("需要lua打包的文件夹（以半角分号隔开）");
+            BundleLuaDirStr = GUILayout.TextField(BundleLuaDirStr);
+            if (BundleLuaDirStr2 != BundleLuaDirStr)
+            {
+                BundleLuaDirStr2 = BundleLuaDirStr;
+                WriteFile();
+                ParseAllDir();
+            }
+            GUILayout.Label("不需要打ab包的文件夹（以半角分号隔开）");
+            BundleFileCullingDirStr = GUILayout.TextField(BundleFileCullingDirStr);
+            if (BundleFileCullingDirStr2 != BundleFileCullingDirStr)
+            {
+                BundleFileCullingDirStr2 = BundleFileCullingDirStr;
+                WriteFile();
+                ParseAllDir();
+            }
+
+            EditorGUILayout.Space();
+            EditorGUILayout.Space();
+            GUILayout.Label("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+            GUILayout.Label("~~~~~~~~~~~~~~~~~~~~~~~~~分割线~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+            GUILayout.Label("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+            EditorGUILayout.Space();
+            EditorGUILayout.Space();
+
             GUILayout.Label("*打包的根目录文件夹:");
             GUILayout.TextArea(TheRootFolderName);
 
@@ -128,7 +253,7 @@ namespace LCG
             GUILayout.Label("检测cs、dll的路径");
             for (int i = 0; i < ScriptFolderPath.Count; i++)
             {
-                EditorGUILayout.LabelField((i + 1).ToString() + ":" + AssetFolder + ScriptFolderPath[i]);
+                EditorGUILayout.LabelField((i + 1).ToString() + ":" + AssetsFolder + ScriptFolderPath[i]);
             }
             EditorGUILayout.Space();
 
@@ -142,14 +267,14 @@ namespace LCG
             GUILayout.Label("需要场景打包的路径");
             for (int i = 0; i < BundleScenePath.Count; i++)
             {
-                EditorGUILayout.LabelField((i + 1).ToString() + ":" + AssetFolder + BundleScenePath[i]);
+                EditorGUILayout.LabelField((i + 1).ToString() + ":" + AssetsFolder + BundleScenePath[i]);
             }
             EditorGUILayout.Space();
 
             GUILayout.Label("需要lua打包的路径");
             for (int i = 0; i < BundleLuaPath.Count; i++)
             {
-                EditorGUILayout.LabelField((i + 1).ToString() + ":" + AssetFolder + BundleLuaPath[i]);
+                EditorGUILayout.LabelField((i + 1).ToString() + ":" + AssetsFolder + BundleLuaPath[i]);
             }
             EditorGUILayout.Space();
 
@@ -401,7 +526,7 @@ namespace LCG
             List<string> luaPathList = new List<string>();
             foreach (string path in ScriptFolderPath)
             {
-                string fullPath = AssetFolder + path;
+                string fullPath = AssetsFolder + path;
                 scriptPathList.AddRange(ABHelper.GetAllFilesPathInDir(fullPath));
             }
             foreach (string path in BundleFolderPath)
@@ -416,12 +541,12 @@ namespace LCG
             }
             foreach (string path in BundleScenePath)
             {
-                string fullPath = AssetFolder + path;
+                string fullPath = AssetsFolder + path;
                 sceneBundlePathList.AddRange(ABHelper.GetAllFilesPathInDir(fullPath));
             }
             foreach (string path in BundleLuaPath)
             {
-                string fullPath = AssetFolder + path;
+                string fullPath = AssetsFolder + path;
                 luaPathList.AddRange(ABHelper.GetAllFilesPathInDir(fullPath));
             }
             CurVersionFileType = new Dictionary<string, string>();
@@ -607,7 +732,7 @@ namespace LCG
                             AssetImporter.GetAtPath(path).assetBundleName = fileName;
                             break;
                         case "3":
-                            fileName = (ABHelper.GetFileFullPathWithoutFtype(path).Replace(AssetFolder, "")) + ".ab";
+                            fileName = (ABHelper.GetFileFullPathWithoutFtype(path).Replace(AssetsFolder, "")) + ".ab";
                             fileName = CreatFileUrlMd5(fileName);
                             AssetImporter.GetAtPath(path).assetBundleName = fileName;
                             break;
@@ -654,7 +779,7 @@ namespace LCG
                 }
             }
             System.GC.Collect();
-            
+
             return result;
         }
         private static void CreatVersionTxt()

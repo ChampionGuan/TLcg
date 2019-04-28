@@ -1,0 +1,3 @@
+UseAssetsDir=Lua;Scenes
+NotRemoveDir=Lua;UI;Audio;Video;Ignore
+NotRemoveFile=Resources/Prefabs/Misc/VideoPlayer.prefab;Scenes/Bootup.unity

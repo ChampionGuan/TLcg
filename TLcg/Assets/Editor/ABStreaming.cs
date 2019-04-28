@@ -9,12 +9,22 @@ namespace LCG
     public class ABStreaming : EditorWindow
     {
         private static EditorWindow TheWindow = null;
-        private static string AssetFolder = "Assets/";
+
+        private static string AssetsFolder = "Assets/";
         private static string ResFolder = "Assets/Resources/";
-        private static List<string> DoNotRemoveDir = new List<string>(new string[] { "Lua", "UI", "Audio", "Video" });
-        private static List<string> DoNotRemoveFile = new List<string>(new string[] { "Resources/Prefabs/Misc/VideoPlayer.prefab", "Scenes/Bootup.unity" });
-        private static List<string> AssetFilePath = new List<string>(new string[] { "Scenes", "Lua" });
-        private static List<string> ResourcesFilePath = new List<string>();
+
+        private static string UseAssetDirStr = "Lua;Scenes";
+        private static string UseAssetDirStr2;
+        private static string NotRemoveDirStr = "Lua;UI;Audio;Video;Ignore";
+        private static string NotRemoveDirStr2;
+        private static string NotRemoveFileStr = "Resources/Prefabs/Misc/VideoPlayer.prefab;Scenes/Bootup.unity";
+        private static string NotRemoveFileStr2;
+
+        private static List<string> NotRemoveDirList = new List<string>(new string[] { });
+        private static List<string> NotRemoveFileList = new List<string>(new string[] { });
+        private static List<string> UseAssetsDir = new List<string>(new string[] { });
+        private static List<string> RemoveResourcesDir = new List<string>();
+        private static List<string> RemoveAssetsDir = new List<string>();
 
         private static string[] TheVersionNum = new string[4] { "0", "0", "0", "0" };
         private static string TheRootFolderName = "tlcg";
@@ -23,9 +33,11 @@ namespace LCG
         [MenuItem("Tools/资源打包前处理")]
         public static void Build()
         {
+            ReadFile();
             RootFolderNmae();
             ParseTheVersion();
             FilesFilter();
+
             TheWindow = EditorWindow.GetWindow(typeof(ABStreaming), true, "打包前的资源处理");
         }
         void OnGUI()
@@ -67,14 +79,42 @@ namespace LCG
             }
 
             EditorGUILayout.Space();
-            GUILayout.Label("打包前，移除非必要资源，减小包体", EditorStyles.boldLabel);
-            for (int i = 0; i < ResourcesFilePath.Count; i++)
+            GUILayout.Label("有用的Assets下文件夹（以半角分号隔开）");
+            UseAssetDirStr = GUILayout.TextField(UseAssetDirStr);
+            if (UseAssetDirStr2 != UseAssetDirStr)
             {
-                EditorGUILayout.LabelField(ResFolder + ResourcesFilePath[i]);
+                UseAssetDirStr2 = UseAssetDirStr;
+                WriteFile();
+                ParseAllDir();
             }
-            for (int i = 0; i < AssetFilePath.Count; i++)
+
+            GUILayout.Label("不移出的文件夹（以半角分号隔开）");
+            NotRemoveDirStr = GUILayout.TextField(NotRemoveDirStr);
+            if (NotRemoveDirStr2 != NotRemoveDirStr)
             {
-                EditorGUILayout.LabelField(AssetFolder + AssetFilePath[i]);
+                NotRemoveDirStr2 = NotRemoveDirStr;
+                WriteFile();
+                ParseAllDir();
+            }
+
+            GUILayout.Label("不移出的文件（以半角分号隔开）");
+            NotRemoveFileStr = GUILayout.TextField(NotRemoveFileStr);
+            if (NotRemoveFileStr2 != NotRemoveFileStr)
+            {
+                NotRemoveFileStr2 = NotRemoveFileStr;
+                WriteFile();
+                ParseAllDir();
+            }
+
+            EditorGUILayout.Space();
+            GUILayout.Label("需要移出的文件夹路径，减小包体", EditorStyles.boldLabel);
+            for (int i = 0; i < RemoveResourcesDir.Count; i++)
+            {
+                EditorGUILayout.LabelField(ResFolder + RemoveResourcesDir[i]);
+            }
+            for (int i = 0; i < RemoveAssetsDir.Count; i++)
+            {
+                EditorGUILayout.LabelField(AssetsFolder + RemoveAssetsDir[i]);
             }
             if (GUILayout.Button("移出"))
             {
@@ -100,9 +140,74 @@ namespace LCG
             TheRootFolderName = version[1];
             TheApkFolderName = version[2];
         }
+        private static void ReadFile()
+        {
+            string s = ABHelper.ReadFile(Application.dataPath + "/Editor/ABStreaming.txt");
+            string[] sp = s.TrimEnd().Replace("\r", "").Split('\n');
+            string[] sp1;
+            foreach (var v in sp)
+            {
+                if (string.IsNullOrEmpty(v))
+                {
+                    continue;
+                }
+                sp1 = v.Split('=');
+
+                switch (sp1[0])
+                {
+                    case "UseAssetsDir": UseAssetDirStr = sp1[1]; break;
+                    case "NotRemoveDir": NotRemoveDirStr = sp1[1]; break;
+                    case "NotRemoveFile": NotRemoveFileStr = sp1[1]; break;
+                    default: break;
+                }
+            }
+        }
+        private static void WriteFile()
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append("UseAssetsDir=" + UseAssetDirStr + "\n");
+            sb.Append("NotRemoveDir=" + NotRemoveDirStr + "\n");
+            sb.Append("NotRemoveFile=" + NotRemoveFileStr + "\n");
+            ABHelper.WriteFile(Application.dataPath + "/Editor/ABStreaming.txt", sb.ToString().TrimEnd());
+        }
+        private static void ParseAllDir()
+        {
+            ParseDir(UseAssetDirStr, UseAssetsDir);
+            ParseDir(NotRemoveDirStr, NotRemoveDirList);
+            ParseDir(NotRemoveFileStr, NotRemoveFileList);
+            FilesFilter();
+        }
+        private static void ParseDir(string s, List<string> l)
+        {
+            string[] sp = s.Split(';');
+
+            l.Clear();
+            foreach (var v in sp)
+            {
+                if (string.IsNullOrEmpty(v))
+                {
+                    continue;
+                }
+                l.Add(v);
+            }
+        }
         private static void FilesFilter()
         {
-            ResourcesFilePath = new List<string>();
+            if (null == RemoveResourcesDir)
+            {
+                RemoveResourcesDir = new List<string>();
+            }
+            if (null == RemoveAssetsDir)
+            {
+                RemoveAssetsDir = new List<string>();
+            }
+            RemoveResourcesDir.Clear();
+            RemoveAssetsDir.Clear();
+
+            foreach (var v in UseAssetsDir)
+            {
+                RemoveAssetsDir.Add(v);
+            }
 
             DirectoryInfo dir = new DirectoryInfo(ResFolder);
             DirectoryInfo[] dirs = dir.GetDirectories();
@@ -111,18 +216,17 @@ namespace LCG
                 string fname = d.FullName.Replace(@"/", @"\");
                 string folderName = fname.Substring(fname.LastIndexOf(@"\") + 1);
 
-                ResourcesFilePath.Add(folderName);
+                RemoveResourcesDir.Add(folderName);
             }
-
-            foreach (var v in DoNotRemoveDir)
+            foreach (var v in NotRemoveDirList)
             {
-                if (ResourcesFilePath.Contains(v))
+                if (RemoveResourcesDir.Contains(v))
                 {
-                    ResourcesFilePath.Remove(v);
+                    RemoveResourcesDir.Remove(v);
                 }
-                if (AssetFilePath.Contains(v))
+                if (RemoveAssetsDir.Contains(v))
                 {
-                    AssetFilePath.Remove(v);
+                    RemoveAssetsDir.Remove(v);
                 }
             }
         }
@@ -155,7 +259,7 @@ namespace LCG
         }
         private static bool CheckRemoveDir(string name)
         {
-            foreach (var v1 in DoNotRemoveDir)
+            foreach (var v1 in NotRemoveDirList)
             {
                 if (name.StartsWith(v1.ToLower() + "/"))
                 {
@@ -332,6 +436,8 @@ namespace LCG
         }
         public static void AssetMoveout()
         {
+            ReadFile();
+            ParseAllDir();
             RootFolderNmae();
             ParseTheVersion();
             FilesFilter();
@@ -346,19 +452,19 @@ namespace LCG
             string path1;
             // ProjectSettings
             ABHelper.DirectoryCopy(string.Format("{0}/../{1}", Application.dataPath, "ProjectSettings"), path + "ProjectSettings");
-            foreach (var v in ResourcesFilePath)
+            foreach (var v in RemoveResourcesDir)
             {
                 path1 = ResFolder.Replace("Assets", "") + v;
                 ABHelper.DirectoryMove(Application.dataPath + path1, path + path1);
             }
-            foreach (var v in AssetFilePath)
+            foreach (var v in UseAssetsDir)
             {
-                path1 = AssetFolder.Replace("Assets", "") + v;
+                path1 = AssetsFolder.Replace("Assets", "") + v;
                 ABHelper.DirectoryMove(Application.dataPath + path1, path + path1);
             }
 
             string path2;
-            foreach (var v in DoNotRemoveFile)
+            foreach (var v in NotRemoveFileList)
             {
                 path1 = string.Format("{0}/../../../temp/{1}", Application.dataPath, v);
                 if (!File.Exists(path1))
@@ -381,6 +487,8 @@ namespace LCG
         }
         public static void AssetMovein()
         {
+            ReadFile();
+            ParseAllDir();
             RootFolderNmae();
             ParseTheVersion();
             FilesFilter();

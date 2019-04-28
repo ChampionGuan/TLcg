@@ -1,0 +1,5 @@
+ScriptDir=Scripts;3rdLibs
+BundleFolderDir=UI
+BundleSceneDir=Scenes
+BundleLuaDir=Lua
+BundleFileCullingDir=Video;Ignore
