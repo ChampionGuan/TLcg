@@ -174,7 +174,7 @@ namespace LCG
             string native = ABHelper.ReadFile(Application.streamingAssetsPath + "/native.txt");
             if (!string.IsNullOrEmpty(native))
             {
-                string[] names = native.Replace("\n", "").Split('\r');
+                string[] names = native.Split('\r');
                 foreach (var v in names)
                 {
                     string[] namess = v.Split(':');
@@ -245,7 +245,7 @@ namespace LCG
                 if (bytesLen > 50 * 1024 * 1024 || i == length - 1)
                 {
                     string zip = "native_" + index + ".zip";
-                    zipTxt.AppendLine(zip + ":" + bytesLen);
+                    zipTxt.Append(zip + ":" + bytesLen + "\r");
                     ABHelper.ZipFile(zipList, Application.streamingAssetsPath + "/" + zip, TheVersionNum[2] + "/");
                     index++;
                     bytesLen = 0;
@@ -257,6 +257,7 @@ namespace LCG
             ABHelper.WriteFile(Application.streamingAssetsPath + "/native.txt", zipTxt.ToString().TrimEnd());
             AssetDatabase.Refresh();
 
+            System.GC.Collect();
             Debug.Log("streamingAssets压缩文件生成成功！！压缩文件源路径：" + path);
         }
         public static void BuildAB(string platformName)
@@ -269,7 +270,7 @@ namespace LCG
             string native = ABHelper.ReadFile(Application.streamingAssetsPath + "/native.txt");
             if (!string.IsNullOrEmpty(native))
             {
-                string[] names = native.Replace("\n", "").Split('\r');
+                string[] names = native.Split('\r');
                 foreach (var v in names)
                 {
                     string p = Application.streamingAssetsPath + "/" + v;
@@ -316,16 +317,17 @@ namespace LCG
 
                 if (!v.EndsWith("version.ini"))
                 {
-                    txt.AppendLine(name1);
+                    txt.Append(name1 + "\r");
                 }
             }
             // version.ini 放置尾包！！
-            txt.AppendLine("version.ini");
+            txt.Append("version.ini");
 
             // 生成列表文件
             ABHelper.WriteFile(Application.streamingAssetsPath + "/native.txt", txt.ToString().TrimEnd());
             AssetDatabase.Refresh();
 
+            System.GC.Collect();
             Debug.Log("streamingAssets文件生成成功！！文件源路径：" + path);
         }
         public static void AssetMoveout()
@@ -374,6 +376,7 @@ namespace LCG
             AssetDatabase.Refresh();
             AssetDatabase.SaveAssets();
 
+            System.GC.Collect();
             Debug.Log("资源移出成功！！");
         }
         public static void AssetMovein()
@@ -394,6 +397,7 @@ namespace LCG
             AssetDatabase.Refresh();
             AssetDatabase.SaveAssets();
 
+            System.GC.Collect();
             Debug.Log("资源移入成功！！");
         }
     }

@@ -330,7 +330,7 @@ namespace LCG
             WWW native = new WWW(ABHelper.StreamingAssetsPath() + "native.txt");
             yield return native;
 
-            string[] files = native.text.Replace("\n", "").Split('\r');
+            string[] files = native.text.Split('\r');
             float length = files.Length;
             float index = 0;
             foreach (var v in files)
@@ -375,7 +375,7 @@ namespace LCG
             ABUnzip.Instance.InitUnzip();
             ABUnzip.Instance.unzipResult = PrepareAssetsResult;
             ABUnzip.Instance.unzipProcess = UnzipProcess;
-            string[] zipFiles = native.text.Replace("\n", "").Split('\r');
+            string[] zipFiles = native.text.Split('\r');
             float length = zipFiles.Length;
             float index = 0;
             foreach (var v in zipFiles)
@@ -444,7 +444,7 @@ namespace LCG
                 yield break;
             }
 
-            long fileSize = long.Parse(www.text.Replace("\n", "").Replace("\r", ""));
+            long fileSize = long.Parse(www.text);
             // Debug.LogFormat("需要下载文件的大小:{0}", fileSize);
 
             // 文件已下载

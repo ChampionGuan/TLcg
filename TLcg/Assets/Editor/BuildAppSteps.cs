@@ -137,11 +137,11 @@ namespace LCG
                             Directory.CreateDirectory(apkpathS);
                         }
 
-                        apkpath1 = string.Format("{0}/male7_v{1}.apk", apkpathS, m_versionNum.Id);
+                        apkpath1 = string.Format("{0}/male7_v{1}.apk", apkpathS, m_versionNum.Id1A2A3);
                         File.Copy(m_buildPath, apkpath1, true);
                         FileInfo file = new FileInfo(apkpath1);
 
-                        apkpath2 = string.Format("{0}/male7_v{1}.ini", apkpathS, m_versionNum.Id);
+                        apkpath2 = string.Format("{0}/male7_v{1}.ini", apkpathS, m_versionNum.Id1A2A3);
                         ABHelper.WriteFile(apkpath2, file.Length.ToString().TrimEnd());
 
                         Debug.Log("成功生成版本！！！！" + apkpath1);
@@ -245,6 +245,8 @@ namespace LCG
 
                 m_editorWindow.Close();
             }
+            System.GC.Collect();
+
             return result;
         }
         private static void BuildEnv(bool isDebug = false)

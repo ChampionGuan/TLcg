@@ -342,9 +342,9 @@ namespace LCG
         {
             string path = Application.dataPath + "/Resources/versionId.bytes";
             StringBuilder sb = new StringBuilder();
-            sb.AppendLine("ResVersion=" + version);
-            sb.AppendLine("ABFolderRoot=" + abRoot);
-            sb.AppendLine("ApkFolderRoot=" + apkRoot);
+            sb.Append("ResVersion=" + version + "\n");
+            sb.Append("ABFolderRoot=" + abRoot + "\n");
+            sb.Append("ApkFolderRoot=" + apkRoot);
             ABHelper.WriteFile(path, sb.ToString().TrimEnd());
         }
         public static void WriteVersionNumFile(string filePath, string num)

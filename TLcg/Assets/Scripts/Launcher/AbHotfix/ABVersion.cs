@@ -22,6 +22,10 @@ namespace LCG
         /// </summary>
         public string Id1A2 { get; private set; }
         /// <summary>
+        /// 前三位版号
+        /// </summary>
+        public string Id1A2A3 { get; private set; }
+        /// <summary>
         /// 第一位版号
         /// </summary>
         public string Id1st { get; private set; }
@@ -51,6 +55,7 @@ namespace LCG
             Id = v;
             IdArray = ABHelper.VersionNumSplit(Id);
             Id1A2 = string.Format("{0}.{1}", IdArray[0], IdArray[1]);
+            Id1A2A3 = string.Format("{0}.{1}", Id1A2, IdArray[2]);
             Id1st = IdArray[0];
             Id2nd = int.Parse(IdArray[1]);
             Id3rd = int.Parse(IdArray[2]);
@@ -61,6 +66,7 @@ namespace LCG
             Id = string.Format("{0}.{1}.{2}.{3}", v[0], v[1], v[2], v[3]);
             IdArray = v;
             Id1A2 = string.Format("{0}.{1}", IdArray[0], IdArray[1]);
+            Id1A2A3 = string.Format("{0}.{1}", Id1A2, IdArray[2]);
             Id1st = v[0];
             Id2nd = int.Parse(v[1]);
             Id3rd = int.Parse(v[2]);
@@ -71,6 +77,7 @@ namespace LCG
             Id = ABHelper.VersionNumCombine(v1, v2, v3, v4);
             IdArray = ABHelper.VersionNumSplit(Id);
             Id1A2 = string.Format("{0}.{1}", IdArray[0], IdArray[1]);
+            Id1A2A3 = string.Format("{0}.{1}", Id1A2, IdArray[2]);
             Id1st = v1;
             Id2nd = v2;
             Id3rd = v3;

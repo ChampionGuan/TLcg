@@ -19,6 +19,8 @@ TLcg/Builds/*
 TLcg/Temp/*
 TLcg/Assets/Resources/Lua/*
 TLcg/Assets/Resources/Lua.meta
+TLcg/Assets/StreamingAssets/*
+TLcg/Assets/StreamingAssets.meta
 TLcg/Assembly-CSharp.csproj
 TLcg/Assembly-CSharp-Editor.csproj
 TLcg/ab_TLcg/
