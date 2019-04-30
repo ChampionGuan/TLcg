@@ -639,8 +639,8 @@ namespace LCG
             List<string> updateFileList = new List<string>();
             List<string> updateScriptList = new List<string>();
 
-            Dictionary<string, string> lastVersionMd5List = ABHelper.ReadMd5File(PlatformABExportPath + "/" + (CurVersionNum - 1) + "/" + ABHelper.Md5FileName);
-            Dictionary<string, List<string>> lastVersionDependenciesList = ABHelper.ReadDependFile(PlatformABExportPath + "/" + (CurVersionNum - 1) + "/" + ABHelper.DependFileName);
+            Dictionary<string, string> lastVersionMd5List = ABHelper.ReadMd5FileByPath(PlatformABExportPath + "/" + (CurVersionNum - 1) + "/" + ABHelper.Md5FileName);
+            Dictionary<string, List<string>> lastVersionDependenciesList = ABHelper.ReadDependFileByPath(PlatformABExportPath + "/" + (CurVersionNum - 1) + "/" + ABHelper.DependFileName);
 
             foreach (KeyValuePair<string, List<string>> pair in CurVersionDependenciesList)
             {
@@ -791,7 +791,7 @@ namespace LCG
             fileUrl = CreatFileUrlMd5(ABHelper.ManifestFileName);
             ABHelper.WriteManifestFile(CurVersionABExportPath + fileUrl, ResFolder, CurVersionManifestList);
             // 创建版本文件
-            CurVersionList = ABHelper.ReadVersionFile(PlatformABExportPath + "/" + (CurVersionNum - 1) + "/" + ABHelper.VersionFileName);
+            CurVersionList = ABHelper.ReadVersionFileByPath(PlatformABExportPath + "/" + (CurVersionNum - 1) + "/" + ABHelper.VersionFileName);
             List<string> filePaths = ABHelper.GetAllFilesPathInDir(CurVersionABExportPath);
             foreach (string path in filePaths)
             {
@@ -827,7 +827,7 @@ namespace LCG
             }
             Debug.Log("Update Version From :" + preVersionNum + " to " + CurVersionNum);
 
-            Dictionary<string, List<string>> preVersionMd5 = ABHelper.ReadVersionFile(PlatformABExportPath + "/" + preVersionNum.ToString() + "/" + ABHelper.VersionFileName);
+            Dictionary<string, List<string>> preVersionMd5 = ABHelper.ReadVersionFileByPath(PlatformABExportPath + "/" + preVersionNum.ToString() + "/" + ABHelper.VersionFileName);
 
             // 需要更新的文件
             Dictionary<string, string> updateFiles = new Dictionary<string, string>();

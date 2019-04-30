@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Collections;
 using System.IO;
 using UnityEngine;
 using System;
@@ -96,15 +97,11 @@ namespace LCG
         {
             get; private set;
         }
+        public List<string> NativeInfoList
+        {
+            get; private set;
+        }
         public string VersionFolderPath
-        {
-            get; private set;
-        }
-        public string VersionNumFilePath
-        {
-            get; private set;
-        }
-        public string ManifestFilePath
         {
             get; private set;
         }
@@ -112,7 +109,11 @@ namespace LCG
         {
             get; private set;
         }
-        public bool IsVersionNumFileExist
+        public string NativeFilePath
+        {
+            get; private set;
+        }
+        public bool IsNativeVersion
         {
             get; private set;
         }
@@ -128,27 +129,38 @@ namespace LCG
         {
             get
             {
-                return IsVersionNumFileExist && IsManifestFileExist && IsVersionFileExist;
+                return IsManifestFileExist && IsVersionFileExist;
             }
         }
-        public VersionInfo(VersionNum versionId)
+        public VersionInfo(VersionNum versionId, bool isNativeVersion = false)
         {
             VersionId = versionId;
+            IsNativeVersion = isNativeVersion;
 
-            VersionFolderPath = string.Format("{0}/{1}/{2}", ABHelper.AppTempCachePath, VersionId.Id1A2, VersionId.Id3rd.ToString());
-
-            VersionFilePath = string.Format("{0}/{1}", VersionFolderPath, ABHelper.VersionFileName);
-            IsVersionFileExist = File.Exists(VersionFilePath);
-
-            VersionNumFilePath = GetABFullPath(ABHelper.VersionNumFileName);
-            IsVersionNumFileExist = null == VersionNumFilePath ? false : File.Exists(VersionNumFilePath);
-
-            ManifestFilePath = GetABFullPath(ABHelper.ManifestFileName);
-            IsManifestFileExist = null == ManifestFilePath ? false : File.Exists(ManifestFilePath);
-
-            if (IsValid)
+            if (isNativeVersion)
             {
-                VersionId.Update(ABHelper.ReadVersionNumFile(VersionNumFilePath));
+                VersionFolderPath = ABHelper.AppNativeVersionPath;
+                VersionFilePath = string.Format("{0}/{1}", VersionFolderPath, ABHelper.VersionFileName);
+                NativeFilePath = string.Format("{0}/{1}", VersionFolderPath, ABHelper.NativeFileName);
+                IsVersionFileExist = true;
+                IsManifestFileExist = true;
+            }
+            else
+            {
+                bool fromNativePath = true;
+                VersionFolderPath = string.Format("{0}/{1}/{2}", ABHelper.AppVersionPath, VersionId.Id1A2, VersionId.Id3rd.ToString());
+                VersionFilePath = string.Format("{0}/{1}", VersionFolderPath, ABHelper.VersionFileName);
+                IsVersionFileExist = File.Exists(VersionFilePath);
+                IsManifestFileExist = !string.IsNullOrEmpty(GetABFullPath(ABHelper.ManifestFileName, ref fromNativePath));
+
+                if (IsValid)
+                {
+                    string versionNumPath = GetABFullPath(ABHelper.VersionNumFileName, ref fromNativePath);
+                    if (!string.IsNullOrEmpty(versionNumPath))
+                    {
+                        VersionId.Update(ABHelper.ReadVersionNumFileByPath(versionNumPath));
+                    }
+                }
             }
         }
         public void ParseVersionList()
@@ -158,13 +170,37 @@ namespace LCG
                 Debug.LogFormat("<color=#FFFF33> 检测不到version文件:{0} ,需要从服务器更新</color>", VersionFilePath);
                 return;
             }
-            VersionInfoList = ABHelper.ReadVersionFile(VersionFilePath);
+            VersionInfoList = ABHelper.ReadVersionFileByPath(VersionFilePath);
         }
-        public string GetAbRelativePath(string abPath)
+        public IEnumerator ParseVersionListByWWW()
+        {
+            if (!IsVersionFileExist)
+            {
+                Debug.LogFormat("<color=#FFFF33> 检测不到version文件:{0} ,需要从服务器更新</color>", VersionFilePath);
+                yield break;
+            }
+
+            WWW www = new WWW(VersionFilePath);
+            yield return www;
+            VersionInfoList = ABHelper.ReadVersionFileByBytes(www.bytes);
+        }
+        public IEnumerator ParseNatvieListByWWW()
+        {
+            if (string.IsNullOrEmpty(NativeFilePath))
+            {
+                Debug.LogFormat("<color=#FFFF33> 检测不到Native文件路径:{0} </color>", NativeFilePath);
+                yield break;
+            }
+
+            WWW www = new WWW(NativeFilePath);
+            yield return www;
+            NativeInfoList = ABHelper.ReadNativeFileByString(www.text);
+        }
+        public string GetAbRelativePath(string abPath, ref bool fromNativePath)
         {
             if (null == VersionInfoList)
             {
-                VersionInfoList = ABHelper.ReadVersionFile(VersionFilePath);
+                ParseVersionList();
             }
 
             string abRelativePath = "";
@@ -172,19 +208,49 @@ namespace LCG
 
             List<string> abVerInfo = null;
             VersionInfoList.TryGetValue(abPath, out abVerInfo);
-            if (null != abVerInfo && int.Parse(abVerInfo[1]) >= ABVersion.OriginalVersionId.Id3rd)
+            if (null != abVerInfo)
             {
-                abRelativePath = string.Format("{0}/{1}", abVerInfo[1], abVerInfo[3]);
+                int id = int.Parse(abVerInfo[1]);
+                if (id < ABVersion.OriginalVersionId.Id3rd)
+                {
+                    return abRelativePath;
+                }
+
+                fromNativePath = id == ABVersion.OriginalVersionId.Id3rd;
+                if (fromNativePath)
+                {
+                    abRelativePath = NativeInfoList.Contains(abVerInfo[3]) ? abVerInfo[3] : null;
+                }
+                else
+                {
+                    abRelativePath = string.Format("{0}/{1}", abVerInfo[1], abVerInfo[3]);
+                }
             }
             return abRelativePath;
         }
-        public string GetABFullPath(string abPath)
+        public string GetABFullPath(string abPath, ref bool fromNativePath)
         {
-            string abFullPath = string.Format("{0}/{1}/{2}", ABHelper.AppTempCachePath, VersionId.Id1A2, GetAbRelativePath(abPath));
-            if (!File.Exists(abFullPath))
+            string abFullPath = null;
+            string abRelativePath = GetAbRelativePath(abPath, ref fromNativePath);
+
+            if (string.IsNullOrEmpty(abRelativePath))
             {
-                return null;
+                return abFullPath;
             }
+
+            if (fromNativePath)
+            {
+                abFullPath = string.Format("{0}/{1}", ABHelper.AppNativeVersionPath, abRelativePath);
+            }
+            else
+            {
+                abFullPath = string.Format("{0}/{1}/{2}", ABHelper.AppVersionPath, VersionId.Id1A2, abRelativePath);
+                if (!File.Exists(abFullPath))
+                {
+                    abFullPath = null;
+                }
+            }
+
             return abFullPath;
         }
     }
@@ -263,13 +329,15 @@ namespace LCG
         // 初始化AB
         public static void InitABVersion()
         {
-            Debug.Log(ABHelper.AppTempCachePath);
+            Debug.Log(ABHelper.AppVersionPath);
+            Debug.Log(ABHelper.AppNativeVersionPath);
+
             // 实例化
             LocalVersionList = new Dictionary<int, VersionInfo>();
             // 需要的文件夹
-            if (!Directory.Exists(ABHelper.AppTempCachePath))
+            if (!Directory.Exists(ABHelper.AppVersionPath))
             {
-                Directory.CreateDirectory(ABHelper.AppTempCachePath);
+                Directory.CreateDirectory(ABHelper.AppVersionPath);
             }
 
             // 版号信息
@@ -278,11 +346,11 @@ namespace LCG
             ABHelper.ABFolderRoot = version[1];
             ABHelper.ApkFolderRoot = version[2];
 
-            // 当前版号第三位在初始时-1（mini包）
-            CurVersionId = new VersionNum(OriginalVersionId.Id1st, OriginalVersionId.Id2nd, OriginalVersionId.Id3rd - 1, OriginalVersionId.Id4th);
+            // 当前版号
+            CurVersionId = new VersionNum(OriginalVersionId.Id1st, OriginalVersionId.Id2nd, OriginalVersionId.Id3rd, OriginalVersionId.Id4th);
 
             // 本地更新地址
-            LocalStorgePath = string.Format("{0}/{1}", ABHelper.AppTempCachePath, OriginalVersionId.Id1A2);
+            LocalStorgePath = string.Format("{0}/{1}", ABHelper.AppVersionPath, OriginalVersionId.Id1A2);
             if (!Directory.Exists(LocalStorgePath))
             {
                 Directory.CreateDirectory(LocalStorgePath);
@@ -307,6 +375,9 @@ namespace LCG
         {
             LocalVersionList.Clear();
 
+            // 首包
+            LocalVersionList.Add(OriginalVersionId.Id3rd, new VersionInfo(OriginalVersionId, true));
+
             // 获取本地的所有版本
             DirectoryInfo dirInfo = new DirectoryInfo(LocalStorgePath);
             foreach (DirectoryInfo info in dirInfo.GetDirectories())
@@ -316,7 +387,7 @@ namespace LCG
                 {
                     continue;
                 }
-                if (id3rd < OriginalVersionId.Id3rd)
+                if (id3rd <= OriginalVersionId.Id3rd)
                 {
                     continue;
                 }

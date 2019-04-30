@@ -59,20 +59,12 @@ namespace LCG
             {
                 return false;
             }
-            if (ABHelper.IngoreHotfix)
+            if (ABHelper.IgnoreHotfix)
             {
                 return false;
             }
 
-            // 处理状态
-            onHandleState = handleState;
-            // 开始
-            onHandleState(new ABHelper.VersionArgs(ABHelper.EVersionState.PrepareAssets));
-            // 当前版本
-            onHandleState(new ABHelper.VersionArgs(ABHelper.EVersionState.ClientVersionId, ABVersion.OriginalVersionId.Id));
-            // 移动文件
-            LauncherEngine.Instance.StartCoroutine(MoveNativeZipFile());
-            return true;
+            return false;
         }
         /// <summary>
         /// 检测更新
@@ -92,14 +84,7 @@ namespace LCG
             // 检测本地资源
             onHandleState(new ABHelper.VersionArgs(ABHelper.EVersionState.CheckLocalVersion));
             // 客户端版本
-            if (ABVersion.CurVersionId.Id3rd < ABVersion.OriginalVersionId.Id3rd)
-            {
-                onHandleState(new ABHelper.VersionArgs(ABHelper.EVersionState.ClientVersionId, ABVersion.OriginalVersionId.Id));
-            }
-            else
-            {
-                onHandleState(new ABHelper.VersionArgs(ABHelper.EVersionState.ClientVersionId, ABVersion.CurVersionId.Id));
-            }
+            onHandleState(new ABHelper.VersionArgs(ABHelper.EVersionState.ClientVersionId, ABVersion.CurVersionId.Id));
 
             if (!string.IsNullOrEmpty(versionId))
             {
@@ -153,7 +138,7 @@ namespace LCG
         /// <returns></returns>
         public bool IsNeedGoStore(string versionNum = null)
         {
-            if (ABHelper.IngoreHotfix)
+            if (ABHelper.IgnoreHotfix)
             {
                 return false;
             }
@@ -185,7 +170,7 @@ namespace LCG
         /// <returns></returns>
         public bool IsNeedHotter(string versionNum = null)
         {
-            if (ABHelper.IngoreHotfix)
+            if (ABHelper.IgnoreHotfix)
             {
                 return false;
             }
@@ -212,7 +197,7 @@ namespace LCG
 
             while (true)
             {
-                if (id3rd < ABVersion.OriginalVersionId.Id3rd)
+                if (id3rd <= ABVersion.OriginalVersionId.Id3rd)
                 {
                     break;
                 }
@@ -314,122 +299,6 @@ namespace LCG
 
             HotfixComplete();
             yield return null;
-        }
-        private IEnumerator MoveNativeFile()
-        {
-            if (Directory.Exists(ABHelper.AppTempCachePath))
-            {
-                Directory.Delete(ABHelper.AppTempCachePath, true);
-            }
-            if (!Directory.Exists(ABVersion.LocalStorgePath))
-            {
-                Directory.CreateDirectory(ABVersion.LocalStorgePath);
-            }
-            ABVersion.LoadAllVersionInfo();
-
-            WWW native = new WWW(ABHelper.StreamingAssetsPath() + "native.txt");
-            yield return native;
-
-            string[] files = native.text.Split('\r');
-            float length = files.Length;
-            float index = 0;
-            foreach (var v in files)
-            {
-                if (string.IsNullOrEmpty(v))
-                {
-                    continue;
-                }
-                index++;
-
-                // 读
-                WWW file = new WWW(ABHelper.StreamingAssetsPath() + v);
-                yield return file;
-                if (!string.IsNullOrEmpty(file.error))
-                {
-                    PrepareAssetsResult(false, file.error);
-                    yield break;
-                }
-
-                // 写
-                ABHelper.WriteFileByBytes(ABVersion.LocalStorgePath + "/" + ABVersion.OriginalVersionId.Id3rd + "/" + v, file.bytes);
-                MovefileProcess(index / length);
-            }
-
-            PrepareAssetsResult(true);
-        }
-        private IEnumerator MoveNativeZipFile()
-        {
-            if (Directory.Exists(ABHelper.AppTempCachePath))
-            {
-                Directory.Delete(ABHelper.AppTempCachePath, true);
-            }
-            if (!Directory.Exists(ABVersion.LocalStorgePath))
-            {
-                Directory.CreateDirectory(ABVersion.LocalStorgePath);
-            }
-            ABVersion.LoadAllVersionInfo();
-
-            WWW native = new WWW(ABHelper.StreamingAssetsPath() + "native.txt");
-            yield return native;
-
-            ABUnzip.Instance.InitUnzip();
-            ABUnzip.Instance.unzipResult = PrepareAssetsResult;
-            ABUnzip.Instance.unzipProcess = UnzipProcess;
-            string[] zipFiles = native.text.Split('\r');
-            float length = zipFiles.Length;
-            float index = 0;
-            foreach (var v in zipFiles)
-            {
-                if (string.IsNullOrEmpty(v))
-                {
-                    continue;
-                }
-                string[] zipInfo = v.Split(':');
-
-                // 读
-                string from = ABHelper.StreamingAssetsPath() + zipInfo[0];
-                WWW zip = new WWW(from);
-                while (!zip.isDone)
-                {
-                    if (!string.IsNullOrEmpty(zip.error))
-                    {
-                        HotterResult(false, zip.error);
-                        yield break;
-                    }
-                    ;
-                    MovefileProcess((zip.progress * 0.5f + index) / length);
-                    yield return null;
-                }
-
-                // 写
-                string to = ABVersion.LocalStorgePath + "/" + zipInfo[0];
-                FileStream fs = new FileStream(to, FileMode.OpenOrCreate);
-                int offset = (int)fs.Length;
-                int total = zip.bytes.Length - 1;
-                int interval = 10000000;
-                fs.Seek(offset, SeekOrigin.Current);
-                while (offset < total)
-                {
-                    if (total - offset < interval)
-                    {
-                        interval = total - offset;
-                    }
-                    fs.Write(zip.bytes, offset, interval);
-                    offset += interval;
-                    MovefileProcess((((offset / (float)total) * 0.5f + 0.5f) + index) / length);
-                    yield return null;
-                }
-                index += 1;
-                fs.Flush();
-                fs.Dispose();
-
-                // 解压
-                string zipFileSuffix = zipInfo[0].Substring(zipInfo[0].LastIndexOf("."));
-                string zipFileName = zipInfo[0].Substring(0, zipInfo[0].LastIndexOf("."));
-                string zipFileRemoteUrl = string.Format("{0}/{1}{2}", ABVersion.LocalStorgePath, zipFileName, zipFileSuffix);
-                ABUnzip.Instance.CreateUnzipTask(ABVersion.LocalStorgePath, zipFileRemoteUrl, zipFileName, null, long.Parse(zipInfo[1]));
-            }
-            ABUnzip.Instance.BeginUnzip();
         }
         private IEnumerator ShowApkDownloadInfo(string remoteUrl, string apkName)
         {
@@ -583,25 +452,6 @@ namespace LCG
             {
                 // 热更结束
                 HotfixComplete();
-            }
-            else
-            {
-                // Debug.Log("资源更新异常！！" + error);
-                // todo 异常，弹框再试一次，或者退出app
-                onHandleState(new ABHelper.VersionArgs(ABHelper.EVersionState.UnknowError, error));
-                onHandleState = null;
-            }
-        }
-        private void PrepareAssetsResult(bool result, string error = null)
-        {
-            if (result)
-            {
-                // 设置当前使用的版本
-                ABVersion.SetCursVersionNum(ABVersion.OriginalVersionId);
-                // 当前版本
-                onHandleState(new ABHelper.VersionArgs(ABHelper.EVersionState.ClientVersionId, ABVersion.CurVersionId.Id));
-                // 首次进入完成
-                onHandleState(new ABHelper.VersionArgs(ABHelper.EVersionState.PrepareAssetsComplete));
             }
             else
             {

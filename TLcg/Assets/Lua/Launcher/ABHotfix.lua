@@ -462,7 +462,7 @@ local function AutofixHandle(value)
 end
 
 function ABHotfix.Bootup(over)
-    CSharp.ABHelper.IngoreHotfix = Config.IngoreHotfix
+    CSharp.ABHelper.IgnoreHotfix = Config.IgnoreHotfix
     -- 初始化
     ABHotfix.Initialize()
     -- 播放闪屏

@@ -121,7 +121,7 @@ namespace LCG
                 else
                 {
                     // 移入ab
-                    ABStreaming.BuildABZip(ABHelper.AndroidPlatform);
+                    ABStreaming.BuildNativeAB(ABHelper.AndroidPlatform);
                     // 移出资源
                     ABStreaming.AssetMoveout();
                     // 将文件移至指定位置！！！

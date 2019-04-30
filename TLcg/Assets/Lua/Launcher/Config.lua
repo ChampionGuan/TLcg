@@ -31,5 +31,5 @@ return {
             Loop = true
         }
     },
-    IngoreHotfix = false,
+    IgnoreHotfix = false,
 }

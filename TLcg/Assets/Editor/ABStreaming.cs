@@ -46,35 +46,17 @@ namespace LCG
             GUILayout.Label("打包前，生成ab 资源包 至streamingAssets", EditorStyles.boldLabel);
             if (GUILayout.Button("android"))
             {
-                BuildAB(ABHelper.AndroidPlatform);
+                BuildNativeAB(ABHelper.AndroidPlatform);
                 TheWindow.Close();
             }
             if (GUILayout.Button("ios"))
             {
-                BuildAB(ABHelper.IosPlatform);
+                BuildNativeAB(ABHelper.IosPlatform);
                 TheWindow.Close();
             }
             if (GUILayout.Button("win"))
             {
-                BuildAB(ABHelper.WinPlatform);
-                TheWindow.Close();
-            }
-
-            EditorGUILayout.Space();
-            GUILayout.Label("打包前，生成ab zip资源包 至streamingAssets", EditorStyles.boldLabel);
-            if (GUILayout.Button("android-zip"))
-            {
-                BuildABZip(ABHelper.AndroidPlatform);
-                TheWindow.Close();
-            }
-            if (GUILayout.Button("ios-zip"))
-            {
-                BuildABZip(ABHelper.IosPlatform);
-                TheWindow.Close();
-            }
-            if (GUILayout.Button("win-zip"))
-            {
-                BuildABZip(ABHelper.WinPlatform);
+                BuildNativeAB(ABHelper.WinPlatform);
                 TheWindow.Close();
             }
 
@@ -230,7 +212,7 @@ namespace LCG
                 }
             }
         }
-        private static Dictionary<string, string> ReadVersionFile(string filePath)
+        private static Dictionary<string, string> ReadVersionFileByPath(string filePath)
         {
             Dictionary<string, string> versionInfo = new Dictionary<string, string>();
 
@@ -268,27 +250,29 @@ namespace LCG
             }
             return true;
         }
-        public static void BuildABZip(string platformName)
+        public static void BuildNativeAB(string platformName)
         {
+            ReadFile();
+            ParseAllDir();
             RootFolderNmae();
             ParseTheVersion();
             FilesFilter();
 
+            string nativePath = string.Format("{0}/{1}", ABHelper.AppNativeVersionPath, ABHelper.NativeFileName);
+
             // 删
-            string native = ABHelper.ReadFile(Application.streamingAssetsPath + "/native.txt");
-            if (!string.IsNullOrEmpty(native))
+            List<string> nativeList = ABHelper.ReadNativeFileByPath(nativePath);
+            foreach (var v in nativeList)
             {
-                string[] names = native.Split('\r');
-                foreach (var v in names)
+                string p = string.Format("{0}/{1}", ABHelper.AppNativeVersionPath, v);
+                if (File.Exists(p))
                 {
-                    string[] namess = v.Split(':');
-                    string p = Application.streamingAssetsPath + "/" + namess[0];
-                    if (File.Exists(p))
-                    {
-                        File.Delete(p);
-                    }
+                    File.Delete(p);
                 }
-                File.Delete(Application.streamingAssetsPath + "/native.txt");
+            }
+            if (File.Exists(nativePath))
+            {
+                File.Delete(nativePath);
             }
 
             // 增
@@ -298,108 +282,13 @@ namespace LCG
                 Debug.LogError("路径不存在：" + path);
                 return;
             }
-            if (!Directory.Exists(Application.streamingAssetsPath))
+            if (!Directory.Exists(ABHelper.AppNativeVersionPath))
             {
-                Directory.CreateDirectory(Application.streamingAssetsPath);
+                Directory.CreateDirectory(ABHelper.AppNativeVersionPath);
             }
-
-            int index = 0;
-            long bytesLen = 0;
-            string versionpath = null;
-            List<string> zipList = new List<string>();
+            Dictionary<string, string> versionInfo = ReadVersionFileByPath(path + "/version.ini");
             List<string> files = ABHelper.GetAllFilesPathInDir(path);
-            Dictionary<string, string> versionInfo = ReadVersionFile(path + "/version.ini");
-            StringBuilder zipTxt = new StringBuilder();
-            int length = files.Count;
-            string name1 = "";
-            string path1 = "";
-            for (int i = 0; i < length; i++)
-            {
-                // 过滤 ui，lua和audio文件
-                path1 = files[i].Replace("\\", "/");
-                name1 = ABHelper.GetFileName(path1);
-                if (versionInfo.ContainsKey(name1))
-                {
-                    if (!CheckRemoveDir(versionInfo[name1]))
-                    {
-                        continue;
-                    }
-                }
-
-                // version.ini 放置尾包！！
-                if (i != length - 1 && files[i].EndsWith("version.ini"))
-                {
-                    versionpath = files[i];
-                    continue;
-                }
-
-                FileInfo f = new FileInfo(files[i]);
-                bytesLen += f.Length;
-                zipList.Add(files[i]);
-
-                // version.ini 放置尾包！！
-                if (!string.IsNullOrEmpty(versionpath))
-                {
-                    FileInfo v = new FileInfo(versionpath);
-                    bytesLen += v.Length;
-                    zipList.Add(versionpath);
-                }
-
-                // 50m一个压缩包
-                if (bytesLen > 50 * 1024 * 1024 || i == length - 1)
-                {
-                    string zip = "native_" + index + ".zip";
-                    zipTxt.Append(zip + ":" + bytesLen + "\r");
-                    ABHelper.ZipFile(zipList, Application.streamingAssetsPath + "/" + zip, TheVersionNum[2] + "/");
-                    index++;
-                    bytesLen = 0;
-                    zipList.Clear();
-                }
-            }
-
-            // 生成列表文件
-            ABHelper.WriteFile(Application.streamingAssetsPath + "/native.txt", zipTxt.ToString().TrimEnd());
-            AssetDatabase.Refresh();
-
-            System.GC.Collect();
-            Debug.Log("streamingAssets压缩文件生成成功！！压缩文件源路径：" + path);
-        }
-        public static void BuildAB(string platformName)
-        {
-            RootFolderNmae();
-            ParseTheVersion();
-            FilesFilter();
-
-            // 删
-            string native = ABHelper.ReadFile(Application.streamingAssetsPath + "/native.txt");
-            if (!string.IsNullOrEmpty(native))
-            {
-                string[] names = native.Split('\r');
-                foreach (var v in names)
-                {
-                    string p = Application.streamingAssetsPath + "/" + v;
-                    if (File.Exists(p))
-                    {
-                        File.Delete(p);
-                    }
-                }
-                File.Delete(Application.streamingAssetsPath + "/native.txt");
-            }
-
-            // 增
-            string path = string.Format("{0}/../../../assetBundle/{1}/{2}/{3}.{4}/HotterZip/{5}-{6}/{7}", Application.dataPath, TheRootFolderName, platformName, TheVersionNum[0], TheVersionNum[1], -1, TheVersionNum[2], TheVersionNum[2]);
-            if (!Directory.Exists(path))
-            {
-                Debug.LogError("路径不存在：" + path);
-                return;
-            }
-            if (!Directory.Exists(Application.streamingAssetsPath))
-            {
-                Directory.CreateDirectory(Application.streamingAssetsPath);
-            }
-            Dictionary<string, string> versionInfo = ReadVersionFile(path + "/version.ini");
-            List<string> files = ABHelper.GetAllFilesPathInDir(path);
-            StringBuilder txt = new StringBuilder();
+            nativeList.Clear();
             string name1 = "";
             string path1 = "";
             string path2 = "";
@@ -416,19 +305,19 @@ namespace LCG
                     }
                 }
 
-                path2 = Application.streamingAssetsPath + "/" + name1;
+                path2 = ABHelper.AppNativeVersionPath + "/" + name1;
                 File.Copy(path1, path2, true);
 
                 if (!v.EndsWith("version.ini"))
                 {
-                    txt.Append(name1 + "\r");
+                    nativeList.Add(name1);
                 }
             }
             // version.ini 放置尾包！！
-            txt.Append("version.ini");
+            nativeList.Add("version.ini");
 
             // 生成列表文件
-            ABHelper.WriteFile(Application.streamingAssetsPath + "/native.txt", txt.ToString().TrimEnd());
+            ABHelper.WriteNativeFile(nativePath, nativeList);
             AssetDatabase.Refresh();
 
             System.GC.Collect();

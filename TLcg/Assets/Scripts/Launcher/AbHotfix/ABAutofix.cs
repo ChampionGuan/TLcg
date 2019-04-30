@@ -41,7 +41,7 @@ namespace LCG
         public void Repair(bool isDeep, Action<ABHelper.VersionArgs> handleState)
         {
             onHandleState = handleState;
-            if (ABHelper.IngoreHotfix)
+            if (ABHelper.IgnoreHotfix)
             {
                 onHandleState(new ABHelper.VersionArgs(ABHelper.EVersionState.AutofixComplete));
                 onHandleState = null;
@@ -52,13 +52,22 @@ namespace LCG
             isDeepFix = isDeep;
             // 客户端版本
             onHandleState(new ABHelper.VersionArgs(ABHelper.EVersionState.ClientVersionId, ABVersion.CurVersionId.Id));
-            // 网络不可达检测
-            if (Application.internetReachability == NetworkReachability.NotReachable)
+            // 和本地发包时的版号一致，不许更新
+            if (ABVersion.CurVersionId.Id3rd == ABVersion.OriginalVersionId.Id3rd)
             {
-                onHandleState(new ABHelper.VersionArgs(ABHelper.EVersionState.Unreachable));
-                return;
+                // 检测完成
+                FixResult(true);
             }
-            LauncherEngine.Instance.StartCoroutine(DownloadVersion());
+            else
+            {
+                // 网络不可达检测
+                if (Application.internetReachability == NetworkReachability.NotReachable)
+                {
+                    onHandleState(new ABHelper.VersionArgs(ABHelper.EVersionState.Unreachable));
+                    return;
+                }
+                LauncherEngine.Instance.StartCoroutine(DownloadVersion());
+            }
         }
         private IEnumerator DownloadVersion()
         {
@@ -95,10 +104,11 @@ namespace LCG
             {
                 key = versionFileName[index];
                 List<string> value = ABVersion.CurVersionInfo.VersionInfoList[key];
-                if (int.Parse(value[1]) >= ABVersion.OriginalVersionId.Id3rd)
+                if (int.Parse(value[1]) > ABVersion.OriginalVersionId.Id3rd)
                 {
-                    abFullPath = ABVersion.CurVersionInfo.GetABFullPath(key);
-                    if (ABHelper.BuildMD5ByFile(abFullPath) != value[0])
+                    bool fromNativePath = true;
+                    abFullPath = ABVersion.CurVersionInfo.GetABFullPath(key, ref fromNativePath);
+                    if (!fromNativePath && ABHelper.BuildMD5ByFile(abFullPath) != value[0])
                     {
                         exceptionList.Add(key, value);
                         downloadSize += long.Parse(value[2]);
@@ -135,7 +145,8 @@ namespace LCG
                         ABDownload.Instance.downloadResult = FixResult;
                         ABDownload.Instance.downloadCountProcess = DownloadPorcess;
 
-                        string relativePath = ABVersion.CurVersionInfo.GetAbRelativePath(pair.Key);
+                        bool fromVersionPath = true;
+                        string relativePath = ABVersion.CurVersionInfo.GetAbRelativePath(pair.Key, ref fromVersionPath);
                         string fileSuffix = relativePath.Contains(".") ? relativePath.Substring(relativePath.LastIndexOf(".")) : "";
                         string fileName = ABHelper.GetFileNameWithoutSuffix(relativePath);
                         string remoteUrl = string.Format("{0}{1}", ABVersion.RemoteUrlPlatform, relativePath);
@@ -165,7 +176,7 @@ namespace LCG
         private void CollectRedundantDirectorys()
         {
             // 获取本地的所有版本
-            DirectoryInfo dirInfo = new DirectoryInfo(ABHelper.AppTempCachePath);
+            DirectoryInfo dirInfo = new DirectoryInfo(ABHelper.AppVersionPath);
             DirectoryInfo[] dirInfos = dirInfo.GetDirectories();
             foreach (DirectoryInfo info in dirInfos)
             {
@@ -201,12 +212,13 @@ namespace LCG
                 needFilePath.Add(ABVersion.CurVersionInfo.VersionFilePath);
                 foreach (var value in ABVersion.CurVersionInfo.VersionInfoList)
                 {
-                    if (int.Parse(value.Value[1]) < ABVersion.OriginalVersionId.Id3rd)
+                    if (int.Parse(value.Value[1]) <= ABVersion.OriginalVersionId.Id3rd)
                     {
                         continue;
                     }
-                    string path = ABVersion.CurVersionInfo.GetABFullPath(value.Key);
-                    if (!string.IsNullOrEmpty(path))
+                    bool fromNativePath = true;
+                    string path = ABVersion.CurVersionInfo.GetABFullPath(value.Key, ref fromNativePath);
+                    if (!fromNativePath && !string.IsNullOrEmpty(path))
                     {
                         needFilePath.Add(path);
                     }

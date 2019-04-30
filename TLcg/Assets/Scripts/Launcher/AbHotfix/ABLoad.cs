@@ -158,12 +158,27 @@ namespace LCG
         {
             m_nowLoadTaskCount = 0;
             m_maxLoadTaskCount = 10;
+
             if (null == ABReferenceMap)
             {
                 ABReferenceMap = new Dictionary<string, ABReference>();
             }
-            // 加载清单文件
-            yield return LauncherEngine.Instance.StartCoroutine(LoadManifest());
+
+            if (null != ABVersion.CurVersionInfo && ABVersion.CurVersionInfo.IsValid)
+            {
+                // 首包
+                if (ABVersion.CurVersionInfo.IsNativeVersion)
+                {
+                    yield return LauncherEngine.Instance.StartCoroutine(ABVersion.CurVersionInfo.ParseVersionListByWWW());
+                    yield return LauncherEngine.Instance.StartCoroutine(ABVersion.CurVersionInfo.ParseNatvieListByWWW());
+                }
+                // 清单文件
+                bool fromNativePath = true;
+                WWW www = new WWW(ABVersion.CurVersionInfo.GetABFullPath(ABHelper.ManifestFileName, ref fromNativePath));
+                yield return www;
+                ABManifest = ABHelper.ReadManifestFileByBytes(www.bytes);
+            }
+
             // 初始化完成，可进行后续操作
             if (null != finish)
             {
@@ -463,7 +478,8 @@ namespace LCG
         private bool LoadAssetBundle(bool beDepend, string abPath, string abRealPath = null)
         {
             bool result = true;
-            abRealPath = null == abRealPath ? ABVersion.CurVersionInfo.GetABFullPath(abPath) : abRealPath;
+            bool fromNativePath = true;
+            abRealPath = null == abRealPath ? ABVersion.CurVersionInfo.GetABFullPath(abPath, ref fromNativePath) : abRealPath;
             if (string.IsNullOrEmpty(abRealPath))
             {
                 result = false;
@@ -503,18 +519,10 @@ namespace LCG
                 m_loadTaskRecycle.Add(task);
             }
         }
-        private IEnumerator LoadManifest()
-        {
-            if (null == ABVersion.CurVersionInfo || !ABVersion.CurVersionInfo.IsManifestFileExist)
-            {
-                yield break;
-            }
-
-            ABManifest = ABHelper.ReadManifestFile(ABVersion.CurVersionInfo.ManifestFilePath);
-        }
         private ABLoadTask NewLoadTask(string abPath, string abName, Type type, Action<string, UnityEngine.Object> complete = null, Action<float> progress = null, bool isScene = false)
         {
-            string abRealPath = ABVersion.CurVersionInfo.GetABFullPath(abPath);
+            bool fromNativePath = true;
+            string abRealPath = ABVersion.CurVersionInfo.GetABFullPath(abPath, ref fromNativePath);
             abPath = abPath.ToLower();
             abName = (null == abName) ? ABHelper.GetFileNameWithoutSuffix(abPath) : abName.ToLower();
 
@@ -640,8 +648,9 @@ namespace LCG
             AssetBundle ab = null;
 
             // 检测是否存在ab
+            bool fromNativePath = true;
             string abname = ABHelper.GetFileFolderPath(path).ToLower() + ".ab";
-            string uiFullPath = ABVersion.CurVersionInfo.GetABFullPath(abname);
+            string uiFullPath = ABVersion.CurVersionInfo.GetABFullPath(abname, ref fromNativePath);
 
             if (!string.IsNullOrEmpty(uiFullPath))
             {
@@ -663,8 +672,10 @@ namespace LCG
                 return null;
             }
 
+            bool fromNativePath = true;
             filePath = filePath + ".lua.txt";
-            return ABVersion.CurVersionInfo.GetABFullPath(filePath);
+            filePath = ABVersion.CurVersionInfo.GetABFullPath(filePath, ref fromNativePath);
+            return fromNativePath ? null : filePath;
         }
         private static bool TrySyncLoadFromAB(string abPath, string assetName, Type type, out UnityEngine.Object obj, bool isScene = false)
         {

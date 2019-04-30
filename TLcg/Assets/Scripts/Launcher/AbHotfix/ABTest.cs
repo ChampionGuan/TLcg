@@ -11,7 +11,7 @@ namespace LCG
         void Start()
         {
             DontDestroyOnLoad(gameObject);
-            Debug.Log(ABHelper.AppTempCachePath);
+            Debug.Log(ABHelper.AppVersionPath);
             ABCheck.Instance.Initialize(() =>
             {
                 // 搭建本地http服，使用hfs.exe测试

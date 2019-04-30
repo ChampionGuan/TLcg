@@ -81,7 +81,7 @@ namespace LCG
                 callBack = c;
             }
         }
-        public static bool IngoreHotfix
+        public static bool IgnoreHotfix
         {
             get; set;
         }
@@ -150,7 +150,14 @@ namespace LCG
             }
 
         }
-        public static string AppTempCachePath
+        public static string NativeFileName
+        {
+            get
+            {
+                return "native.ini";
+            }
+        }
+        public static string AppVersionPath
         {
             get
             {
@@ -158,6 +165,14 @@ namespace LCG
                 return Application.persistentDataPath + "/version";
             }
         }
+        public static string AppNativeVersionPath
+        {
+            get
+            {
+                return Application.streamingAssetsPath + "/version";
+            }
+        }
+
         public static string ApkLocalPath
         {
             get
@@ -347,17 +362,9 @@ namespace LCG
             sb.Append("ApkFolderRoot=" + apkRoot);
             ABHelper.WriteFile(path, sb.ToString().TrimEnd());
         }
-        public static void WriteVersionNumFile(string filePath, string num)
-        {
-            byte[] numbytes = Encoding.UTF8.GetBytes(num.ToString().TrimEnd().ToLower());
-            Encrypt(ref numbytes); //RC4 加密文件
-            ABHelper.WriteFileByBytes(filePath, numbytes);
-        }
-        public static string[] ReadVersionNumFile(string filePath)
+        public static string[] ReadVersionNumFileByBytes(byte[] numbytes)
         {
             string[] num = null;
-
-            byte[] numbytes = ABHelper.ReadFileToBytes(filePath);
             if (null == numbytes)
             {
                 return num;
@@ -373,11 +380,19 @@ namespace LCG
 
             return num;
         }
-        public static Dictionary<string, List<string>> ReadVersionFile(string filePath)
+        public static string[] ReadVersionNumFileByPath(string filePath)
+        {
+            return ReadVersionNumFileByBytes(ABHelper.ReadFileToBytes(filePath));
+        }
+        public static void WriteVersionNumFile(string filePath, string num)
+        {
+            byte[] numbytes = Encoding.UTF8.GetBytes(num.ToString().TrimEnd().ToLower());
+            Encrypt(ref numbytes); //RC4 加密文件
+            ABHelper.WriteFileByBytes(filePath, numbytes);
+        }
+        public static Dictionary<string, List<string>> ReadVersionFileByBytes(byte[] versionbytes)
         {
             Dictionary<string, List<string>> versionInfo = new Dictionary<string, List<string>>();
-
-            byte[] versionbytes = ABHelper.ReadFileToBytes(filePath);
             if (null == versionbytes)
             {
                 return versionInfo;
@@ -400,6 +415,10 @@ namespace LCG
 
             return versionInfo;
         }
+        public static Dictionary<string, List<string>> ReadVersionFileByPath(string filePath)
+        {
+            return ReadVersionFileByBytes(ABHelper.ReadFileToBytes(filePath));
+        }
         public static void WriteVersionFile(string filePath, Dictionary<string, List<string>> versionInfo)
         {
             StringBuilder versionTxt = new StringBuilder();
@@ -413,85 +432,9 @@ namespace LCG
             Encrypt(ref versionbytes); //RC4 加密文件
             ABHelper.WriteFileByBytes(filePath, versionbytes);
         }
-        public static Dictionary<string, List<string>> ReadDependFile(string filePath)
-        {
-            Dictionary<string, List<string>> depenInfo = new Dictionary<string, List<string>>();
-
-            string dependTxt = ABHelper.ReadFile(filePath);
-            if (!string.IsNullOrEmpty(dependTxt))
-            {
-                // assets/resources/ui/tips:assets/resources/ui/tips/tips.bytes,assets/resources/ui/tips/tips@atlas2!a.png
-                string[] split = dependTxt.Split('\r');
-                foreach (string k in split)
-                {
-                    string[] split2 = k.Split(':');
-                    if (!depenInfo.ContainsKey(split2[0]))
-                    {
-                        depenInfo.Add(split2[0], new List<string>());
-                    }
-
-                    string[] split3 = split2[1].Split(',');
-                    foreach (string k3 in split3)
-                    {
-                        depenInfo[split2[0]].Add(k3);
-                    }
-                }
-            }
-
-            return depenInfo;
-        }
-        public static void WriteDependFile(string filePath, Dictionary<string, List<string>> dependInfo)
-        {
-            StringBuilder dependTxt = new StringBuilder();
-            foreach (KeyValuePair<string, List<string>> pair in dependInfo)
-            {
-                dependTxt.Append(pair.Key + ":");
-                for (int i = 0; i < pair.Value.Count; i++)
-                {
-                    if (i == pair.Value.Count - 1)
-                    {
-                        dependTxt.Append(pair.Value[i] + "\r");
-                    }
-                    else
-                    {
-                        dependTxt.Append(pair.Value[i] + ",");
-                    }
-                }
-            }
-            ABHelper.WriteFile(filePath, dependTxt.ToString().TrimEnd().ToLower());
-        }
-        public static Dictionary<string, string> ReadMd5File(string filePath)
-        {
-            Dictionary<string, string> md5Info = new Dictionary<string, string>();
-
-            string md5Txt = ABHelper.ReadFile(filePath);
-            if (!string.IsNullOrEmpty(md5Txt))
-            {
-                // assets/resources/ui/tips/tips.bytes:bd51b54f940b530425662e4529ea5673
-                string[] split = md5Txt.Split('\r');
-                foreach (string k in split)
-                {
-                    string[] split2 = k.Split(':');
-                    md5Info.Add(split2[0], split2[1]);
-                }
-            }
-
-            return md5Info;
-        }
-        public static void WriteMd5File(string filePath, Dictionary<string, string> md5Info)
-        {
-            StringBuilder md5Txt = new StringBuilder();
-            foreach (KeyValuePair<string, string> pair in md5Info)
-            {
-                md5Txt.Append(pair.Key + ":" + pair.Value + "\r");
-            }
-            ABHelper.WriteFile(filePath, md5Txt.ToString().TrimEnd().ToLower());
-        }
-        public static Dictionary<string, List<string>> ReadManifestFile(string filePath)
+        public static Dictionary<string, List<string>> ReadManifestFileByBytes(byte[] manifestbytes)
         {
             Dictionary<string, List<string>> manifestInfo = new Dictionary<string, List<string>>();
-
-            byte[] manifestbytes = ABHelper.ReadFileToBytes(filePath);
             if (null == manifestbytes)
             {
                 return manifestInfo;
@@ -525,6 +468,10 @@ namespace LCG
 
             return manifestInfo;
         }
+        public static Dictionary<string, List<string>> ReadManifestFileByPath(string filePath)
+        {
+            return ReadManifestFileByBytes(ABHelper.ReadFileToBytes(filePath));
+        }
         public static void WriteManifestFile(string filePath, string replaceTxt, Dictionary<string, List<string>> manifestInfo)
         {
             StringBuilder manifestTxt = new StringBuilder();
@@ -551,6 +498,111 @@ namespace LCG
             ABHelper.WriteFileByBytes(filePath + "-Manifest.txt", manifestbytes);
             Encrypt(ref manifestbytes); //RC4 加密文件
             ABHelper.WriteFileByBytes(filePath, manifestbytes);
+        }
+        public static Dictionary<string, List<string>> ReadDependFileByString(string dependTxt)
+        {
+            Dictionary<string, List<string>> depenInfo = new Dictionary<string, List<string>>();
+            if (!string.IsNullOrEmpty(dependTxt))
+            {
+                // assets/resources/ui/tips:assets/resources/ui/tips/tips.bytes,assets/resources/ui/tips/tips@atlas2!a.png
+                string[] split = dependTxt.Split('\r');
+                foreach (string k in split)
+                {
+                    string[] split2 = k.Split(':');
+                    if (!depenInfo.ContainsKey(split2[0]))
+                    {
+                        depenInfo.Add(split2[0], new List<string>());
+                    }
+
+                    string[] split3 = split2[1].Split(',');
+                    foreach (string k3 in split3)
+                    {
+                        depenInfo[split2[0]].Add(k3);
+                    }
+                }
+            }
+
+            return depenInfo;
+        }
+        public static Dictionary<string, List<string>> ReadDependFileByPath(string filePath)
+        {
+            return ReadDependFileByString(ABHelper.ReadFile(filePath));
+        }
+        public static void WriteDependFile(string filePath, Dictionary<string, List<string>> dependInfo)
+        {
+            StringBuilder dependTxt = new StringBuilder();
+            foreach (KeyValuePair<string, List<string>> pair in dependInfo)
+            {
+                dependTxt.Append(pair.Key + ":");
+                for (int i = 0; i < pair.Value.Count; i++)
+                {
+                    if (i == pair.Value.Count - 1)
+                    {
+                        dependTxt.Append(pair.Value[i] + "\r");
+                    }
+                    else
+                    {
+                        dependTxt.Append(pair.Value[i] + ",");
+                    }
+                }
+            }
+            ABHelper.WriteFile(filePath, dependTxt.ToString().TrimEnd().ToLower());
+        }
+        public static Dictionary<string, string> ReadMd5FileByString(string md5Txt)
+        {
+            Dictionary<string, string> md5Info = new Dictionary<string, string>();
+            if (!string.IsNullOrEmpty(md5Txt))
+            {
+                // assets/resources/ui/tips/tips.bytes:bd51b54f940b530425662e4529ea5673
+                string[] split = md5Txt.Split('\r');
+                foreach (string k in split)
+                {
+                    string[] split2 = k.Split(':');
+                    md5Info.Add(split2[0], split2[1]);
+                }
+            }
+
+            return md5Info;
+        }
+        public static Dictionary<string, string> ReadMd5FileByPath(string filePath)
+        {
+            return ReadMd5FileByString(ABHelper.ReadFile(filePath));
+        }
+        public static void WriteMd5File(string filePath, Dictionary<string, string> md5Info)
+        {
+            StringBuilder md5Txt = new StringBuilder();
+            foreach (KeyValuePair<string, string> pair in md5Info)
+            {
+                md5Txt.Append(pair.Key + ":" + pair.Value + "\r");
+            }
+            ABHelper.WriteFile(filePath, md5Txt.ToString().TrimEnd().ToLower());
+        }
+        public static List<string> ReadNativeFileByString(string nativeTxt)
+        {
+            List<string> nativeInfo = new List<string>();
+            if (!string.IsNullOrEmpty(nativeTxt))
+            {
+                string[] split = nativeTxt.Split('\r');
+                foreach (string k in split)
+                {
+                    nativeInfo.Add(k);
+                }
+            }
+
+            return nativeInfo;
+        }
+        public static List<string> ReadNativeFileByPath(string filePath)
+        {
+            return ReadNativeFileByString(ABHelper.ReadFile(filePath));
+        }
+        public static void WriteNativeFile(string filePath, List<string> nativeInfo)
+        {
+            StringBuilder nativeTxt = new StringBuilder();
+            foreach (var pair in nativeInfo)
+            {
+                nativeTxt.Append(pair + "\r");
+            }
+            ABHelper.WriteFile(filePath, nativeTxt.ToString().TrimEnd().ToLower());
         }
         /// <summary>
         /// 获取文件名(有后缀无路径)或者文件夹
@@ -965,9 +1017,9 @@ namespace LCG
         /// </summary>
         public static void ClearVersionAb()
         {
-            if (Directory.Exists(ABHelper.AppTempCachePath))
+            if (Directory.Exists(ABHelper.AppVersionPath))
             {
-                Directory.Delete(ABHelper.AppTempCachePath, true);
+                Directory.Delete(ABHelper.AppVersionPath, true);
             }
         }
     }
