@@ -215,12 +215,7 @@ namespace LCG
             if (null != abVerInfo)
             {
                 int id = int.Parse(abVerInfo[1]);
-                if (id < ABVersion.OriginalVersionId.Id3rd)
-                {
-                    return abRelativePath;
-                }
-
-                fromNativePath = id == ABVersion.OriginalVersionId.Id3rd;
+                fromNativePath = id <= ABVersion.OriginalVersionId.Id3rd;
                 if (fromNativePath)
                 {
                     abRelativePath = ABVersion.OriginalVersionInfo.NativeInfoList.Contains(abVerInfo[3]) ? abVerInfo[3] : null;
