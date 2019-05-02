@@ -59,10 +59,6 @@ namespace LCG
             {
                 return false;
             }
-            if (ABHelper.IgnoreHotfix)
-            {
-                return false;
-            }
 
             return false;
         }

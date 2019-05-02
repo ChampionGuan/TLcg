@@ -156,6 +156,7 @@ namespace LCG
 
         public IEnumerator Init(Action finish = null)
         {
+            m_isInitialized = false;
             m_nowLoadTaskCount = 0;
             m_maxLoadTaskCount = 10;
 
@@ -167,23 +168,27 @@ namespace LCG
             if (null != ABVersion.CurVersionInfo && ABVersion.CurVersionInfo.IsValid)
             {
                 // 首包
-                if (ABVersion.CurVersionInfo.IsNativeVersion)
-                {
-                    yield return LauncherEngine.Instance.StartCoroutine(ABVersion.CurVersionInfo.ParseVersionListByWWW());
-                    yield return LauncherEngine.Instance.StartCoroutine(ABVersion.CurVersionInfo.ParseNatvieListByWWW());
-                }
+                yield return LauncherEngine.Instance.StartCoroutine(ABVersion.OriginalVersionInfo.ParseVersionListByWWW());
+                yield return LauncherEngine.Instance.StartCoroutine(ABVersion.OriginalVersionInfo.ParseNatvieListByWWW());
+
                 // 清单文件
                 bool fromNativePath = true;
-                WWW www = new WWW(ABVersion.CurVersionInfo.GetABFullPath(ABHelper.ManifestFileName, ref fromNativePath));
-                yield return www;
-                ABManifest = ABHelper.ReadManifestFileByBytes(www.bytes);
+                string manifestFilePath = ABVersion.CurVersionInfo.GetABFullPath(ABHelper.ManifestFileName, ref fromNativePath);
+                if (!string.IsNullOrEmpty(manifestFilePath))
+                {
+                    WWW www = new WWW(manifestFilePath);
+                    yield return www;
+                    ABManifest = ABHelper.ReadManifestFileByBytes(www.bytes);
+                }
             }
-
+            if (null != ABManifest)
+            {
+                m_isInitialized = true;
+            }
             // 初始化完成，可进行后续操作
             if (null != finish)
             {
                 Debug.Log("<color=#20F856>AB初始化完毕</color>");
-                m_isInitialized = true;
                 finish();
             }
         }
@@ -249,7 +254,11 @@ namespace LCG
             else
             {
                 // 场景只加载ab
-                LoadAssetBundle(b, task.AbPath, task.AbRealPath);
+                if (LoadAssetBundle(b, task.AbPath, task.AbRealPath))
+                {
+                    ABReference abRef = ABReferenceMap[task.AbPath];
+                    abRef.ReferenceAsc();
+                }
             }
             return null;
         }
@@ -345,7 +354,11 @@ namespace LCG
             else
             {
                 // 场景只加载ab
-                LoadAssetBundle(b, task.AbPath, task.AbRealPath);
+                if (LoadAssetBundle(b, task.AbPath, task.AbRealPath))
+                {
+                    ABReference abRef = ABReferenceMap[task.AbPath];
+                    abRef.ReferenceAsc();
+                }
             }
         }
         private IEnumerator AsyncLoadAsset(ABReference abRef, ABLoadTask task)
@@ -562,7 +575,7 @@ namespace LCG
         /// <returns></returns>
         public static UnityEngine.Object LoadObject(string resourcePath, string assetName, Type type)
         {
-            if (null == ABVersion.CurVersionInfo || !ABVersion.CurVersionInfo.IsValid)
+            if (ABHelper.IgnoreHotfix || null == ABVersion.CurVersionInfo || !ABVersion.CurVersionInfo.IsValid)
             {
                 return null;
             }
@@ -590,7 +603,7 @@ namespace LCG
         /// <returns></returns>
         public static bool AsyncLoadObject(string resourcePath, string assetName, Type type, Action<string, UnityEngine.Object> complete, Action<float> progress = null)
         {
-            if (null == ABVersion.CurVersionInfo || !ABVersion.CurVersionInfo.IsValid)
+            if (ABHelper.IgnoreHotfix || null == ABVersion.CurVersionInfo || !ABVersion.CurVersionInfo.IsValid)
             {
                 return false;
             }
@@ -615,7 +628,7 @@ namespace LCG
         /// <returns></returns>
         public static bool LoadScene(string path, string sname)
         {
-            if (null == ABVersion.CurVersionInfo || !ABVersion.CurVersionInfo.IsValid)
+            if (ABHelper.IgnoreHotfix || null == ABVersion.CurVersionInfo || !ABVersion.CurVersionInfo.IsValid)
             {
                 return false;
             }
@@ -641,7 +654,7 @@ namespace LCG
         /// <returns></returns>
         public static AssetBundle GetUIAssetBundle(string path)
         {
-            if (null == ABVersion.CurVersionInfo || !ABVersion.CurVersionInfo.IsValid)
+            if (ABHelper.IgnoreHotfix || null == ABVersion.CurVersionInfo || !ABVersion.CurVersionInfo.IsValid)
             {
                 return null;
             }
@@ -667,7 +680,7 @@ namespace LCG
         /// <returns></returns>
         public static string GetLuaPath(string filePath)
         {
-            if (null == ABVersion.CurVersionInfo || !ABVersion.CurVersionInfo.IsValid)
+            if (ABHelper.IgnoreHotfix || null == ABVersion.CurVersionInfo || !ABVersion.CurVersionInfo.IsValid)
             {
                 return null;
             }

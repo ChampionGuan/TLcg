@@ -212,8 +212,8 @@ local function HotfixHandle(value)
         end
 
         -- -- 测试代码！！
-        -- decode.ClientVersion = "0.0.1"
-        -- decode.ClientAddr = "http://192.168.1.110:100/2_champion/"
+        decode.ClientVersion = "0.0.0"
+        decode.ClientAddr = "http://7.lightpaw.com:18080/ab_tlcg"
 
         -- 客户端版本号
         Common.LoginInfo.ResVersion = decode.ClientVersion

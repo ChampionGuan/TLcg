@@ -145,6 +145,8 @@ namespace LCG
                         ABHelper.WriteFile(apkpath2, file.Length.ToString().TrimEnd());
 
                         Debug.Log("成功生成版本！！！！" + apkpath1);
+                        System.GC.Collect();
+                        System.GC.Collect();
                     }
                     // 移入资源
                     ABStreaming.AssetMovein();
@@ -176,6 +178,9 @@ namespace LCG
         //目标平台
         private static bool BulidTarget(bool isDebug = false)
         {
+            System.GC.Collect();
+            System.GC.Collect();
+
             bool result = true;
             try
             {

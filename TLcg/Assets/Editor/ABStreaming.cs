@@ -252,6 +252,9 @@ namespace LCG
         }
         public static void BuildNativeAB(string platformName)
         {
+            System.GC.Collect();
+            System.GC.Collect();
+
             ReadFile();
             ParseAllDir();
             RootFolderNmae();
@@ -325,6 +328,9 @@ namespace LCG
         }
         public static void AssetMoveout()
         {
+            System.GC.Collect();
+            System.GC.Collect();
+
             ReadFile();
             ParseAllDir();
             RootFolderNmae();
@@ -376,6 +382,9 @@ namespace LCG
         }
         public static void AssetMovein()
         {
+            System.GC.Collect();
+            System.GC.Collect();
+
             ReadFile();
             ParseAllDir();
             RootFolderNmae();

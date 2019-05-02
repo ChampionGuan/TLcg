@@ -1,0 +1,17 @@
+﻿
+
+<linker>
+
+	<assembly fullname="Assembly-CSharp" preserve="all">
+	</assembly>
+
+	<assembly fullname="UnityEngine.CoreModule">
+	    <type fullname="UnityEngine.FlareLayer" preserve="all"/>
+		<type fullname="UnityEngine.LODGroup" preserve="all"/>
+	</assembly>
+
+	<assembly fullname="UnityEngine.Timeline">
+	    <type fullname="UnityEngine.Timeline.TimelineAsset" preserve="all"/>
+	</assembly>
+
+</linker>

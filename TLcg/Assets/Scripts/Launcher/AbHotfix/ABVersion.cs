@@ -202,6 +202,10 @@ namespace LCG
             {
                 ParseVersionList();
             }
+            if (null == VersionInfoList)
+            {
+                return null;
+            }
 
             string abRelativePath = "";
             abPath = abPath.ToLower();
@@ -219,7 +223,7 @@ namespace LCG
                 fromNativePath = id == ABVersion.OriginalVersionId.Id3rd;
                 if (fromNativePath)
                 {
-                    abRelativePath = NativeInfoList.Contains(abVerInfo[3]) ? abVerInfo[3] : null;
+                    abRelativePath = ABVersion.OriginalVersionInfo.NativeInfoList.Contains(abVerInfo[3]) ? abVerInfo[3] : null;
                 }
                 else
                 {
@@ -305,6 +309,11 @@ namespace LCG
         {
             get; private set;
         }
+        // 初始版号资源
+        public static VersionInfo OriginalVersionInfo
+        {
+            get; private set;
+        }
         // 当前使用的版本资源信息
         public static VersionInfo CurVersionInfo
         {
@@ -376,7 +385,8 @@ namespace LCG
             LocalVersionList.Clear();
 
             // 首包
-            LocalVersionList.Add(OriginalVersionId.Id3rd, new VersionInfo(OriginalVersionId, true));
+            OriginalVersionInfo = new VersionInfo(OriginalVersionId, true);
+            LocalVersionList.Add(OriginalVersionId.Id3rd, OriginalVersionInfo);
 
             // 获取本地的所有版本
             DirectoryInfo dirInfo = new DirectoryInfo(LocalStorgePath);

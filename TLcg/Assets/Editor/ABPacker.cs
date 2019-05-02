@@ -397,6 +397,8 @@ namespace LCG
                 CurVersionFileType.Add(filePath, type);
             }
             CurVersionDependenciesList[filePath].Add(filePath);
+
+            System.GC.Collect();
         }
         public static void HandleFolderAssets(string path, string type)
         {
@@ -413,6 +415,8 @@ namespace LCG
                 CurVersionFileType.Add(filePath2, type);
             }
             CurVersionDependenciesList[filePath2].Add(filePath);
+
+            System.GC.Collect();
         }
         public static void HandleLuaAssets(string path, string type)
         {
@@ -427,6 +431,8 @@ namespace LCG
                 CurVersionFileType.Add(filePath, type);
             }
             CurVersionDependenciesList[filePath].Add(filePath);
+
+            System.GC.Collect();
         }
         public static void HandleFileAssets(string path, string type)
         {
@@ -460,6 +466,8 @@ namespace LCG
             CurVersionDependenciesList[filePath].Add(filePath);
             // 依赖关系文件只存储非递归依赖
             CurVersionDependenciesList[filePath].AddRange(AssetDatabase.GetDependencies(filePath, false));
+
+            System.GC.Collect();
         }
         private static void CeateVersionDir(BuildTarget platform)
         {
@@ -516,6 +524,9 @@ namespace LCG
                 Directory.Delete(CurVersionABExportPath, true);
             }
             Directory.CreateDirectory(CurVersionABExportPath);
+
+            System.GC.Collect();
+            System.GC.Collect();
         }
         private static void CreatFileDependencies()
         {
@@ -598,6 +609,8 @@ namespace LCG
             ABHelper.WriteMd5File(CurVersionABExportPath + ABHelper.Md5FileName, CurVersionMd5List);
             // 版本所需资源的依赖关系
             ABHelper.WriteDependFile(CurVersionABExportPath + ABHelper.DependFileName, CurVersionDependenciesList);
+
+            System.GC.Collect();
         }
         private static string CreatFileUrlMd5(string fileName)
         {
@@ -680,6 +693,7 @@ namespace LCG
                     }
                 }
             }
+            System.GC.Collect();
 
             // 检测cs和dll脚本
             if (updateScriptList.Count > 0)
@@ -704,6 +718,7 @@ namespace LCG
                     throw new Exception("打包中断!!!!!!!!!!");
                 }
             }
+            System.GC.Collect();
 
             if (updateFileList.Count > 0)
             {
@@ -743,8 +758,16 @@ namespace LCG
                 {
                     // 收集内存
                     System.GC.Collect();
+                    System.GC.Collect();
+                    System.GC.Collect();
+                    System.GC.Collect();
+                    System.Threading.Thread.Sleep(1000);
+
                     // 生成ab文件
                     BuildPipeline.BuildAssetBundles(CurVersionABExportPath, BuildAssetBundleOptions.ChunkBasedCompression | BuildAssetBundleOptions.DeterministicAssetBundle, platform);
+
+                    System.GC.Collect();
+                    System.GC.Collect();
                 }
                 catch (Exception e)
                 {
@@ -755,6 +778,8 @@ namespace LCG
 
                 ClearAssetBundlesName();
                 AssetDatabase.Refresh();
+
+                System.GC.Collect();
             }
             else
             {
@@ -778,6 +803,7 @@ namespace LCG
                     }
                 }
             }
+            System.GC.Collect();
             System.GC.Collect();
 
             return result;
