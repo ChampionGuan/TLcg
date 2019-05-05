@@ -176,9 +176,16 @@ namespace LCG
                 string manifestFilePath = ABVersion.CurVersionInfo.GetABFullPath(ABHelper.ManifestFileName, ref fromNativePath);
                 if (!string.IsNullOrEmpty(manifestFilePath))
                 {
-                    WWW www = new WWW(manifestFilePath);
-                    yield return www;
-                    ABManifest = ABHelper.ReadManifestFileByBytes(www.bytes);
+                    if (fromNativePath)
+                    {
+                        WWW www = new WWW(manifestFilePath);
+                        yield return www;
+                        ABManifest = ABHelper.ReadManifestFileByBytes(www.bytes);
+                    }
+                    else
+                    {
+                        ABManifest = ABHelper.ReadManifestFileByPath(manifestFilePath);
+                    }
                 }
             }
             if (null != ABManifest)

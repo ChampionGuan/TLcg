@@ -265,11 +265,12 @@ namespace LCG
                     {
                         if (path1.Contains(ResFolder) && assetPath != path1)
                         {
+                            assetPath = assetPath.Replace(ResFolder, "");
                             if (!CurVersionManifestList.ContainsKey(assetPath))
                             {
                                 CurVersionManifestList.Add(assetPath, new List<string>());
                             }
-                            CurVersionManifestList[assetPath].Add(path1);
+                            CurVersionManifestList[assetPath].Add(path1.Replace(ResFolder, ""));
                         }
                     }
                 }
@@ -292,11 +293,12 @@ namespace LCG
                     {
                         if (path1.Contains(ResFolder) && assetPath != path1)
                         {
+                            assetPath = assetPath.Replace(AssetFolder, "");
                             if (!CurVersionManifestList.ContainsKey(assetPath))
                             {
                                 CurVersionManifestList.Add(assetPath, new List<string>());
                             }
-                            CurVersionManifestList[assetPath].Add(path1);
+                            CurVersionManifestList[assetPath].Add(path1.Replace(ResFolder, ""));
                         }
                     }
                 }
@@ -319,7 +321,7 @@ namespace LCG
 
             // ab的依赖文件
             string fileUrl = CreatFileUrlMd5(ABHelper.ManifestFileName);
-            ABHelper.WriteManifestFile(PlatformABExportPath + "/" + fileUrl, ResFolder, CurVersionManifestList);
+            ABHelper.WriteManifestFile(PlatformABExportPath + "/" + fileUrl, CurVersionManifestList);
 
             // 删除不用的manifest
             List<string> allFiles = ABHelper.GetAllFilesPathInDir(PlatformABExportPath);

@@ -472,17 +472,17 @@ namespace LCG
         {
             return ReadManifestFileByBytes(ABHelper.ReadFileToBytes(filePath));
         }
-        public static void WriteManifestFile(string filePath, string replaceTxt, Dictionary<string, List<string>> manifestInfo)
+        public static void WriteManifestFile(string filePath, Dictionary<string, List<string>> manifestInfo)
         {
             StringBuilder manifestTxt = new StringBuilder();
             foreach (KeyValuePair<string, List<string>> pair in manifestInfo)
             {
-                string fileName = ABHelper.GetFileFullPathWithoutFtype(pair.Key).Replace(replaceTxt, "") + ".ab";
+                string fileName = ABHelper.GetFileFullPathWithoutFtype(pair.Key) + ".ab";
                 manifestTxt.Append(fileName + ":");
 
                 for (int i = 0; i < pair.Value.Count; i++)
                 {
-                    fileName = ABHelper.GetFileFullPathWithoutFtype(pair.Value[i]).Replace(replaceTxt, "") + ".ab";
+                    fileName = ABHelper.GetFileFullPathWithoutFtype(pair.Value[i]) + ".ab";
                     if (i == pair.Value.Count - 1)
                     {
                         manifestTxt.Append(fileName + "\r");

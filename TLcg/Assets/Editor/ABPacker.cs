@@ -434,7 +434,7 @@ namespace LCG
 
             System.GC.Collect();
         }
-        public static void HandleFileAssets(string path, string type)
+        public static void HandleFileAssets(string path, string replacetxt, string type)
         {
             string filePath = path.Replace("\\", "/");
             string[] dependPaths = AssetDatabase.GetDependencies(filePath);
@@ -449,11 +449,12 @@ namespace LCG
                     // resources文件夹下的资源入清单文件
                     if (path1.Contains(ResFolder) && filePath != path1)
                     {
-                        if (!CurVersionManifestList.ContainsKey(filePath))
+                        string filePath2 = filePath.Replace(replacetxt, "");
+                        if (!CurVersionManifestList.ContainsKey(filePath2))
                         {
-                            CurVersionManifestList.Add(filePath, new List<string>());
+                            CurVersionManifestList.Add(filePath2, new List<string>());
                         }
-                        CurVersionManifestList[filePath].Add(path1);
+                        CurVersionManifestList[filePath2].Add(path1.Replace(ResFolder, ""));
                     }
                 }
             }
@@ -594,7 +595,7 @@ namespace LCG
                 {
                     continue;
                 }
-                HandleFileAssets(path, "2");
+                HandleFileAssets(path, ResFolder, "2");
             }
             foreach (string path in sceneBundlePathList)
             {
@@ -602,7 +603,7 @@ namespace LCG
                 {
                     continue;
                 }
-                HandleFileAssets(path, "3");
+                HandleFileAssets(path, AssetsFolder, "3");
             }
 
             // 版本所需资源的md5码保存
@@ -681,7 +682,7 @@ namespace LCG
                     // 老文件有更新时
                     else if (CurVersionMd5List[depend].ToLower() != lastVersionMd5List[depend.ToLower()])
                     {
-                        if (depend != pathName && depend.StartsWith(ResFolder))
+                        if (depend != pathName && depend.StartsWith(ResFolder) && !depend.EndsWith(".prefab"))
                         {
                             continue;
                         }
@@ -815,7 +816,7 @@ namespace LCG
             ABHelper.WriteVersionNumFile(CurVersionABExportPath + fileUrl, ABHelper.VersionNumCombine(TheVersionNum[0], TheVersionNum[1], CurVersionNum.ToString(), TheVersionNum[3]));
             // ab的依赖文件
             fileUrl = CreatFileUrlMd5(ABHelper.ManifestFileName);
-            ABHelper.WriteManifestFile(CurVersionABExportPath + fileUrl, ResFolder, CurVersionManifestList);
+            ABHelper.WriteManifestFile(CurVersionABExportPath + fileUrl, CurVersionManifestList);
             // 创建版本文件
             CurVersionList = ABHelper.ReadVersionFileByPath(PlatformABExportPath + "/" + (CurVersionNum - 1) + "/" + ABHelper.VersionFileName);
             List<string> filePaths = ABHelper.GetAllFilesPathInDir(CurVersionABExportPath);
@@ -974,13 +975,13 @@ namespace LCG
                     return;
                 }
             }
-            catch
+            catch (Exception e)
             {
                 if (Directory.Exists(CurVersionABExportPath))
                 {
                     Directory.Delete(CurVersionABExportPath, true);
                 }
-                Debug.Log("打包失败！！！！！");
+                Debug.Log("打包失败！！！！！" + e.Message);
                 return;
             }
 
