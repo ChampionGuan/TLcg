@@ -431,7 +431,7 @@ namespace LCG
         {
             onHandleState(new ABHelper.VersionArgs(ABHelper.EVersionState.ABInit));
             // 设置当前使用的版本
-            ABVersion.SetCursVersionNum(ABVersion.ServerVersionId);
+            ABVersion.SetCurVersionNum(ABVersion.ServerVersionId);
             // 当前版本
             onHandleState(new ABHelper.VersionArgs(ABHelper.EVersionState.ServerVersionId, ABVersion.CurVersionId.Id));
 

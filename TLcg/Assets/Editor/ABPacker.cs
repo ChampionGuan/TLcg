@@ -147,7 +147,7 @@ namespace LCG
             {
                 Debug.LogError("资源单号错误！！！！！");
             }
-            string version = ABHelper.VersionNumCombine(TheVersionNum[0], TheVersionNum[1], TheVersionNum[2], TheVersionNum[3]);
+            string version = ABHelper.VersionNumCombine(TheVersionNum[0], TheVersionNum[1], CurVersionNum.ToString(), TheVersionNum[3]);
             ABHelper.WriteVersionIdFile(version, TheRootFolderName, TheApkFolderName);
         }
 
@@ -947,8 +947,6 @@ namespace LCG
         }
         private static void BuildPacker(BuildTarget platform, bool onlyLua = false)
         {
-            SaveTheVersion();
-
             long start = System.DateTime.Now.Second;
             Debug.Log("开始处理：" + System.DateTime.Now.ToString());
 
@@ -994,6 +992,8 @@ namespace LCG
                 CreatHotterZip(i);
             }
 
+            // 保存版号
+            SaveTheVersion();
             // 结束
             Debug.Log("处理结束：" + System.DateTime.Now.ToString());
             EditorUtility.DisplayDialog("提示", "打包已完成！！", "ok");

@@ -363,10 +363,10 @@ namespace LCG
             // 获取本地的所有版本
             LoadAllVersionInfo();
             // 现在在用的版本号
-            SetCursVersionNum(CurVersionId);
+            SetCurVersionNum(CurVersionId);
         }
         // 设置当前版号资源
-        public static void SetCursVersionNum(VersionNum curVersion)
+        public static void SetCurVersionNum(VersionNum curVersion)
         {
             // 设置为当前使用版号
             CurVersionId = curVersion;
