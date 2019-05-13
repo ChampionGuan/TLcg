@@ -279,7 +279,7 @@ namespace LCG
             }
 
             // 增
-            string path = string.Format("{0}/../../../assetBundle/{1}/{2}/{3}.{4}/HotterZip/{5}-{6}/{7}", Application.dataPath, TheRootFolderName, platformName, TheVersionNum[0], TheVersionNum[1], -1, TheVersionNum[2], TheVersionNum[2]);
+            string path = string.Format("{0}/../../../assetBundle/{1}/{2}/{3}.{4}/HotterZip/{5}-{6}/", Application.dataPath, TheRootFolderName, platformName, TheVersionNum[0], TheVersionNum[1], -1, TheVersionNum[2]);
             if (!Directory.Exists(path))
             {
                 Debug.LogError("路径不存在：" + path);
@@ -289,7 +289,7 @@ namespace LCG
             {
                 Directory.CreateDirectory(ABHelper.AppNativeVersionPath);
             }
-            Dictionary<string, string> versionInfo = ReadVersionFileByPath(path + "/version.ini");
+            Dictionary<string, string> versionInfo = ReadVersionFileByPath(path + TheVersionNum[2] + "/version.ini");
             List<string> files = ABHelper.GetAllFilesPathInDir(path);
             nativeList.Clear();
             string name1 = "";
