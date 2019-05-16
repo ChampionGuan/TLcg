@@ -293,7 +293,15 @@ namespace LCG
         }
         private UnityEngine.Object SyncLoadAsset(ABLoadTask task)
         {
-            UnityEngine.Object spawner = Resources.Load(ABHelper.GetFileFullPathWithoutFtype(task.AbPath), task.AbType);
+            UnityEngine.Object spawner;
+            if (null == task.AbType)
+            {
+                spawner = Resources.Load(ABHelper.GetFileFullPathWithoutFtype(task.AbPath));
+            }
+            else
+            {
+                spawner = Resources.Load(ABHelper.GetFileFullPathWithoutFtype(task.AbPath), task.AbType);
+            }
             LoadComplete(spawner, task);
             return spawner;
         }
@@ -404,7 +412,15 @@ namespace LCG
         }
         private IEnumerator AsyncLoadAsset(ABLoadTask task)
         {
-            ResourceRequest request = Resources.LoadAsync(ABHelper.GetFileFullPathWithoutFtype(task.AbPath));
+            ResourceRequest request;
+            if (null == task.AbType)
+            {
+                request = Resources.LoadAsync(ABHelper.GetFileFullPathWithoutFtype(task.AbPath));
+            }
+            else
+            {
+                request = Resources.LoadAsync(ABHelper.GetFileFullPathWithoutFtype(task.AbPath), task.AbType);
+            }
             while (!request.isDone)
             {
                 if (null != task.Progress)

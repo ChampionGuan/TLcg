@@ -280,7 +280,14 @@ namespace LCG
                     return obj;
                 }
 
-                obj = Resources.Load(thePath, type);
+                if (null == type)
+                {
+                    obj = Resources.Load(thePath);
+                }
+                else
+                {
+                    obj = Resources.Load(thePath, type);
+                }
                 LoadComplete(obj);
                 return obj;
             }
@@ -311,7 +318,15 @@ namespace LCG
                     return;
                 }
 
-                UnityEngine.Object obj = Resources.Load(thePath, type);
+                UnityEngine.Object obj;
+                if (null == type)
+                {
+                    obj = Resources.Load(thePath);
+                }
+                else
+                {
+                    obj = Resources.Load(thePath, type);
+                }
                 complete.Invoke(obj);
                 complete = null;
                 progress = null;

@@ -987,7 +987,7 @@ namespace LCG
             CreatVersionTxt();
 
             // 生成版本增量包
-            for (int i = int.Parse(TheVersionNum[2]) - 1; i < CurVersionNum; i++)
+            for (int i = -1; i < CurVersionNum; i++)
             {
                 CreatHotterZip(i);
             }
