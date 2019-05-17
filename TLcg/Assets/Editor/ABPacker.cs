@@ -682,15 +682,14 @@ namespace LCG
                     // 老文件有更新时
                     else if (CurVersionMd5List[depend].ToLower() != lastVersionMd5List[depend.ToLower()])
                     {
-                        if (depend != pathName && depend.StartsWith(ResFolder) && !depend.EndsWith(".prefab"))
+                        if (depend == pathName || !depend.StartsWith(ResFolder) || (depend.StartsWith(ResFolder) && !depend.EndsWith(".prefab")))
                         {
-                            continue;
+                            if (IsScriptFileRes(pathName))
+                                updateScriptList.Add(pathName);
+                            else
+                                updateFileList.Add(pathName);
+                            break;
                         }
-                        if (IsScriptFileRes(pathName))
-                            updateScriptList.Add(pathName);
-                        else
-                            updateFileList.Add(pathName);
-                        break;
                     }
                 }
             }
