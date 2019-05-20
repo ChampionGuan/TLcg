@@ -14,13 +14,12 @@ namespace LCG
         private static EditorWindow TheWindow = null;
         private static string AssetsFolder = "Assets/";
         private static string ResFolder = "Assets/Resources/";
+        private static bool Building = false;
 
         private static string ScriptDirStr = "Scripts;3rdLibs";
         private static string ScriptDirStr2;
         private static string BundleFolderDirStr = "UI";
         private static string BundleFolderDirStr2;
-        private static string BundleSceneDirStr = "Scenes";
-        private static string BundleSceneDirStr2;
         private static string BundleLuaDirStr = "Lua";
         private static string BundleLuaDirStr2;
         private static string BundleFileCullingDirStr = "Video;Ignore";
@@ -28,10 +27,9 @@ namespace LCG
 
         private static List<string> ScriptFolderPath = new List<string>(new string[] { });
         private static List<string> BundleFolderPath = new List<string>(new string[] { });
-        private static List<string> BundleScenePath = new List<string>(new string[] { });
         private static List<string> BundleLuaPath = new List<string>(new string[] { });
-        private static List<string> BundleFileCullingPath = new List<string>(new string[] { });
         private static List<string> BundleFilePath = new List<string>();
+        private static List<string> BundleFileCullingPath = new List<string>(new string[] { });
 
         private static string[] TheVersionNum = new string[4] { "0", "0", "0", "0" };
         private static string TheRootFolderName = "tlcg";
@@ -93,7 +91,6 @@ namespace LCG
                 {
                     case "ScriptDir": ScriptDirStr = sp1[1]; break;
                     case "BundleFolderDir": BundleFolderDirStr = sp1[1]; break;
-                    case "BundleSceneDir": BundleSceneDirStr = sp1[1]; break;
                     case "BundleLuaDir": BundleLuaDirStr = sp1[1]; break;
                     case "BundleFileCullingDir": BundleFileCullingDirStr = sp1[1]; break;
                     default: break;
@@ -105,7 +102,6 @@ namespace LCG
             StringBuilder sb = new StringBuilder();
             sb.Append("ScriptDir=" + ScriptDirStr + "\n");
             sb.Append("BundleFolderDir=" + BundleFolderDirStr + "\n");
-            sb.Append("BundleSceneDir=" + BundleSceneDirStr + "\n");
             sb.Append("BundleLuaDir=" + BundleLuaDirStr + "\n");
             sb.Append("BundleFileCullingDir=" + BundleFileCullingDirStr + "\n");
             ABHelper.WriteFile(Application.dataPath + "/Editor/ABPacker.txt", sb.ToString().TrimEnd());
@@ -114,7 +110,6 @@ namespace LCG
         {
             ParseDir(ScriptDirStr, ScriptFolderPath);
             ParseDir(BundleFolderDirStr, BundleFolderPath);
-            ParseDir(BundleSceneDirStr, BundleScenePath);
             ParseDir(BundleLuaDirStr, BundleLuaPath);
             ParseDir(BundleFileCullingDirStr, BundleFileCullingPath);
             FileBundleList();
@@ -165,7 +160,7 @@ namespace LCG
             {
                 string fname = d.FullName.Replace(@"/", @"\");
                 string folderName = fname.Substring(fname.LastIndexOf(@"\") + 1);
-                if (BundleFolderPath.Contains(folderName) || BundleScenePath.Contains(folderName) || BundleLuaPath.Contains(folderName))
+                if (BundleFolderPath.Contains(folderName) || BundleLuaPath.Contains(folderName))
                 {
                     continue;
                 }
@@ -200,14 +195,6 @@ namespace LCG
             if (BundleFolderDirStr2 != BundleFolderDirStr)
             {
                 BundleFolderDirStr2 = BundleFolderDirStr;
-                WriteFile();
-                ParseAllDir();
-            }
-            GUILayout.Label("需要场景打包的文件夹（以半角分号隔开）");
-            BundleSceneDirStr = GUILayout.TextField(BundleSceneDirStr);
-            if (BundleSceneDirStr2 != BundleSceneDirStr)
-            {
-                BundleSceneDirStr2 = BundleSceneDirStr;
                 WriteFile();
                 ParseAllDir();
             }
@@ -261,13 +248,6 @@ namespace LCG
             for (int i = 0; i < BundleFolderPath.Count; i++)
             {
                 EditorGUILayout.LabelField((i + 1).ToString() + ":" + ResFolder + BundleFolderPath[i]);
-            }
-            EditorGUILayout.Space();
-
-            GUILayout.Label("需要场景打包的路径");
-            for (int i = 0; i < BundleScenePath.Count; i++)
-            {
-                EditorGUILayout.LabelField((i + 1).ToString() + ":" + AssetsFolder + BundleScenePath[i]);
             }
             EditorGUILayout.Space();
 
@@ -344,10 +324,10 @@ namespace LCG
         private static Dictionary<string, List<string>> CurVersionManifestList = null;
         private static Dictionary<string, List<string>> CurVersionList = null;
         private static Dictionary<string, string> CurVersionMd5List = null;
-        // 这个特殊定义，（value 0:文件夹打包，1：lua打包，2：文件打包，3：场景打包）
-        private static Dictionary<string, string> CurVersionFileType = null;
+        private static Dictionary<string, int> CurVersionRCList = null;
+        private static Dictionary<string, ResType> CurVersionFileType = null;
         private static Dictionary<string, string> CurVersionFileUrlMd5 = null;
-
+        private enum ResType { None, Folder, Lua, File, Depend, Script }
         private static bool IsNeedFileRes(string fileName)
         {
             if (fileName.EndsWith(".cs") || fileName.EndsWith(".meta") || fileName.EndsWith(".gitkeep") || fileName.EndsWith(".DS_Store"))
@@ -377,6 +357,21 @@ namespace LCG
             }
             Debug.Log("所有assetBundle名称已移除！！！");
         }
+        private static System.Threading.Thread GCCollect()
+        {
+            // 开启线程
+            System.Threading.Thread thread = new System.Threading.Thread(delegate ()
+            {
+                while (true)
+                {
+                    System.GC.Collect();
+                    System.Threading.Thread.Sleep(5000);
+                }
+            });
+            thread.IsBackground = true;
+
+            return thread;
+        }
         private static void BuildFailure()
         {
             if (Directory.Exists(CurVersionABExportPath))
@@ -384,89 +379,277 @@ namespace LCG
                 Directory.Delete(CurVersionABExportPath, true);
             }
         }
-        private static void HandleScriptAssets(string path, string type)
+        private static void HandleScriptAssets(string path)
         {
             string filePath = path.Replace("\\", "/");
+            // 类型
+            if (!CurVersionFileType.ContainsKey(filePath))
+            {
+                CurVersionFileType.Add(filePath, ResType.None);
+            }
+            CurVersionFileType[filePath] = ResType.Script;
+
+            // 依赖
+            if (!CurVersionDependenciesList.ContainsKey(filePath))
+            {
+                CurVersionDependenciesList.Add(filePath, new List<string>() { filePath });
+            }
+
+            // md5
             if (!CurVersionMd5List.ContainsKey(filePath))
             {
                 CurVersionMd5List.Add(filePath, ABHelper.BuildMD5ByFile(filePath));
             }
-            if (!CurVersionDependenciesList.ContainsKey(filePath))
+
+            // 引用次数
+            if (!CurVersionRCList.ContainsKey(filePath))
             {
-                CurVersionDependenciesList.Add(filePath, new List<string>());
-                CurVersionFileType.Add(filePath, type);
+                CurVersionRCList.Add(filePath, 0);
             }
-            CurVersionDependenciesList[filePath].Add(filePath);
+            CurVersionRCList[filePath]++;
 
             System.GC.Collect();
         }
-        public static void HandleFolderAssets(string path, string type)
+        private static void HandleFolderAssets(string path)
         {
             string filePath = path.Replace("\\", "/");
-            if (!CurVersionMd5List.ContainsKey(filePath))
-            {
-                CurVersionMd5List.Add(filePath, ABHelper.BuildMD5ByFile(filePath));
-            }
-
             string filePath2 = ABHelper.GetFileFolderPath(filePath);
+
+            // 文件类型
+            if (!CurVersionFileType.ContainsKey(filePath))
+            {
+                CurVersionFileType.Add(filePath, ResType.None);
+            }
+            CurVersionFileType[filePath] = ResType.Folder;
+            // 文件夹类型
+            if (!CurVersionFileType.ContainsKey(filePath2))
+            {
+                CurVersionFileType.Add(filePath2, ResType.None);
+            }
+            CurVersionFileType[filePath2] = ResType.Folder;
+
+            // 依赖
             if (!CurVersionDependenciesList.ContainsKey(filePath2))
             {
                 CurVersionDependenciesList.Add(filePath2, new List<string>());
-                CurVersionFileType.Add(filePath2, type);
             }
             CurVersionDependenciesList[filePath2].Add(filePath);
 
-            System.GC.Collect();
-        }
-        public static void HandleLuaAssets(string path, string type)
-        {
-            string filePath = path.Replace("\\", "/");
+            // md5
             if (!CurVersionMd5List.ContainsKey(filePath))
             {
                 CurVersionMd5List.Add(filePath, ABHelper.BuildMD5ByFile(filePath));
             }
-            if (!CurVersionDependenciesList.ContainsKey(filePath))
+
+            // 引用次数
+            if (!CurVersionRCList.ContainsKey(filePath))
             {
-                CurVersionDependenciesList.Add(filePath, new List<string>());
-                CurVersionFileType.Add(filePath, type);
+                CurVersionRCList.Add(filePath, 0);
             }
-            CurVersionDependenciesList[filePath].Add(filePath);
+            CurVersionRCList[filePath]++;
 
             System.GC.Collect();
         }
-        public static void HandleFileAssets(string path, string replacetxt, string type)
+        private static void HandleLuaAssets(string path)
         {
             string filePath = path.Replace("\\", "/");
+            // 类型
+            if (!CurVersionFileType.ContainsKey(filePath))
+            {
+                CurVersionFileType.Add(filePath, ResType.None);
+            }
+            CurVersionFileType[filePath] = ResType.Lua;
+
+            // 依赖
+            if (!CurVersionDependenciesList.ContainsKey(filePath))
+            {
+                CurVersionDependenciesList.Add(filePath, new List<string>() { filePath });
+            }
+
+            // md5
+            if (!CurVersionMd5List.ContainsKey(filePath))
+            {
+                CurVersionMd5List.Add(filePath, ABHelper.BuildMD5ByFile(filePath));
+            }
+
+            // 引用次数
+            if (!CurVersionRCList.ContainsKey(filePath))
+            {
+                CurVersionRCList.Add(filePath, 0);
+            }
+            CurVersionRCList[filePath]++;
+
+            System.GC.Collect();
+        }
+        private static void HandleFileAssets(string path)
+        {
+            string filePath = path.Replace("\\", "/");
+
+            // 类型
+            if (!CurVersionFileType.ContainsKey(filePath))
+            {
+                CurVersionFileType.Add(filePath, ResType.None);
+            }
+            CurVersionFileType[filePath] = ResType.File;
+
+            // 依赖
             string[] dependPaths = AssetDatabase.GetDependencies(filePath);
+            if (!CurVersionDependenciesList.ContainsKey(filePath))
+            {
+                CurVersionDependenciesList.Add(filePath, new List<string>());
+            }
+            CurVersionDependenciesList[filePath].AddRange(dependPaths);
+
+            // 依赖文件
             if (dependPaths.Length > 0)
             {
                 foreach (string path1 in dependPaths)
                 {
+                    // md5
                     if (!CurVersionMd5List.ContainsKey(path1))
                     {
                         CurVersionMd5List.Add(path1, ABHelper.BuildMD5ByFile(path1));
                     }
-                    // resources文件夹下的资源入清单文件
-                    if (path1.Contains(ResFolder) && filePath != path1)
+
+                    // 引用次数
+                    if (!CurVersionRCList.ContainsKey(path1))
                     {
-                        string filePath2 = filePath.Replace(replacetxt, "");
-                        if (!CurVersionManifestList.ContainsKey(filePath2))
-                        {
-                            CurVersionManifestList.Add(filePath2, new List<string>());
-                        }
-                        CurVersionManifestList[filePath2].Add(path1.Replace(ResFolder, ""));
+                        CurVersionRCList.Add(path1, 0);
+                    }
+                    CurVersionRCList[path1]++;
+
+                    // 依赖文件的类型
+                    if (!CurVersionFileType.ContainsKey(path1))
+                    {
+                        CurVersionFileType.Add(path1, ResType.Depend);
                     }
                 }
             }
 
-            if (!CurVersionDependenciesList.ContainsKey(filePath))
+            System.GC.Collect();
+        }
+        private static void OutputMainfestFile()
+        {
+            foreach (var v in CurVersionDependenciesList)
             {
-                CurVersionDependenciesList.Add(filePath, new List<string>());
-                CurVersionFileType.Add(filePath, type);
+                // 文件夹打包不存在依赖关系！！
+                if (CurVersionFileType[v.Key] == ResType.Folder)
+                {
+                    continue;
+                }
+
+                // 只有resource下文件存在依赖关系！！
+                string filePath2 = v.Key.Substring(ResFolder.Length);
+                if (v.Key.StartsWith(ResFolder))
+                {
+                    foreach (var m in v.Value)
+                    {
+                        if (m == v.Key)
+                        {
+                            continue;
+                        }
+                        if (IsScriptFileRes(m))
+                        {
+                            continue;
+                        }
+                        if (m.StartsWith(ResFolder))
+                        {
+                            // 文件夹打包不存在依赖关系！！
+
+                            if (!CurVersionManifestList.ContainsKey(filePath2))
+                            {
+                                CurVersionManifestList.Add(filePath2, new List<string>());
+                            }
+                            if (CurVersionFileType[m] == ResType.Folder)
+                            {
+                                CurVersionManifestList[filePath2].Add(ABHelper.GetFileFolderPath(m).Substring(ResFolder.Length));
+                            }
+                            else
+                            {
+                                CurVersionManifestList[filePath2].Add(m.Substring(ResFolder.Length));
+                            }
+                        }
+                        else if (CurVersionRCList.ContainsKey(m) && CurVersionRCList[m] > 1)
+                        {
+                            if (!CurVersionManifestList.ContainsKey(filePath2))
+                            {
+                                CurVersionManifestList.Add(filePath2, new List<string>());
+                            }
+                            CurVersionManifestList[filePath2].Add(m.Substring(AssetsFolder.Length));
+                        }
+                    }
+                }
             }
-            CurVersionDependenciesList[filePath].Add(filePath);
-            // 依赖关系文件只存储非递归依赖
-            CurVersionDependenciesList[filePath].AddRange(AssetDatabase.GetDependencies(filePath, false));
+        }
+        private static void CreatFileDependencies()
+        {
+            List<string> scriptPathList = new List<string>();
+            List<string> folderBundlePathList = new List<string>();
+            List<string> fileBundlePathList = new List<string>();
+            List<string> luaPathList = new List<string>();
+            foreach (string path in ScriptFolderPath)
+            {
+                string fullPath = AssetsFolder + path;
+                scriptPathList.AddRange(ABHelper.GetAllFilesPathInDir(fullPath));
+            }
+            foreach (string path in BundleFolderPath)
+            {
+                string fullPath = ResFolder + path;
+                folderBundlePathList.AddRange(ABHelper.GetAllFilesPathInDir(fullPath));
+            }
+            foreach (string path in BundleFilePath)
+            {
+                string fullPath = ResFolder + path;
+                fileBundlePathList.AddRange(ABHelper.GetAllFilesPathInDir(fullPath));
+            }
+            foreach (string path in BundleLuaPath)
+            {
+                string fullPath = AssetsFolder + path;
+                luaPathList.AddRange(ABHelper.GetAllFilesPathInDir(fullPath));
+            }
+            CurVersionFileType = new Dictionary<string, ResType>();
+            CurVersionDependenciesList = new Dictionary<string, List<string>>();
+            CurVersionManifestList = new Dictionary<string, List<string>>();
+            CurVersionMd5List = new Dictionary<string, string>();
+            CurVersionRCList = new Dictionary<string, int>();
+            foreach (string path in scriptPathList)
+            {
+                if (!IsScriptFileRes(path))
+                {
+                    continue;
+                }
+                HandleScriptAssets(path);
+            }
+            foreach (string path in folderBundlePathList)
+            {
+                if (!IsNeedFileRes(path))
+                {
+                    continue;
+                }
+                HandleFolderAssets(path);
+            }
+            foreach (string path in luaPathList)
+            {
+                if (!path.EndsWith(".lua"))
+                {
+                    continue;
+                }
+                HandleLuaAssets(path);
+            }
+            foreach (string path in fileBundlePathList)
+            {
+                if (!IsNeedFileRes(path))
+                {
+                    continue;
+                }
+                HandleFileAssets(path);
+            }
+    
+            OutputMainfestFile();
+            // 版本所需资源的md5码保存
+            ABHelper.WriteMd5File(CurVersionABExportPath + ABHelper.Md5FileName, CurVersionMd5List, CurVersionRCList);
+            // 版本所需资源的依赖关系
+            ABHelper.WriteDependFile(CurVersionABExportPath + ABHelper.DependFileName, CurVersionDependenciesList);
 
             System.GC.Collect();
         }
@@ -529,90 +712,6 @@ namespace LCG
             System.GC.Collect();
             System.GC.Collect();
         }
-        private static void CreatFileDependencies()
-        {
-            List<string> scriptPathList = new List<string>();
-            List<string> folderBundlePathList = new List<string>();
-            List<string> fileBundlePathList = new List<string>();
-            List<string> sceneBundlePathList = new List<string>();
-            List<string> luaPathList = new List<string>();
-            foreach (string path in ScriptFolderPath)
-            {
-                string fullPath = AssetsFolder + path;
-                scriptPathList.AddRange(ABHelper.GetAllFilesPathInDir(fullPath));
-            }
-            foreach (string path in BundleFolderPath)
-            {
-                string fullPath = ResFolder + path;
-                folderBundlePathList.AddRange(ABHelper.GetAllFilesPathInDir(fullPath));
-            }
-            foreach (string path in BundleFilePath)
-            {
-                string fullPath = ResFolder + path;
-                fileBundlePathList.AddRange(ABHelper.GetAllFilesPathInDir(fullPath));
-            }
-            foreach (string path in BundleScenePath)
-            {
-                string fullPath = AssetsFolder + path;
-                sceneBundlePathList.AddRange(ABHelper.GetAllFilesPathInDir(fullPath));
-            }
-            foreach (string path in BundleLuaPath)
-            {
-                string fullPath = AssetsFolder + path;
-                luaPathList.AddRange(ABHelper.GetAllFilesPathInDir(fullPath));
-            }
-            CurVersionFileType = new Dictionary<string, string>();
-            CurVersionDependenciesList = new Dictionary<string, List<string>>();
-            CurVersionManifestList = new Dictionary<string, List<string>>();
-            CurVersionMd5List = new Dictionary<string, string>();
-            foreach (string path in scriptPathList)
-            {
-                if (!IsScriptFileRes(path))
-                {
-                    continue;
-                }
-                HandleScriptAssets(path, "4");
-            }
-            foreach (string path in folderBundlePathList)
-            {
-                if (!IsNeedFileRes(path))
-                {
-                    continue;
-                }
-                HandleFolderAssets(path, "0");
-            }
-            foreach (string path in luaPathList)
-            {
-                if (!path.EndsWith(".lua"))
-                {
-                    continue;
-                }
-                HandleLuaAssets(path, "1");
-            }
-            foreach (string path in fileBundlePathList)
-            {
-                if (!IsNeedFileRes(path))
-                {
-                    continue;
-                }
-                HandleFileAssets(path, ResFolder, "2");
-            }
-            foreach (string path in sceneBundlePathList)
-            {
-                if (!path.EndsWith(".unity"))
-                {
-                    continue;
-                }
-                HandleFileAssets(path, AssetsFolder, "3");
-            }
-
-            // 版本所需资源的md5码保存
-            ABHelper.WriteMd5File(CurVersionABExportPath + ABHelper.Md5FileName, CurVersionMd5List);
-            // 版本所需资源的依赖关系
-            ABHelper.WriteDependFile(CurVersionABExportPath + ABHelper.DependFileName, CurVersionDependenciesList);
-
-            System.GC.Collect();
-        }
         private static string CreatFileUrlMd5(string fileName)
         {
             if (null == CurVersionFileUrlMd5)
@@ -620,8 +719,8 @@ namespace LCG
                 CurVersionFileUrlMd5 = new Dictionary<string, string>();
             }
 
-            // string fileUrl = fileName.Replace("/", "-").ToLower();
-            string fileUrl = ABHelper.BuildMD5ByString(fileName);
+            string fileUrl = fileName.Replace("/", "-").ToLower();
+            //string fileUrl = ABHelper.BuildMD5ByString(fileName);
             if (!CurVersionFileUrlMd5.ContainsKey(fileUrl))
             {
                 CurVersionFileUrlMd5.Add(fileUrl, fileName);
@@ -631,7 +730,7 @@ namespace LCG
         }
         private static void CopyLuaFiles(string path)
         {
-            string filePath = CreatFileUrlMd5(path.Replace("Assets/", "") + ".txt");
+            string filePath = CreatFileUrlMd5(path.Substring(AssetsFolder.Length) + ".txt");
             filePath = (CurVersionABExportPath + filePath).ToLower();
             string fileFolder = Path.GetDirectoryName(filePath);
             if (!Directory.Exists(fileFolder))
@@ -648,46 +747,131 @@ namespace LCG
             ABHelper.Encrypt(ref bytes); //RC4 加密lua文件
             ABHelper.WriteFileByBytes(filePath, bytes);
         }
+        private static void AddUpdateFile(List<string> list, string pathName)
+        {
+            if (list.Contains(pathName))
+            {
+                return;
+            }
+            list.Add(pathName);
+        }
         private static bool CreatABPacker(BuildTarget platform)
         {
             List<string> updateFileList = new List<string>();
             List<string> updateScriptList = new List<string>();
 
-            Dictionary<string, string> lastVersionMd5List = ABHelper.ReadMd5FileByPath(PlatformABExportPath + "/" + (CurVersionNum - 1) + "/" + ABHelper.Md5FileName);
+            Dictionary<string, List<string>> lastVersionMd5List = ABHelper.ReadMd5FileByPath(PlatformABExportPath + "/" + (CurVersionNum - 1) + "/" + ABHelper.Md5FileName);
             Dictionary<string, List<string>> lastVersionDependenciesList = ABHelper.ReadDependFileByPath(PlatformABExportPath + "/" + (CurVersionNum - 1) + "/" + ABHelper.DependFileName);
 
             foreach (KeyValuePair<string, List<string>> pair in CurVersionDependenciesList)
             {
                 string pathName = pair.Key;
+
+                // 冗余资源处理
+                foreach (string depend in pair.Value)
+                {
+                    // 非resource下资源！！
+                    if (depend.StartsWith(ResFolder))
+                    {
+                        continue;
+                    }
+                    if (!CurVersionRCList.ContainsKey(depend))
+                    {
+                        continue;
+                    }
+                    string dependLower = depend.ToLower();
+
+                    // 无上一版本,本次版本引用数>1
+                    if (!lastVersionMd5List.ContainsKey(dependLower) && CurVersionRCList[depend] > 1)
+                    {
+                        if (IsScriptFileRes(depend))
+                            AddUpdateFile(updateScriptList, depend);
+                        else
+                            AddUpdateFile(updateFileList, depend);
+                        continue;
+                    }
+
+                    // 此版本引用数>1
+                    if (CurVersionRCList[depend] > 1)
+                    {
+                        if (!lastVersionMd5List.ContainsKey(dependLower) || int.Parse(lastVersionMd5List[dependLower][1]) <= 1)
+                        {
+                            if (IsScriptFileRes(pathName))
+                                AddUpdateFile(updateScriptList, pathName);
+                            else
+                                AddUpdateFile(updateFileList, pathName);
+
+                            if (IsScriptFileRes(depend))
+                                AddUpdateFile(updateScriptList, depend);
+                            else
+                                AddUpdateFile(updateFileList, depend);
+                        }
+                        else if (lastVersionMd5List[dependLower][0] != CurVersionMd5List[depend])
+                        {
+                            if (IsScriptFileRes(depend))
+                                AddUpdateFile(updateScriptList, depend);
+                            else
+                                AddUpdateFile(updateFileList, depend);
+                        }
+                    }
+                    // <=1，但是资源更新了！！
+                    else if (!lastVersionMd5List.ContainsKey(dependLower) || lastVersionMd5List[dependLower][0] != CurVersionMd5List[depend])
+                    {
+                        if (IsScriptFileRes(pathName))
+                            AddUpdateFile(updateScriptList, pathName);
+                        else
+                            AddUpdateFile(updateFileList, pathName);
+                    }
+                }
+
                 // 新资源时
                 if (!lastVersionDependenciesList.ContainsKey(pathName.ToLower()))
                 {
                     if (IsScriptFileRes(pathName))
-                        updateScriptList.Add(pathName);
+                        AddUpdateFile(updateScriptList, pathName);
                     else
-                        updateFileList.Add(pathName);
+                        AddUpdateFile(updateFileList, pathName);
                     continue;
                 }
+                // 依赖文件
                 foreach (string depend in pair.Value)
                 {
+                    string dependLower = depend.ToLower();
                     // 新增了依赖文件时
-                    if (!lastVersionDependenciesList[pathName.ToLower()].Contains(depend.ToLower()))
+                    if (!lastVersionDependenciesList[pathName.ToLower()].Contains(dependLower))
                     {
                         if (IsScriptFileRes(pathName))
-                            updateScriptList.Add(pathName);
+                            AddUpdateFile(updateScriptList, pathName);
                         else
-                            updateFileList.Add(pathName);
+                            AddUpdateFile(updateFileList, pathName);
                         break;
                     }
                     // 老文件有更新时
-                    else if (CurVersionMd5List[depend].ToLower() != lastVersionMd5List[depend.ToLower()])
+                    else if (CurVersionMd5List[depend].ToLower() != lastVersionMd5List[dependLower][0])
                     {
-                        if (depend == pathName || !depend.StartsWith(ResFolder) || (depend.StartsWith(ResFolder) && !depend.EndsWith(".prefab")))
+                        bool need = false;
+                        // 自身更改
+                        if (!need && depend == pathName)
+                        {
+                            need = true;
+                        }
+                        // 场景依赖的预设更改，场景需要重新打包！！坑点
+                        if (!need && depend.StartsWith(ResFolder) && depend.EndsWith(".prefab"))
+                        {
+                            need = true;
+                        }
+                        // 文件夹打包的资源更改，文件重新打包！！！
+                        if (!need && depend.StartsWith(ResFolder) && CurVersionFileType[depend] == ResType.Folder)
+                        {
+                            need = true;
+                        }
+
+                        if (need)
                         {
                             if (IsScriptFileRes(pathName))
-                                updateScriptList.Add(pathName);
+                                AddUpdateFile(updateScriptList, pathName);
                             else
-                                updateFileList.Add(pathName);
+                                AddUpdateFile(updateFileList, pathName);
                             break;
                         }
                     }
@@ -730,24 +914,24 @@ namespace LCG
                     string fileName;
                     switch (CurVersionFileType[path])
                     {
-                        case "0":
+                        case ResType.Folder:
                             foreach (string path2 in CurVersionDependenciesList[path])
                             {
-                                fileName = (ABHelper.GetFileFolderPath(path2).Replace(ResFolder, "")) + ".ab";
+                                fileName = (ABHelper.GetFileFolderPath(path2).Substring(ResFolder.Length)) + ".ab";
                                 fileName = CreatFileUrlMd5(fileName);
                                 AssetImporter.GetAtPath(path2).assetBundleName = fileName;
                             }
                             break;
-                        case "1":
+                        case ResType.Lua:
                             CopyLuaFiles(path);
                             break;
-                        case "2":
-                            fileName = (ABHelper.GetFileFullPathWithoutFtype(path).Replace(ResFolder, "")) + ".ab";
+                        case ResType.File:
+                            fileName = (ABHelper.GetFileFullPathWithoutFtype(path).Substring(ResFolder.Length)) + ".ab";
                             fileName = CreatFileUrlMd5(fileName);
                             AssetImporter.GetAtPath(path).assetBundleName = fileName;
                             break;
-                        case "3":
-                            fileName = (ABHelper.GetFileFullPathWithoutFtype(path).Replace(AssetsFolder, "")) + ".ab";
+                        case ResType.Depend:
+                            fileName = (ABHelper.GetFileFullPathWithoutFtype(path).Substring(AssetsFolder.Length)) + ".ab";
                             fileName = CreatFileUrlMd5(fileName);
                             AssetImporter.GetAtPath(path).assetBundleName = fileName;
                             break;
@@ -756,16 +940,14 @@ namespace LCG
                 }
                 try
                 {
-                    // 收集内存
-                    System.GC.Collect();
-                    System.GC.Collect();
-                    System.GC.Collect();
-                    System.GC.Collect();
-                    System.Threading.Thread.Sleep(1000);
+                    // 开启线程
+                    System.Threading.Thread thread = GCCollect();
+                    thread.Start();
 
                     // 生成ab文件
                     BuildPipeline.BuildAssetBundles(CurVersionABExportPath, BuildAssetBundleOptions.ChunkBasedCompression | BuildAssetBundleOptions.DeterministicAssetBundle, platform);
 
+                    thread.Abort();
                     System.GC.Collect();
                     System.GC.Collect();
                 }
@@ -927,6 +1109,10 @@ namespace LCG
                 filePreSize += fileInfo.Length;
             }
 
+            // 开启线程
+            System.Threading.Thread thread = GCCollect();
+            thread.Start();
+
             // 进行压缩
             ZipSuccess = true;
             ABHelper.ZipFile(zipFullName, sourzeZipFolder.FullName, zipEvents);
@@ -942,10 +1128,12 @@ namespace LCG
             FileInfo zipfile = new FileInfo(zipFullName);
             ABHelper.WriteFile(zipFolder + ".ini", ("zipsize:" + zipfile.Length + ":" + filePreSize));
 
+            thread.Abort();
             System.GC.Collect();
         }
         private static void BuildPacker(BuildTarget platform, bool onlyLua = false)
         {
+            Building = true;
             long start = System.DateTime.Now.Second;
             Debug.Log("开始处理：" + System.DateTime.Now.ToString());
 
@@ -969,6 +1157,7 @@ namespace LCG
                 if (!CreatABPacker(platform))
                 {
                     EditorUtility.DisplayDialog("提示", "本次版本与上次版本没有变化！！", "ok");
+                    Building = false;
                     return;
                 }
             }
@@ -979,6 +1168,7 @@ namespace LCG
                     Directory.Delete(CurVersionABExportPath, true);
                 }
                 Debug.Log("打包失败！！！！！" + e.Message);
+                Building = false;
                 return;
             }
 
@@ -994,10 +1184,23 @@ namespace LCG
             // 保存版号
             SaveTheVersion();
             // 结束
+            Building = false;
             Debug.Log("处理结束：" + System.DateTime.Now.ToString());
             EditorUtility.DisplayDialog("提示", "打包已完成！！", "ok");
         }
 
         #endregion
+
+        [UnityEditor.Callbacks.PostProcessScene]
+        public static void PackerScene()
+        {
+            if (!Building)
+            {
+                return;
+            }
+            System.GC.Collect();
+            System.GC.Collect();
+            System.GC.Collect();
+        }
     }
 }

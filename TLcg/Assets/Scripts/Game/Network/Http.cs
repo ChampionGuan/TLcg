@@ -27,6 +27,7 @@ namespace LCG
 
         //http方法
         private List<Action> m_httpActions = new List<Action>();
+        private List<Action> m_httpActions_2 = new List<Action>();
 
         /// <summary>  
         /// 创建GET方式的HTTP请求  
@@ -216,30 +217,32 @@ namespace LCG
         /// <returns></returns>
         public static bool RemoteCertificateValidationCallback(System.Object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
         {
-            bool isOk = true;
-            // If there are errors in the certificate chain,
-            // look at each error to determine the cause.
-            if (sslPolicyErrors != SslPolicyErrors.None)
-            {
-                for (int i = 0; i < chain.ChainStatus.Length; i++)
-                {
-                    if (chain.ChainStatus[i].Status == X509ChainStatusFlags.RevocationStatusUnknown)
-                    {
-                        continue;
-                    }
-                    chain.ChainPolicy.RevocationFlag = X509RevocationFlag.EntireChain;
-                    chain.ChainPolicy.RevocationMode = X509RevocationMode.Online;
-                    chain.ChainPolicy.UrlRetrievalTimeout = new TimeSpan(0, 1, 0);
-                    chain.ChainPolicy.VerificationFlags = X509VerificationFlags.AllFlags;
-                    bool chainIsValid = chain.Build((X509Certificate2)certificate);
-                    if (!chainIsValid)
-                    {
-                        isOk = false;
-                        break;
-                    }
-                }
-            }
-            return isOk;
+            return true;
+
+            // bool isOk = true;
+            // // If there are errors in the certificate chain,
+            // // look at each error to determine the cause.
+            // if (sslPolicyErrors != SslPolicyErrors.None)
+            // {
+            //     for (int i = 0; i < chain.ChainStatus.Length; i++)
+            //     {
+            //         if (chain.ChainStatus[i].Status == X509ChainStatusFlags.RevocationStatusUnknown)
+            //         {
+            //             continue;
+            //         }
+            //         chain.ChainPolicy.RevocationFlag = X509RevocationFlag.EntireChain;
+            //         chain.ChainPolicy.RevocationMode = X509RevocationMode.Online;
+            //         chain.ChainPolicy.UrlRetrievalTimeout = new TimeSpan(0, 1, 0);
+            //         chain.ChainPolicy.VerificationFlags = X509VerificationFlags.AllFlags;
+            //         bool chainIsValid = chain.Build((X509Certificate2)certificate);
+            //         if (!chainIsValid)
+            //         {
+            //             isOk = false;
+            //             break;
+            //         }
+            //     }
+            // }
+            // return isOk;
         }
 
         /// <summary>
@@ -327,14 +330,22 @@ namespace LCG
 
         public void CustomUpdate()
         {
-            for (int i = 0; i < m_httpActions.Count; i++)
+            if (m_httpActions.Count < 1)
             {
-                if (null != m_httpActions[i])
+                return;
+            }
+
+            m_httpActions_2.AddRange(m_httpActions);
+            m_httpActions.Clear();
+
+            for (int i = 0; i < m_httpActions_2.Count; i++)
+            {
+                if (null != m_httpActions_2[i])
                 {
-                    m_httpActions[i]();
+                    m_httpActions_2[i]();
                 }
             }
-            m_httpActions.Clear();
+            m_httpActions_2.Clear();
         }
 
         public void CustomFixedUpdate()
@@ -344,6 +355,7 @@ namespace LCG
         public void CustomDestroy()
         {
             m_httpActions.Clear();
+            m_httpActions_2.Clear();
         }
 
         public void CustomAppFocus(bool focus)

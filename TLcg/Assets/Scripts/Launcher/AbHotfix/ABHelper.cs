@@ -548,9 +548,9 @@ namespace LCG
             }
             ABHelper.WriteFile(filePath, dependTxt.ToString().TrimEnd().ToLower());
         }
-        public static Dictionary<string, string> ReadMd5FileByString(string md5Txt)
+        public static Dictionary<string, List<string>> ReadMd5FileByString(string md5Txt)
         {
-            Dictionary<string, string> md5Info = new Dictionary<string, string>();
+            Dictionary<string, List<string>> md5Info = new Dictionary<string, List<string>>();
             if (!string.IsNullOrEmpty(md5Txt))
             {
                 // assets/resources/ui/tips/tips.bytes:bd51b54f940b530425662e4529ea5673
@@ -558,22 +558,24 @@ namespace LCG
                 foreach (string k in split)
                 {
                     string[] split2 = k.Split(':');
-                    md5Info.Add(split2[0], split2[1]);
+                    md5Info.Add(split2[0], new List<string>() { split2[1], split2[2] });
                 }
             }
 
             return md5Info;
         }
-        public static Dictionary<string, string> ReadMd5FileByPath(string filePath)
+        public static Dictionary<string, List<string>> ReadMd5FileByPath(string filePath)
         {
             return ReadMd5FileByString(ABHelper.ReadFile(filePath));
         }
-        public static void WriteMd5File(string filePath, Dictionary<string, string> md5Info)
+        public static void WriteMd5File(string filePath, Dictionary<string, string> md5Info, Dictionary<string, int> crInfo)
         {
             StringBuilder md5Txt = new StringBuilder();
+            int rc = 1;
             foreach (KeyValuePair<string, string> pair in md5Info)
             {
-                md5Txt.Append(pair.Key + ":" + pair.Value + "\r");
+                rc = crInfo.ContainsKey(pair.Key) ? crInfo[pair.Key] : 1;
+                md5Txt.Append(pair.Key + ":" + pair.Value + ":" + rc + "\r");
             }
             ABHelper.WriteFile(filePath, md5Txt.ToString().TrimEnd().ToLower());
         }
