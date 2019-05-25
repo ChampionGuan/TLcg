@@ -138,6 +138,7 @@ namespace LCG
             {
                 response = request.GetResponse();
                 int bufferLength = (int)response.ContentLength;
+                // 注意！！！如果是压缩流，ContentLength值是无效的，所以约定好不要采用压缩流信息！！
                 if (bufferLength <= 0)
                 {
                     throw new Exception(ErrorCode.ReceiveZero);

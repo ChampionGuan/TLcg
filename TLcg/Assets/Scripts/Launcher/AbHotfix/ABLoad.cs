@@ -133,6 +133,7 @@ namespace LCG
                 {
                     TheAB.Unload(true);
                     TheAB = null;
+                    Debug.Log("卸载ab:" + abPath);
                 }
             }
         }

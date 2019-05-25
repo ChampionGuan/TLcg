@@ -327,6 +327,8 @@ namespace LCG
         private static Dictionary<string, int> CurVersionRCList = null;
         private static Dictionary<string, ResType> CurVersionFileType = null;
         private static Dictionary<string, string> CurVersionFileUrlMd5 = null;
+        private static List<string> CurVersionRmFileList = null;
+
         private enum ResType { None, Folder, Lua, File, Depend, Script }
         private static bool IsNeedFileRes(string fileName)
         {
@@ -612,6 +614,7 @@ namespace LCG
             CurVersionManifestList = new Dictionary<string, List<string>>();
             CurVersionMd5List = new Dictionary<string, string>();
             CurVersionRCList = new Dictionary<string, int>();
+            CurVersionRmFileList = new List<string>();
             foreach (string path in scriptPathList)
             {
                 if (!IsScriptFileRes(path))
@@ -644,7 +647,7 @@ namespace LCG
                 }
                 HandleFileAssets(path);
             }
-    
+
             OutputMainfestFile();
             // 版本所需资源的md5码保存
             ABHelper.WriteMd5File(CurVersionABExportPath + ABHelper.Md5FileName, CurVersionMd5List, CurVersionRCList);
@@ -909,33 +912,53 @@ namespace LCG
                 ClearAssetBundlesName();
                 AssetDatabase.Refresh();
 
-                foreach (string path in updateFileList)
+                string[] depends;
+                string fileName = "";
+                foreach (var path in updateFileList)
                 {
-                    string fileName;
-                    switch (CurVersionFileType[path])
+                    if (CurVersionFileType[path] == ResType.Lua)
                     {
-                        case ResType.Folder:
-                            foreach (string path2 in CurVersionDependenciesList[path])
+                        CopyLuaFiles(path);
+                    }
+                    else if (CurVersionFileType[path] == ResType.Folder)
+                    {
+                        foreach (var path2 in CurVersionDependenciesList[path])
+                        {
+                            fileName = (ABHelper.GetFileFolderPath(path2).Substring(ResFolder.Length)) + ".ab";
+                            fileName = CreatFileUrlMd5(fileName);
+                            AssetImporter.GetAtPath(path2).assetBundleName = fileName;
+                        }
+                    }
+                    else
+                    {
+                        depends = AssetDatabase.GetDependencies(path);
+                        foreach (var path2 in depends)
+                        {
+                            if (path2 == path || (CurVersionRCList.ContainsKey(path2) && CurVersionRCList[path2] > 1))
                             {
-                                fileName = (ABHelper.GetFileFolderPath(path2).Substring(ResFolder.Length)) + ".ab";
-                                fileName = CreatFileUrlMd5(fileName);
-                                AssetImporter.GetAtPath(path2).assetBundleName = fileName;
+                                if (CurVersionFileType[path2] == ResType.File)
+                                {
+                                    fileName = (ABHelper.GetFileFullPathWithoutFtype(path2).Substring(ResFolder.Length)) + ".ab";
+                                    fileName = CreatFileUrlMd5(fileName);
+                                    AssetImporter.GetAtPath(path2).assetBundleName = fileName;
+                                }
+                                else if (CurVersionFileType[path2] == ResType.Depend)
+                                {
+                                    fileName = (ABHelper.GetFileFullPathWithoutFtype(path2).Substring(AssetsFolder.Length)) + ".ab";
+                                    fileName = CreatFileUrlMd5(fileName);
+                                    AssetImporter.GetAtPath(path2).assetBundleName = fileName;
+                                }
+                                else
+                                {
+                                    fileName = "";
+                                }
+                                // 待移除的文件
+                                if (!string.IsNullOrEmpty(fileName) && !updateFileList.Contains(path2) && !CurVersionRmFileList.Contains(fileName))
+                                {
+                                    CurVersionRmFileList.Add(fileName);
+                                }
                             }
-                            break;
-                        case ResType.Lua:
-                            CopyLuaFiles(path);
-                            break;
-                        case ResType.File:
-                            fileName = (ABHelper.GetFileFullPathWithoutFtype(path).Substring(ResFolder.Length)) + ".ab";
-                            fileName = CreatFileUrlMd5(fileName);
-                            AssetImporter.GetAtPath(path).assetBundleName = fileName;
-                            break;
-                        case ResType.Depend:
-                            fileName = (ABHelper.GetFileFullPathWithoutFtype(path).Substring(AssetsFolder.Length)) + ".ab";
-                            fileName = CreatFileUrlMd5(fileName);
-                            AssetImporter.GetAtPath(path).assetBundleName = fileName;
-                            break;
-                        default: break;
+                        }
                     }
                 }
                 try
@@ -946,6 +969,16 @@ namespace LCG
 
                     // 生成ab文件
                     BuildPipeline.BuildAssetBundles(CurVersionABExportPath, BuildAssetBundleOptions.ChunkBasedCompression | BuildAssetBundleOptions.DeterministicAssetBundle, platform);
+
+                    // 移除不需要更新文件
+                    foreach (var path in CurVersionRmFileList)
+                    {
+                        string path2 = CurVersionABExportPath + path;
+                        if (File.Exists(path2))
+                        {
+                            File.Delete(path2);
+                        }
+                    }
 
                     thread.Abort();
                     System.GC.Collect();
