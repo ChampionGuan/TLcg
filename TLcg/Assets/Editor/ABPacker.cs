@@ -794,6 +794,15 @@ namespace LCG
                         continue;
                     }
 
+                    // 此版本引用数<=1,且上次版本引用数>1
+                    if (CurVersionRCList[depend] <= 1 && lastVersionMd5List.ContainsKey(dependLower) && int.Parse(lastVersionMd5List[dependLower][1]) > 1)
+                    {
+                        if (IsScriptFileRes(pathName))
+                            AddUpdateFile(updateScriptList, pathName);
+                        else
+                            AddUpdateFile(updateFileList, pathName);
+                    }
+
                     // 此版本引用数>1
                     if (CurVersionRCList[depend] > 1)
                     {

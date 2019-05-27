@@ -28,6 +28,10 @@ namespace LCG
         private static Dictionary<string, ReferenceCount> m_objDir = new Dictionary<string, ReferenceCount>();
         public static UnityEngine.Object LoadObject(string resourcePath, Type type = null)
         {
+            if (string.IsNullOrEmpty(resourcePath))
+            {
+                return null;
+            }
             ReferenceCount rc = null;
             if (m_objDir.ContainsKey(resourcePath))
             {
@@ -42,6 +46,14 @@ namespace LCG
         }
         public static void AsyncLoadObject(string resourcePath, Type type, Action<UnityEngine.Object> complete, Action<float> progress = null)
         {
+            if (string.IsNullOrEmpty(resourcePath))
+            {
+                if (null != complete)
+                {
+                    complete.Invoke(null);
+                }
+                return;
+            }
             ReferenceCount rc = null;
             if (m_objDir.ContainsKey(resourcePath))
             {
@@ -56,6 +68,10 @@ namespace LCG
         }
         public static void UnloadObject(string resourcePath)
         {
+            if (string.IsNullOrEmpty(resourcePath))
+            {
+                return;
+            }
             if (!m_objDir.ContainsKey(resourcePath))
             {
                 return;
@@ -66,6 +82,10 @@ namespace LCG
         private static Dictionary<string, AssetBundle> m_abDir = new Dictionary<string, AssetBundle>();
         public static void LoadUI(string uipath)
         {
+            if (string.IsNullOrEmpty(uipath))
+            {
+                return;
+            }
             AssetBundle ab = null;
             if (m_abDir.ContainsKey(uipath))
             {
@@ -117,6 +137,10 @@ namespace LCG
         }
         public static void UnloadUI(string uipath)
         {
+            if (string.IsNullOrEmpty(uipath))
+            {
+                return;
+            }
             string id = uipath;
             if (m_pkgDir.ContainsKey(uipath))
             {
@@ -136,6 +160,10 @@ namespace LCG
         private static string lastSceneName = null;
         public static void LoadScene(string sname)
         {
+            if (string.IsNullOrEmpty(sname))
+            {
+                return;
+            }
             //  加载新场景
             bool r = ABLoader.LoadScene(ScenePathPrefix + sname, sname);
 
@@ -152,6 +180,10 @@ namespace LCG
         }
         public static void UnloadScene(string sname)
         {
+            if (string.IsNullOrEmpty(sname))
+            {
+                return;
+            }
             ABLoader.UnloadScene(ScenePathPrefix + sname);
             // 和上一场景一致
             if (lastSceneName == sname)
@@ -162,6 +194,10 @@ namespace LCG
         public static List<string> LoadedLua = new List<string>();
         public static byte[] LoadLua(ref string filePath)
         {
+            if (string.IsNullOrEmpty(filePath))
+            {
+                return null;
+            }
             try
             {
                 if (!LoadedLua.Contains(filePath))
