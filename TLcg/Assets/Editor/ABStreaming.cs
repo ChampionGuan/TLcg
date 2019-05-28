@@ -31,7 +31,7 @@ namespace LCG
         private static string TheApkFolderName = "tlcg";
 
         [MenuItem("Tools/资源打包前处理")]
-        public static void Build()
+        static void Build()
         {
             ReadFile();
             RootFolderNmae();
@@ -250,7 +250,7 @@ namespace LCG
             }
             return true;
         }
-        public static void BuildNativeAB(string platformName)
+        public static bool BuildNativeAB(string platformName)
         {
             System.GC.Collect();
             System.GC.Collect();
@@ -283,7 +283,7 @@ namespace LCG
             if (!Directory.Exists(path))
             {
                 Debug.LogError("路径不存在：" + path);
-                return;
+                return false;
             }
             if (!Directory.Exists(ABHelper.AppNativeVersionPath))
             {
@@ -325,6 +325,7 @@ namespace LCG
 
             System.GC.Collect();
             Debug.Log("streamingAssets文件生成成功！！文件源路径：" + path);
+            return true;
         }
         public static void AssetMoveout()
         {

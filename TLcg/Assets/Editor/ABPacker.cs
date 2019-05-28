@@ -15,6 +15,7 @@ namespace LCG
         private static string AssetsFolder = "Assets/";
         private static string ResFolder = "Assets/Resources/";
         private static bool Building = false;
+        private static bool IgnoreScript = false;
 
         private static string ScriptDirStr = "Scripts;3rdLibs";
         private static string ScriptDirStr2;
@@ -36,7 +37,7 @@ namespace LCG
         private static string TheApkFolderName = "tlcg";
 
         [MenuItem("Tools/资源打包优化版")]
-        public static void Build()
+        static void Build()
         {
             ReadFile();
             RootFolderNmae();
@@ -44,13 +45,13 @@ namespace LCG
             ParseAllDir();
             TheWindow = EditorWindow.GetWindow(typeof(ABPacker), true, "资源打包优化版");
         }
-        public static void BuildWinPacker()
+        public static void BuildAndroidPacker()
         {
             ReadFile();
             RootFolderNmae();
             ParseTheVersion();
             ParseAllDir();
-            BuildPacker(BuildTarget.StandaloneWindows);
+            BuildPacker(BuildTarget.Android);
         }
         public static void BuildIosPacker()
         {
@@ -60,13 +61,23 @@ namespace LCG
             ParseAllDir();
             BuildPacker(BuildTarget.iOS);
         }
-        public static void BuildAndroidPacker()
+        public static void BuildWinPacker()
         {
             ReadFile();
             RootFolderNmae();
             ParseTheVersion();
             ParseAllDir();
-            BuildPacker(BuildTarget.Android);
+            BuildPacker(BuildTarget.StandaloneWindows);
+        }
+        public static bool CommandBuild(bool ignoreScript, BuildTarget target)
+        {
+            IgnoreScript = ignoreScript;
+
+            ReadFile();
+            RootFolderNmae();
+            ParseTheVersion();
+            ParseAllDir();
+            return BuildPacker(target);
         }
         private static void RootFolderNmae()
         {
@@ -787,7 +798,7 @@ namespace LCG
                     // 无上一版本,本次版本引用数>1
                     if (!lastVersionMd5List.ContainsKey(dependLower) && CurVersionRCList[depend] > 1)
                     {
-                        if (IsScriptFileRes(depend))
+                        if (IsScriptFileRes(depend) && !IgnoreScript)
                             AddUpdateFile(updateScriptList, depend);
                         else
                             AddUpdateFile(updateFileList, depend);
@@ -797,7 +808,7 @@ namespace LCG
                     // 此版本引用数<=1,且上次版本引用数>1
                     if (CurVersionRCList[depend] <= 1 && lastVersionMd5List.ContainsKey(dependLower) && int.Parse(lastVersionMd5List[dependLower][1]) > 1)
                     {
-                        if (IsScriptFileRes(pathName))
+                        if (IsScriptFileRes(pathName) && !IgnoreScript)
                             AddUpdateFile(updateScriptList, pathName);
                         else
                             AddUpdateFile(updateFileList, pathName);
@@ -808,19 +819,19 @@ namespace LCG
                     {
                         if (!lastVersionMd5List.ContainsKey(dependLower) || int.Parse(lastVersionMd5List[dependLower][1]) <= 1)
                         {
-                            if (IsScriptFileRes(pathName))
+                            if (IsScriptFileRes(pathName) && !IgnoreScript)
                                 AddUpdateFile(updateScriptList, pathName);
                             else
                                 AddUpdateFile(updateFileList, pathName);
 
-                            if (IsScriptFileRes(depend))
+                            if (IsScriptFileRes(depend) && !IgnoreScript)
                                 AddUpdateFile(updateScriptList, depend);
                             else
                                 AddUpdateFile(updateFileList, depend);
                         }
                         else if (lastVersionMd5List[dependLower][0] != CurVersionMd5List[depend])
                         {
-                            if (IsScriptFileRes(depend))
+                            if (IsScriptFileRes(depend) && !IgnoreScript)
                                 AddUpdateFile(updateScriptList, depend);
                             else
                                 AddUpdateFile(updateFileList, depend);
@@ -829,7 +840,7 @@ namespace LCG
                     // <=1，但是资源更新了！！
                     else if (!lastVersionMd5List.ContainsKey(dependLower) || lastVersionMd5List[dependLower][0] != CurVersionMd5List[depend])
                     {
-                        if (IsScriptFileRes(pathName))
+                        if (IsScriptFileRes(pathName) && !IgnoreScript)
                             AddUpdateFile(updateScriptList, pathName);
                         else
                             AddUpdateFile(updateFileList, pathName);
@@ -839,7 +850,7 @@ namespace LCG
                 // 新资源时
                 if (!lastVersionDependenciesList.ContainsKey(pathName.ToLower()))
                 {
-                    if (IsScriptFileRes(pathName))
+                    if (IsScriptFileRes(pathName) && !IgnoreScript)
                         AddUpdateFile(updateScriptList, pathName);
                     else
                         AddUpdateFile(updateFileList, pathName);
@@ -852,7 +863,7 @@ namespace LCG
                     // 新增了依赖文件时
                     if (!lastVersionDependenciesList[pathName.ToLower()].Contains(dependLower))
                     {
-                        if (IsScriptFileRes(pathName))
+                        if (IsScriptFileRes(pathName) && !IgnoreScript)
                             AddUpdateFile(updateScriptList, pathName);
                         else
                             AddUpdateFile(updateFileList, pathName);
@@ -880,7 +891,7 @@ namespace LCG
 
                         if (need)
                         {
-                            if (IsScriptFileRes(pathName))
+                            if (IsScriptFileRes(pathName) && !IgnoreScript)
                                 AddUpdateFile(updateScriptList, pathName);
                             else
                                 AddUpdateFile(updateFileList, pathName);
@@ -1173,7 +1184,7 @@ namespace LCG
             thread.Abort();
             System.GC.Collect();
         }
-        private static void BuildPacker(BuildTarget platform, bool onlyLua = false)
+        private static bool BuildPacker(BuildTarget platform, bool onlyLua = false)
         {
             Building = true;
             long start = System.DateTime.Now.Second;
@@ -1192,7 +1203,10 @@ namespace LCG
             CreatFileDependencies();
 
             // 关闭面板
-            TheWindow.Close();
+            if (null != TheWindow)
+            {
+                TheWindow.Close();
+            }
             // 生成ab资源
             try
             {
@@ -1200,7 +1214,7 @@ namespace LCG
                 {
                     EditorUtility.DisplayDialog("提示", "本次版本与上次版本没有变化！！", "ok");
                     Building = false;
-                    return;
+                    return false;
                 }
             }
             catch (Exception e)
@@ -1211,7 +1225,7 @@ namespace LCG
                 }
                 Debug.Log("打包失败！！！！！" + e.Message);
                 Building = false;
-                return;
+                return false;
             }
 
             // 生成版本文件
@@ -1229,6 +1243,7 @@ namespace LCG
             Building = false;
             Debug.Log("处理结束：" + System.DateTime.Now.ToString());
             EditorUtility.DisplayDialog("提示", "打包已完成！！", "ok");
+            return true;
         }
 
         #endregion

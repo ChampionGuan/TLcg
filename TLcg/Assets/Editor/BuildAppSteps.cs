@@ -26,6 +26,7 @@ namespace LCG
         static string m_buildPath = string.Empty;
         static string m_apkFolderPath = string.Empty;
         static BuildTarget m_buildTarget = BuildTarget.Android;
+        static bool m_isDebug = false;
         static BuildTargetGroup m_buildTargetGroup = BuildTargetGroup.Android;
         static BuildOptions m_buildOptions = BuildOptions.None;
         static string m_luajitWorkingPath = "/Luajit/luajit-2.1.0b2/src/";
@@ -33,6 +34,19 @@ namespace LCG
 
         [MenuItem("Tools/版本打包工具")]
         private static void Build()
+        {
+            Prepare();
+            m_editorWindow = EditorWindow.GetWindow(typeof(BuildAppSteps), true, "打包");
+        }
+        public static bool CommandBuild(bool debug, BuildTarget target)
+        {
+            m_isDebug = debug;
+            m_buildTarget = target;
+
+            Prepare();
+            return BuildApk();
+        }
+        private static void Prepare()
         {
             m_process = new System.Diagnostics.Process();
             m_process.StartInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
@@ -52,9 +66,7 @@ namespace LCG
             m_versionNum = new VersionNum(ABHelper.ReadVersionIdFile()[0]);
             m_apkFolderPath = ABHelper.ReadVersionIdFile()[2];
 
-            m_editorWindow = EditorWindow.GetWindow(typeof(BuildAppSteps), true, "打包");
         }
-
         private static string mode = "debug";
         private static string platform = ABHelper.AndroidPlatform;
         private void OnGUI()
@@ -97,6 +109,7 @@ namespace LCG
 
             if (GUILayout.Button("Build正式版本"))
             {
+                m_isDebug = mode == "debug";
                 if (platform == ABHelper.AndroidPlatform)
                 {
                     m_buildTarget = BuildTarget.Android;
@@ -114,18 +127,48 @@ namespace LCG
                     m_buildTarget = BuildTarget.NoTarget;
                 }
 
-                if (m_buildTarget != BuildTarget.Android)
+                BuildApk();
+            }
+            if (GUILayout.Button("Build内网版本"))
+            {
+                m_isDebug = mode == "debug";
+                if (platform == ABHelper.AndroidPlatform)
                 {
-                    BulidTarget(mode == "debug");
+                    m_buildTarget = BuildTarget.Android;
+                }
+                else if (platform == ABHelper.IosPlatform)
+                {
+                    m_buildTarget = BuildTarget.iOS;
+                }
+                else if (platform == ABHelper.WinPlatform)
+                {
+                    m_buildTarget = BuildTarget.StandaloneWindows;
                 }
                 else
                 {
-                    // 移入ab
-                    ABStreaming.BuildNativeAB(ABHelper.AndroidPlatform);
+                    m_buildTarget = BuildTarget.NoTarget;
+                }
+
+                BulidTarget(m_isDebug);
+            }
+        }
+        private static bool BuildApk()
+        {
+            bool result = true;
+
+            // android平台
+            if (m_buildTarget == BuildTarget.Android)
+            {
+                // 移入ab
+                result = ABStreaming.BuildNativeAB(ABHelper.AndroidPlatform);
+                if (result)
+                {
                     // 移出资源
                     ABStreaming.AssetMoveout();
+                    // 打包
+                    result = BulidTarget(m_isDebug);
                     // 将文件移至指定位置！！！
-                    if (BulidTarget(mode == "debug"))
+                    if (result)
                     {
                         string apkpath1;
                         string apkpath2;
@@ -144,6 +187,8 @@ namespace LCG
                         apkpath2 = string.Format("{0}/male7_v{1}.ini", apkpathS, m_versionNum.Id1A2A3);
                         ABHelper.WriteFile(apkpath2, file.Length.ToString().TrimEnd());
 
+                        // TODO 加固并且重新签名
+
                         Debug.Log("成功生成版本！！！！" + apkpath1);
                         System.GC.Collect();
                         System.GC.Collect();
@@ -152,29 +197,17 @@ namespace LCG
                     ABStreaming.AssetMovein();
                 }
             }
-            if (GUILayout.Button("Build内网版本"))
+            else if (m_buildTarget == BuildTarget.iOS)
             {
-                if (platform == ABHelper.AndroidPlatform)
-                {
-                    m_buildTarget = BuildTarget.Android;
-                }
-                else if (platform == ABHelper.IosPlatform)
-                {
-                    m_buildTarget = BuildTarget.iOS;
-                }
-                else if (platform == ABHelper.WinPlatform)
-                {
-                    m_buildTarget = BuildTarget.StandaloneWindows;
-                }
-                else
-                {
-                    m_buildTarget = BuildTarget.NoTarget;
-                }
-
-                BulidTarget(mode == "debug");
+                result = BulidTarget(m_isDebug);
+                // TODO 打开xcode，编译ipa
             }
+            else
+            {
+                result = BulidTarget(m_isDebug);
+            }
+            return result;
         }
-
         //目标平台
         private static bool BulidTarget(bool isDebug = false)
         {
@@ -248,7 +281,10 @@ namespace LCG
                 Debug.Log("后处理过程结束...");
                 Debug.Log("版本发布结束！");
 
-                m_editorWindow.Close();
+                if (null != m_editorWindow)
+                {
+                    m_editorWindow.Close();
+                }
             }
             System.GC.Collect();
 
