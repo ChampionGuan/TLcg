@@ -6,6 +6,7 @@ using System;
 using System.IO;
 using UnityEditor.Callbacks;
 using UnityEditor.iOS.Xcode;
+using System.Text;
 
 namespace LCG
 {
@@ -13,6 +14,9 @@ namespace LCG
     {
         static System.Diagnostics.Process m_process = null;
         static EditorWindow m_editorWindow;
+        static bool m_buildApp = false;
+        static bool m_xluaGen = false;
+        static bool m_commandBuildApp = false;
 
         static string m_productName = "tlcg";
         static string m_companyName = "champion";
@@ -32,20 +36,49 @@ namespace LCG
         static string m_luajitWorkingPath = "/Luajit/luajit-2.1.0b2/src/";
         static string m_luajitExePath = "luajit.exe";
 
+        [UnityEditor.Callbacks.DidReloadScripts]
+        private static void AllScriptsReloaded()
+        {
+            ReadBuildTxt();
+            if (!m_buildApp || !m_xluaGen)
+            {
+                return;
+            }
+
+            m_xluaGen = false;
+            m_buildApp = true;
+            WriteBuildTxt();
+            Prepare();
+
+            if (m_commandBuildApp)
+            {
+                BuildApk();
+            }
+            else
+            {
+                m_editorWindow = EditorWindow.GetWindow(typeof(BuildAppSteps), true, "打包");
+            }
+        }
         [MenuItem("Tools/版本打包工具")]
         private static void Build()
         {
-            Prepare();
-            m_editorWindow = EditorWindow.GetWindow(typeof(BuildAppSteps), true, "打包");
+            m_commandBuildApp = false;
+            m_buildApp = true;
+            m_xluaGen = true;
+            WriteBuildTxt();
+            HofixInject();
         }
-        public static bool CommandBuild(bool debug, BuildTarget target)
+        public static void CommandBuild(bool debug, BuildTarget target)
         {
             m_isDebug = debug;
             m_buildTarget = target;
-
-            Prepare();
-            return BuildApk();
+            m_commandBuildApp = true;
+            m_buildApp = true;
+            m_xluaGen = true;
+            WriteBuildTxt();
+            HofixInject();
         }
+
         private static void Prepare()
         {
             m_process = new System.Diagnostics.Process();
@@ -65,7 +98,13 @@ namespace LCG
 #endif
             m_versionNum = new VersionNum(ABHelper.ReadVersionIdFile()[0]);
             m_apkFolderPath = ABHelper.ReadVersionIdFile()[2];
-
+            XLua.Hotfix.HotfixInject();
+        }
+        private static void HofixInject()
+        {
+            // 处理XLua脚本
+            CSObjectWrapEditor.Generator.ClearAll();
+            CSObjectWrapEditor.Generator.GenAll();
         }
         private static string mode = "debug";
         private static string platform = ABHelper.AndroidPlatform;
@@ -127,6 +166,7 @@ namespace LCG
                     m_buildTarget = BuildTarget.NoTarget;
                 }
 
+                HofixInject();
                 BuildApk();
             }
             if (GUILayout.Button("Build内网版本"))
@@ -225,10 +265,6 @@ namespace LCG
                 // 打包环境
                 BuildEnv(isDebug);
 
-                // 处理XLua脚本
-                CSObjectWrapEditor.Generator.ClearAll();
-                CSObjectWrapEditor.Generator.GenAll();
-
                 // 收集lua文件
                 BuildLuaConfigs.Collect();
 
@@ -287,6 +323,9 @@ namespace LCG
                 }
             }
             System.GC.Collect();
+            m_xluaGen = false;
+            m_buildApp = false;
+            WriteBuildTxt();
 
             return result;
         }
@@ -559,6 +598,40 @@ namespace LCG
 
                 proj.WriteToFile(projectPath);
             }
+        }
+        private static void ReadBuildTxt()
+        {
+            string s = ABHelper.ReadFile(Application.dataPath + "/Editor/BuildAppSteps.txt");
+            string[] sp = s.TrimEnd().Replace("\r", "").Split('\n');
+            string[] sp1;
+            foreach (var v in sp)
+            {
+                if (string.IsNullOrEmpty(v))
+                {
+                    continue;
+                }
+                sp1 = v.Split('=');
+
+                switch (sp1[0])
+                {
+                    case "commandBuildApp": m_commandBuildApp = bool.Parse(sp1[1]); break;
+                    case "buildApp": m_buildApp = bool.Parse(sp1[1]); break;
+                    case "xluaGen": m_xluaGen = bool.Parse(sp1[1]); break;
+                    case "isdebug": m_isDebug = bool.Parse(sp1[1]); break;
+                    case "target": m_buildTarget = (BuildTarget)Enum.Parse(typeof(BuildTarget), sp1[1]); break;
+                    default: break;
+                }
+            }
+        }
+        private static void WriteBuildTxt()
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append("commandBuildApp=" + m_commandBuildApp.ToString() + "\n");
+            sb.Append("buildApp=" + m_buildApp.ToString() + "\n");
+            sb.Append("xluaGen=" + m_xluaGen.ToString() + "\n");
+            sb.Append("isdebug=" + m_isDebug.ToString() + "\n");
+            sb.Append("target=" + m_buildTarget.ToString() + "\n");
+            ABHelper.WriteFile(Application.dataPath + "/Editor/BuildAppSteps.txt", sb.ToString().TrimEnd());
         }
     }
 }

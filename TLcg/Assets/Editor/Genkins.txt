@@ -1,0 +1,1 @@
+-quit -batchmode -nographics -projectPath E:\2_champion\TLcg\TLcg  -executeMethod LCG.Genkins.BuildAB2Apk -platform "$platform" -mode "$mode" -logFile build.log

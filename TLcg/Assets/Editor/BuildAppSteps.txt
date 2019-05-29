@@ -1,0 +1,5 @@
+commandBuildApp=True
+buildApp=False
+xluaGen=False
+isdebug=False
+target=Android

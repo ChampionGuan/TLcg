@@ -6,41 +6,23 @@ namespace LCG
     public class Genkins : EditorWindow
     {
         static BuildTarget Platform = BuildTarget.NoTarget;
-        static bool IgnoreScript;
         static bool IsDebug = false;
 
         static void BuildApk()
         {
             parseCommand();
-            if (!BuildAppSteps.CommandBuild(IsDebug, Platform))
-            {
-                throw new System.Exception("生成apk失败！！");
-            }
+            BuildAppSteps.CommandBuild(IsDebug, Platform);
         }
         static void BuildAB()
         {
             parseCommand();
-            if (!ABPacker.CommandBuild(IsDebug, Platform))
-            {
-                throw new System.Exception("生成ab失败！！");
-            }
+            ABPacker.CommandBuild(true, Platform);
         }
         static void BuildAB2Apk()
         {
-            bool result;
             parseCommand();
-
-            result = ABPacker.CommandBuild(IsDebug, Platform);
-            if (!result)
-            {
-                throw new System.Exception("生成ab失败！！");
-            }
-
-            result = BuildAppSteps.CommandBuild(IsDebug, Platform);
-            if (!result)
-            {
-                throw new System.Exception("生成apk失败！！");
-            }
+            ABPacker.CommandBuild(IsDebug, Platform);
+            BuildAppSteps.CommandBuild(IsDebug, Platform);
         }
         static void parseCommand()
         {
@@ -48,11 +30,7 @@ namespace LCG
 
             for (int i = 0; i < args.Length; ++i)
             {
-                if ("-ignoreScript" == args[i])
-                {
-                    IgnoreScript = bool.Parse(args[i + 1]);
-                }
-                else if ("-mode" == args[i])
+                if ("-mode" == args[i])
                 {
                     IsDebug = bool.Parse(args[i + 1]);
                 }

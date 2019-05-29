@@ -798,7 +798,7 @@ namespace LCG
                     // 无上一版本,本次版本引用数>1
                     if (!lastVersionMd5List.ContainsKey(dependLower) && CurVersionRCList[depend] > 1)
                     {
-                        if (IsScriptFileRes(depend) && !IgnoreScript)
+                        if (IsScriptFileRes(depend))
                             AddUpdateFile(updateScriptList, depend);
                         else
                             AddUpdateFile(updateFileList, depend);
@@ -808,7 +808,7 @@ namespace LCG
                     // 此版本引用数<=1,且上次版本引用数>1
                     if (CurVersionRCList[depend] <= 1 && lastVersionMd5List.ContainsKey(dependLower) && int.Parse(lastVersionMd5List[dependLower][1]) > 1)
                     {
-                        if (IsScriptFileRes(pathName) && !IgnoreScript)
+                        if (IsScriptFileRes(pathName))
                             AddUpdateFile(updateScriptList, pathName);
                         else
                             AddUpdateFile(updateFileList, pathName);
@@ -819,19 +819,19 @@ namespace LCG
                     {
                         if (!lastVersionMd5List.ContainsKey(dependLower) || int.Parse(lastVersionMd5List[dependLower][1]) <= 1)
                         {
-                            if (IsScriptFileRes(pathName) && !IgnoreScript)
+                            if (IsScriptFileRes(pathName))
                                 AddUpdateFile(updateScriptList, pathName);
                             else
                                 AddUpdateFile(updateFileList, pathName);
 
-                            if (IsScriptFileRes(depend) && !IgnoreScript)
+                            if (IsScriptFileRes(depend))
                                 AddUpdateFile(updateScriptList, depend);
                             else
                                 AddUpdateFile(updateFileList, depend);
                         }
                         else if (lastVersionMd5List[dependLower][0] != CurVersionMd5List[depend])
                         {
-                            if (IsScriptFileRes(depend) && !IgnoreScript)
+                            if (IsScriptFileRes(depend))
                                 AddUpdateFile(updateScriptList, depend);
                             else
                                 AddUpdateFile(updateFileList, depend);
@@ -840,7 +840,7 @@ namespace LCG
                     // <=1，但是资源更新了！！
                     else if (!lastVersionMd5List.ContainsKey(dependLower) || lastVersionMd5List[dependLower][0] != CurVersionMd5List[depend])
                     {
-                        if (IsScriptFileRes(pathName) && !IgnoreScript)
+                        if (IsScriptFileRes(pathName))
                             AddUpdateFile(updateScriptList, pathName);
                         else
                             AddUpdateFile(updateFileList, pathName);
@@ -850,7 +850,7 @@ namespace LCG
                 // 新资源时
                 if (!lastVersionDependenciesList.ContainsKey(pathName.ToLower()))
                 {
-                    if (IsScriptFileRes(pathName) && !IgnoreScript)
+                    if (IsScriptFileRes(pathName))
                         AddUpdateFile(updateScriptList, pathName);
                     else
                         AddUpdateFile(updateFileList, pathName);
@@ -863,7 +863,7 @@ namespace LCG
                     // 新增了依赖文件时
                     if (!lastVersionDependenciesList[pathName.ToLower()].Contains(dependLower))
                     {
-                        if (IsScriptFileRes(pathName) && !IgnoreScript)
+                        if (IsScriptFileRes(pathName))
                             AddUpdateFile(updateScriptList, pathName);
                         else
                             AddUpdateFile(updateFileList, pathName);
@@ -891,7 +891,7 @@ namespace LCG
 
                         if (need)
                         {
-                            if (IsScriptFileRes(pathName) && !IgnoreScript)
+                            if (IsScriptFileRes(pathName))
                                 AddUpdateFile(updateScriptList, pathName);
                             else
                                 AddUpdateFile(updateFileList, pathName);
@@ -903,7 +903,7 @@ namespace LCG
             System.GC.Collect();
 
             // 检测cs和dll脚本
-            if (updateScriptList.Count > 0)
+            if (updateScriptList.Count > 0 && !IgnoreScript)
             {
                 StringBuilder sb = new StringBuilder();
                 foreach (var pair in updateScriptList)
