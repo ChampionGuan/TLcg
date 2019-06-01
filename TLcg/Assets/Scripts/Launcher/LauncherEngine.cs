@@ -95,6 +95,10 @@ namespace LCG
             {
                 return true;
             }
+            if (!ABVersion.CurVersionId.Id.Contains(versionId))
+            {
+                return true;
+            }
             return false;
         }
 
