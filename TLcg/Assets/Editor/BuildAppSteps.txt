@@ -1,5 +1,5 @@
-commandBuildApp=True
+commandBuildApp=False
 buildApp=False
 xluaGen=False
-isdebug=False
+isdebug=True
 target=Android

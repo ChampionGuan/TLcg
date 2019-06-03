@@ -220,14 +220,53 @@ namespace LCG
                             Directory.CreateDirectory(apkpathS);
                         }
 
-                        apkpath1 = string.Format("{0}/male7_v{1}.apk", apkpathS, m_versionNum.Id1A2A3);
+                        apkpath1 = string.Format("{0}/male7_v{1}#{2}.apk", apkpathS, m_versionNum.Id1A2A3, System.DateTime.Now.ToString("yyyy-M-d H-m-s"));
                         File.Copy(m_buildPath, apkpath1, true);
                         FileInfo file = new FileInfo(apkpath1);
 
-                        apkpath2 = string.Format("{0}/male7_v{1}.ini", apkpathS, m_versionNum.Id1A2A3);
+                        apkpath2 = string.Format("{0}/male7_v{1}#{2}.ini", apkpathS, m_versionNum.Id1A2A3, System.DateTime.Now.ToString("yyyy-M-d H-m-s"));
                         ABHelper.WriteFile(apkpath2, file.Length.ToString().TrimEnd());
 
-                        // TODO 加固并且重新签名
+                        // 加固且重新签名
+#if UNITY_EDITOR_OSX
+                        string mtpPath = Application.dataPath.Replace("Assets", "MTPTools/MTPClient-osx/");
+                        if (System.IO.Directory.Exists(mtpPath))
+                        {
+                            Debug.Log("开始加固签名...");
+                            long start = System.DateTime.Now.Second;
+                            System.Diagnostics.Process proc = new System.Diagnostics.Process ();
+                            proc.StartInfo.WorkingDirectory = mtpPath;
+                            proc.StartInfo.FileName = "/bin/bash";
+                            proc.StartInfo.Arguments = string.Format("{0} {1} {2} {3}", "mtp.sh", 19548, apkpath1, apkpathS);;
+                            proc.StartInfo.UseShellExecute = false;
+                            proc.StartInfo.RedirectStandardOutput = true;
+                            proc.StartInfo.RedirectStandardInput = true;
+                            proc.Start();
+                            proc.WaitForExit();
+
+                            string output = proc.StandardOutput.ReadToEnd();
+                            Debug.Log(string.Format("加固签名:{0}", proc.StandardOutput.ReadToEnd()));
+                            ABHelper.WriteFile(mtpPath + "/log.text", System.DateTime.Now.ToString() + "  " + apkpath1 + "\n" + output);
+
+                            proc.Close();
+                            Debug.Log(string.Format("加固签名完成！！！,用时:{0}s", System.DateTime.Now.Second - start));
+                        }
+#elif UNITY_EDITOR_WIN
+                        string mtpPath = Application.dataPath.Replace("Assets", "MTPTools/MTPClient-64/").Replace("/", "\\");
+                        if (System.IO.Directory.Exists(mtpPath))
+                        {
+                            Debug.Log("开始加固签名...");
+                            long start = System.DateTime.Now.Second;
+                            System.Diagnostics.Process proc = new System.Diagnostics.Process();
+                            proc.StartInfo.WorkingDirectory = mtpPath;
+                            proc.StartInfo.FileName = "mtp.bat";
+                            proc.StartInfo.Arguments = string.Format("{0} {1} {2}", 19548, apkpath1, apkpathS);
+                            proc.Start();
+                            proc.WaitForExit();
+                            proc.Close();
+                            Debug.Log(string.Format("加固签名完成！！！,用时:{0}s", System.DateTime.Now.Second - start));
+                        }
+#endif
 
                         Debug.Log("成功生成版本！！！！" + apkpath1);
                         System.GC.Collect();
@@ -246,6 +285,11 @@ namespace LCG
             {
                 result = BulidTarget(m_isDebug);
             }
+
+            m_xluaGen = false;
+            m_buildApp = false;
+            WriteBuildTxt();
+
             return result;
         }
         //目标平台

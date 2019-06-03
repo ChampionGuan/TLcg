@@ -157,6 +157,98 @@ namespace LCG
             ABHelper.WriteVersionIdFile(version, TheRootFolderName, TheApkFolderName);
         }
 
+        private static void UploadAB()
+        {
+#if UNITY_EDITOR_OSX
+            string path = new DirectoryInfo(string.Format("{0}/../../../", Application.dataPath)).FullName;
+            string batTool = "scps3upload.sh";
+            if (!File.Exists(string.Format("{0}/../../../{1}", Application.dataPath, "scps3")))
+            {
+                return;
+            }
+
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine("#!/bin/sh");
+            sb.AppendLine(string.Format("./scps3 {0} {1}", PlatformABExportRelativePath + "/" + CurVersionNum, PlatformABExportRelativePath + "/"));
+            ABHelper.WriteFile(path + batTool, sb.ToString());
+
+            System.Diagnostics.Process proc = new System.Diagnostics.Process ();
+            proc.StartInfo.WorkingDirectory = path;
+            proc.StartInfo.FileName = "/bin/bash";
+            proc.StartInfo.Arguments = batTool;
+            proc.StartInfo.UseShellExecute = false;
+            proc.StartInfo.RedirectStandardOutput = true;
+            proc.StartInfo.RedirectStandardInput = true;
+            proc.Start();
+            proc.WaitForExit();
+            Debug.Log(string.Format("ab上传:{0}", proc.StandardOutput.ReadToEnd()));
+            proc.Close();
+
+            StringBuilder sb2 = new StringBuilder();
+            sb2.AppendLine("#!/bin/sh");
+            for (int i = 0; i < CurVersionNum; i++)
+            {
+                string p = string.Format("{0}/HotterZip/{1}-{2}", PlatformABExportRelativePath, i, CurVersionNum);
+                sb2.AppendLine(string.Format("./scps3 {0}.zip {1}.zip", p, p));
+                sb2.AppendLine(string.Format("./scps3 {0}.ini {1}.ini", p, p));
+            }
+            ABHelper.WriteFile(path + batTool, sb2.ToString());
+
+            System.Diagnostics.Process proc2 = new System.Diagnostics.Process ();
+            proc2.StartInfo.WorkingDirectory = path;
+            proc2.StartInfo.FileName = "/bin/bash";
+            proc2.StartInfo.Arguments = batTool;
+            proc2.StartInfo.UseShellExecute = false;
+            proc2.StartInfo.RedirectStandardOutput = true;
+            proc2.StartInfo.RedirectStandardInput = true;
+            proc2.Start();
+            proc2.WaitForExit();
+            Debug.Log(string.Format("ab上传:{0}", proc2.StandardOutput.ReadToEnd()));
+            proc2.Close();
+
+            Debug.Log("上传完成！！！！");
+
+#elif UNITY_EDITOR_WIN
+            string path = new DirectoryInfo(string.Format("{0}/../../../", Application.dataPath)).FullName;
+            string batTool = "scps3upload.bat";
+            if (!File.Exists(string.Format("{0}/../../../{1}", Application.dataPath, "scps3.exe")))
+            {
+                return;
+            }
+
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine("@echo off");
+            sb.AppendLine(string.Format("scps3.exe {0} {1}", PlatformABExportRelativePath + "/" + CurVersionNum, PlatformABExportRelativePath) + "/");
+            ABHelper.WriteFile(path + batTool, sb.ToString());
+
+            System.Diagnostics.Process proc = new System.Diagnostics.Process();
+            proc.StartInfo.WorkingDirectory = path;
+            proc.StartInfo.FileName = batTool;
+            proc.Start();
+            proc.WaitForExit();
+            proc.Close();
+
+            StringBuilder sb2 = new StringBuilder();
+            sb2.AppendLine("@echo off");
+            for (int i = 0; i < CurVersionNum; i++)
+            {
+                string p = string.Format("{0}/HotterZip/{1}-{2}", PlatformABExportRelativePath, i, CurVersionNum);
+                sb2.AppendLine(string.Format("scps3.exe {0}.zip {1}.zip", p, p));
+                sb2.AppendLine(string.Format("scps3.exe {0}.ini {1}.ini", p, p));
+            }
+            ABHelper.WriteFile(path + batTool, sb2.ToString());
+
+            System.Diagnostics.Process proc2 = new System.Diagnostics.Process();
+            proc2.StartInfo.WorkingDirectory = path;
+            proc2.StartInfo.FileName = batTool;
+            proc2.Start();
+            proc2.WaitForExit();
+            proc2.Close();
+
+            Debug.Log("上传完成！！！！");
+#endif
+        }
+
         private static void FileBundleList()
         {
             if (null == BundleFilePath)
@@ -322,6 +414,8 @@ namespace LCG
 
         // 平台导出路径
         private static string PlatformABExportPath = "";
+        // 平台导出的相对路径
+        private static string PlatformABExportRelativePath = "";
         // 本次版本需更新资源路径
         private static string ABExportHotterZipPath = "";
 
@@ -688,7 +782,8 @@ namespace LCG
             }
 
             // 创建平台文件夹
-            PlatformABExportPath = string.Format("{0}/../../../assetBundle/{1}/{2}/{3}.{4}", Application.dataPath, TheRootFolderName, platformName, TheVersionNum[0], TheVersionNum[1]);
+            PlatformABExportRelativePath = string.Format("assetBundle/{0}/{1}/{2}.{3}", TheRootFolderName, platformName, TheVersionNum[0], TheVersionNum[1]);
+            PlatformABExportPath = string.Format("{0}/../../../{1}", Application.dataPath, PlatformABExportRelativePath);
             if (!Directory.Exists(PlatformABExportPath))
             {
                 Directory.CreateDirectory(PlatformABExportPath);
@@ -1239,6 +1334,8 @@ namespace LCG
 
             // 保存版号
             SaveTheVersion();
+            // 上传ab
+            UploadAB();
             // 结束
             Building = false;
             Debug.Log("处理结束：" + System.DateTime.Now.ToString());
