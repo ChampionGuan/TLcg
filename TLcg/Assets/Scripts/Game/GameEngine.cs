@@ -82,6 +82,7 @@ namespace LCG
         public void HotfixTest()
         {
             Debug.Log("cs hotfix log!");
+            Debug.Log("test!!");
         }
     }
 }
