@@ -21,6 +21,7 @@ namespace LCG
             m_objDir.Clear();
             m_pkgDir.Clear();
             m_abDir.Clear();
+			UnloadScene(lastSceneName);
             ABLoader.UnloadAll();
             UIPackage.RemoveAllPackages();
             Resources.UnloadUnusedAssets();

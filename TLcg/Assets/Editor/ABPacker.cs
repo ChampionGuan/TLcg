@@ -771,12 +771,15 @@ namespace LCG
             {
                 case BuildTarget.StandaloneWindows:
                     platformName = ABHelper.WinPlatform;
+                    EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.Standalone, BuildTarget.StandaloneWindows);
                     break;
                 case BuildTarget.iOS:
                     platformName = ABHelper.IosPlatform;
+                    EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.iOS, BuildTarget.iOS);
                     break;
                 case BuildTarget.Android:
                     platformName = ABHelper.AndroidPlatform;
+                    EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.Android, BuildTarget.Android);
                     break;
                 default:
                     Debug.LogError("暂不支持此平台！" + platform.ToString());
