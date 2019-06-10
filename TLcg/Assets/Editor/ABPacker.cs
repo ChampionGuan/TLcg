@@ -163,22 +163,21 @@ namespace LCG
         }
         private static void BuildResult(bool r, string e = "")
         {
+            string js = r ? "成功" : string.IsNullOrEmpty(e) ? "失败" : "失败。" + e;
+            js = string.Format("构建-AB\n状态：{0}\n平台：{1}\n版本标识：{2}", js, CurBuildTarget.ToString(), TheRootFolderName);
+            js = r ? string.Format("{0}\n版本id：{1}", js, CurVersionId) : js;
+            Debug.Log(js);
+
             if (string.IsNullOrEmpty(DingMsgUrl))
             {
                 return;
             }
 
-            string js = r ? "成功" : string.IsNullOrEmpty(e) ? "失败" : "失败。" + e;
-            js = string.Format("状态：{0}\n平台：{1}\n版本标识：{2}", js, CurBuildTarget.ToString(), TheRootFolderName);
-            js = r ? string.Format("{0}\n版本id：{1}", js, CurVersionId) : js;
             js = "{ \"msgtype\": \"text\", \"text\": {\"content\": \"" + js + "\"}}";
-
             ServicePointManager.ServerCertificateValidationCallback = (a, b, c, d) => { return true; };
             WebRequest request = WebRequest.Create(DingMsgUrl);
             request.Method = "POST";
             request.ContentType = "application/json";
-
-            Debug.Log(js);
 
             if (string.IsNullOrEmpty(js))
             {
@@ -322,10 +321,14 @@ namespace LCG
                 }
             }
         }
+
+        private Vector2 scrollPos = Vector2.zero;
         void OnGUI()
         {
             GUILayout.Label("AssetBundle自动打包工具", EditorStyles.boldLabel);
             EditorGUILayout.Space();
+
+            scrollPos = EditorGUILayout.BeginScrollView(scrollPos);
 
             EditorGUILayout.Space();
             GUILayout.Label("钉钉机器人");
@@ -371,25 +374,24 @@ namespace LCG
             }
 
             EditorGUILayout.Space();
-            EditorGUILayout.Space();
-            GUILayout.Label("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-            GUILayout.Label("~~~~~~~~~~~~~~~~~~~~~~~~~分割线~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-            GUILayout.Label("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-            EditorGUILayout.Space();
-            EditorGUILayout.Space();
 
             GUILayout.Label("*打包的根目录文件夹:");
             GUILayout.TextArea(TheRootFolderName);
 
-            GUILayout.Label("*版号第一位:");
-            TheVersionNum[0] = GUILayout.TextField(TheVersionNum[0]);
+            EditorGUILayout.BeginHorizontal();
+            GUILayout.Label("*版号第一位", GUILayout.Width(150));
+            GUILayout.Label("版号第二位", GUILayout.Width(150));
+            GUILayout.Label("版号第三位(自动生成)", GUILayout.Width(150));
+            GUILayout.Label("版号第四位", GUILayout.Width(150));
+            EditorGUILayout.EndHorizontal();
+            EditorGUILayout.BeginHorizontal();
+            TheVersionNum[0] = GUILayout.TextField(TheVersionNum[0], GUILayout.Width(150));
+            TheVersionNum[1] = GUILayout.TextField(TheVersionNum[1], GUILayout.Width(150));
+            GUILayout.TextField("*", GUILayout.Width(150));
+            TheVersionNum[3] = GUILayout.TextField(TheVersionNum[3], GUILayout.Width(150));
+            EditorGUILayout.EndHorizontal();
 
-            GUILayout.Label("*版号第二位:");
-            TheVersionNum[1] = GUILayout.TextField(TheVersionNum[1]);
-
-            GUILayout.Label("*版号第四位:");
-            TheVersionNum[3] = GUILayout.TextField(TheVersionNum[3]);
-
+            EditorGUILayout.Space();
             EditorGUILayout.Space();
 
             GUILayout.Label("检测cs、dll的路径");
@@ -436,6 +438,7 @@ namespace LCG
             {
                 BuildPacker(BuildTarget.Android);
             }
+            EditorGUILayout.EndScrollView();
         }
         #endregion
 
