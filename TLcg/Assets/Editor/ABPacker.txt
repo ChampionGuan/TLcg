@@ -1,4 +1,5 @@
-ScriptDir=Scripts;3rdLibs
-BundleFolderDir=UI
-BundleLuaDir=Lua
-BundleFileCullingDir=Video;Ignore
+ScriptDir|Scripts;3rdLibs
+BundleFolderDir|UI
+BundleLuaDir|Lua
+BundleFileCullingDir|Video;Ignore
+DingMsgUrl|https://oapi.dingtalk.com/robot/send?access_token=a9715710c44afaea78e1ec5deb2a8811a1e92f83c30ff95c4786a355d75ebb83

@@ -5,6 +5,7 @@ using System.IO;
 using System.Text;
 using ICSharpCode.SharpZipLib.Zip;
 using System;
+using System.Net;
 
 namespace LCG
 {
@@ -25,6 +26,8 @@ namespace LCG
         private static string BundleLuaDirStr2;
         private static string BundleFileCullingDirStr = "Video;Ignore";
         private static string BundleFileCullingDirStr2;
+        private static string DingMsgUrl;
+        private static string DingMsgUrl2;
 
         private static List<string> ScriptFolderPath = new List<string>(new string[] { });
         private static List<string> BundleFolderPath = new List<string>(new string[] { });
@@ -96,7 +99,7 @@ namespace LCG
                 {
                     continue;
                 }
-                sp1 = v.Split('=');
+                sp1 = v.Split('|');
 
                 switch (sp1[0])
                 {
@@ -104,6 +107,7 @@ namespace LCG
                     case "BundleFolderDir": BundleFolderDirStr = sp1[1]; break;
                     case "BundleLuaDir": BundleLuaDirStr = sp1[1]; break;
                     case "BundleFileCullingDir": BundleFileCullingDirStr = sp1[1]; break;
+                    case "DingMsgUrl": DingMsgUrl = sp1[1]; break;
                     default: break;
                 }
             }
@@ -111,10 +115,11 @@ namespace LCG
         private static void WriteFile()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("ScriptDir=" + ScriptDirStr + "\n");
-            sb.Append("BundleFolderDir=" + BundleFolderDirStr + "\n");
-            sb.Append("BundleLuaDir=" + BundleLuaDirStr + "\n");
-            sb.Append("BundleFileCullingDir=" + BundleFileCullingDirStr + "\n");
+            sb.Append("ScriptDir|" + ScriptDirStr + "\n");
+            sb.Append("BundleFolderDir|" + BundleFolderDirStr + "\n");
+            sb.Append("BundleLuaDir|" + BundleLuaDirStr + "\n");
+            sb.Append("BundleFileCullingDir|" + BundleFileCullingDirStr + "\n");
+            sb.Append("DingMsgUrl|" + DingMsgUrl + "\n");
             ABHelper.WriteFile(Application.dataPath + "/Editor/ABPacker.txt", sb.ToString().TrimEnd());
         }
         private static void ParseAllDir()
@@ -153,10 +158,46 @@ namespace LCG
             {
                 Debug.LogError("资源单号错误！！！！！");
             }
-            string version = ABHelper.VersionNumCombine(TheVersionNum[0], TheVersionNum[1], CurVersionNum.ToString(), TheVersionNum[3]);
-            ABHelper.WriteVersionIdFile(version, TheRootFolderName, TheApkFolderName);
+            CurVersionId = ABHelper.VersionNumCombine(TheVersionNum[0], TheVersionNum[1], CurVersionNum.ToString(), TheVersionNum[3]);
+            ABHelper.WriteVersionIdFile(CurVersionId, TheRootFolderName, TheApkFolderName);
         }
+        private static void BuildResult(bool r, string e = "")
+        {
+            if (string.IsNullOrEmpty(DingMsgUrl))
+            {
+                return;
+            }
 
+            string js = r ? "成功" : string.IsNullOrEmpty(e) ? "失败" : "失败。" + e;
+            js = string.Format("状态：{0}\n平台：{1}\n版本标识：{2}", js, CurBuildTarget.ToString(), TheRootFolderName);
+            js = r ? string.Format("{0}\n版本id：{1}", js, CurVersionId) : js;
+            js = "{ \"msgtype\": \"text\", \"text\": {\"content\": \"" + js + "\"}}";
+
+            ServicePointManager.ServerCertificateValidationCallback = (a, b, c, d) => { return true; };
+            WebRequest request = WebRequest.Create(DingMsgUrl);
+            request.Method = "POST";
+            request.ContentType = "application/json";
+
+            Debug.Log(js);
+
+            if (string.IsNullOrEmpty(js))
+            {
+                request.ContentLength = 0;
+            }
+            else
+            {
+                byte[] bs = Encoding.UTF8.GetBytes(js);
+                request.ContentLength = bs.Length;
+                Stream newStream = request.GetRequestStream();
+                newStream.Write(bs, 0, bs.Length);
+                newStream.Close();
+            }
+            WebResponse response = request.GetResponse();
+            Stream stream = response.GetResponseStream();
+            Encoding encode = Encoding.UTF8;
+            StreamReader reader = new StreamReader(stream, encode);
+            Debug.Log(reader.ReadToEnd());
+        }
         private static void UploadAB()
         {
             if (Application.platform == RuntimePlatform.OSXEditor)
@@ -286,6 +327,15 @@ namespace LCG
             GUILayout.Label("AssetBundle自动打包工具", EditorStyles.boldLabel);
             EditorGUILayout.Space();
 
+            EditorGUILayout.Space();
+            GUILayout.Label("钉钉机器人");
+            DingMsgUrl = GUILayout.TextField(DingMsgUrl);
+            if (DingMsgUrl2 != DingMsgUrl)
+            {
+                DingMsgUrl2 = DingMsgUrl;
+                WriteFile();
+                ParseAllDir();
+            }
             EditorGUILayout.Space();
             GUILayout.Label("检测cs、dll的文件夹（以半角分号隔开）");
             ScriptDirStr = GUILayout.TextField(ScriptDirStr);
@@ -423,8 +473,12 @@ namespace LCG
 
         // 本次版本号
         private static int CurVersionNum = 0;
+        // 本次版号
+        private static string CurVersionId;
         // 本次版本导出路径
         private static string CurVersionABExportPath = "";
+        // 版本平台
+        private static BuildTarget CurBuildTarget;
 
         // 本次版本的一些信息
         private static Dictionary<string, List<string>> CurVersionDependenciesList = null;
@@ -1287,6 +1341,7 @@ namespace LCG
         private static bool BuildPacker(BuildTarget platform, bool onlyLua = false)
         {
             Building = true;
+            CurBuildTarget = platform;
             long start = System.DateTime.Now.Second;
             Debug.Log("开始处理：" + System.DateTime.Now.ToString());
 
@@ -1314,6 +1369,7 @@ namespace LCG
                 {
                     EditorUtility.DisplayDialog("提示", "本次版本与上次版本没有变化！！", "ok");
                     Building = false;
+                    BuildResult(false, "本次版本与上次版本没有变化！！");
                     return false;
                 }
             }
@@ -1325,6 +1381,7 @@ namespace LCG
                 }
                 Debug.Log("打包失败！！！！！" + e.Message);
                 Building = false;
+                BuildResult(false, e.Message);
                 return false;
             }
 
@@ -1345,6 +1402,7 @@ namespace LCG
             Building = false;
             Debug.Log("处理结束：" + System.DateTime.Now.ToString());
             EditorUtility.DisplayDialog("提示", "打包已完成！！", "ok");
+            BuildResult(true);
             return true;
         }
 
