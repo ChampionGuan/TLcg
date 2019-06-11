@@ -202,7 +202,7 @@ namespace LCG
             if (Application.platform == RuntimePlatform.OSXEditor)
             {
                 string path = new DirectoryInfo(string.Format("{0}/../../../", Application.dataPath)).FullName;
-                string batTool = "scps3upload.sh";
+                string batTool = TheRootFolderName + "scps3upload.sh";
                 if (!File.Exists(string.Format("{0}/../../../{1}", Application.dataPath, "scps3")))
                 {
                     return;
@@ -252,7 +252,7 @@ namespace LCG
             else if (Application.platform == RuntimePlatform.WindowsEditor)
             {
                 string path = new DirectoryInfo(string.Format("{0}/../../../", Application.dataPath)).FullName;
-                string batTool = "scps3upload.bat";
+                string batTool = TheRootFolderName + "scps3upload.bat";
                 if (!File.Exists(string.Format("{0}/../../../{1}", Application.dataPath, "scps3.exe")))
                 {
                     return;

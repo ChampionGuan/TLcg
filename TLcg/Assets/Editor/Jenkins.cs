@@ -1,12 +1,15 @@
 using UnityEngine;
 using UnityEditor;
+using System.Collections.Generic;
 
 namespace LCG
 {
-    public class Genkins : EditorWindow
+    public class Jenkins : EditorWindow
     {
         static BuildTarget Platform = BuildTarget.NoTarget;
         static bool IsDebug = false;
+        static string ABRoot = null;
+        static string DeployId = null;
 
         static void BuildApk()
         {
@@ -23,6 +26,18 @@ namespace LCG
             parseCommand();
             ABPacker.CommandBuild(IsDebug, Platform);
             BuildAppSteps.CommandBuild(IsDebug, Platform);
+        }
+        static void ChangeDeploy()
+        {
+            parseCommand();
+            if (string.IsNullOrEmpty(DeployId)) return;
+        }
+        static void ChangeABRoot()
+        {
+            parseCommand();
+            if (string.IsNullOrEmpty(ABRoot)) return;
+            List<string> version = ABHelper.ReadVersionIdFile();
+            ABHelper.WriteVersionIdFile(version[0], ABRoot, version[2]);
         }
         static void parseCommand()
         {
@@ -48,6 +63,14 @@ namespace LCG
                     {
                         Platform = BuildTarget.StandaloneWindows;
                     }
+                }
+                else if ("-abRoot" == args[i])
+                {
+                    ABRoot = args[i + 1];
+                }
+                else if ("-deployId" == args[i])
+                {
+                    DeployId = args[i + 1];
                 }
             }
         }
