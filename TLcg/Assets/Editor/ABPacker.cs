@@ -694,7 +694,7 @@ namespace LCG
 
             System.GC.Collect();
         }
-        private static void OutputMainfestFile()
+        private static void OutputManifestFile()
         {
             foreach (var v in CurVersionDependenciesList)
             {
@@ -812,7 +812,7 @@ namespace LCG
                 HandleFileAssets(path);
             }
 
-            OutputMainfestFile();
+            OutputManifestFile();
             // 版本所需资源的md5码保存
             ABHelper.WriteMd5File(CurVersionABExportPath + ABHelper.Md5FileName, CurVersionMd5List, CurVersionRCList);
             // 版本所需资源的依赖关系
@@ -1345,6 +1345,7 @@ namespace LCG
         {
             Building = true;
             CurBuildTarget = platform;
+            bool result = true;
             long start = System.DateTime.Now.Second;
             Debug.Log("开始处理：" + System.DateTime.Now.ToString());
 
@@ -1370,10 +1371,10 @@ namespace LCG
             {
                 if (!CreatABPacker(platform))
                 {
-                    EditorUtility.DisplayDialog("提示", "本次版本与上次版本没有变化！！", "ok");
                     Building = false;
+                    result = false;
                     BuildResult(false, "本次版本与上次版本没有变化！！");
-                    return false;
+                    EditorUtility.DisplayDialog("提示", "本次版本与上次版本没有变化！！", "ok");
                 }
             }
             catch (Exception e)
@@ -1382,31 +1383,43 @@ namespace LCG
                 {
                     Directory.Delete(CurVersionABExportPath, true);
                 }
-                Debug.Log("打包失败！！！！！" + e.Message);
                 Building = false;
+                result = false;
                 BuildResult(false, e.Message);
-                return false;
             }
 
-            // 生成版本文件
-            CreatVersionTxt();
-
-            // 生成版本增量包
-            for (int i = -1; i < CurVersionNum; i++)
+            // 打包失败
+            if (!result)
             {
-                CreatHotterZip(i);
+                CurVersionNum--;
             }
 
             // 保存版号
             SaveTheVersion();
-            // 上传ab
-            UploadAB();
-            // 结束
-            Building = false;
+
+            // 打包成功
+            if (result)
+            {
+                // 生成版本文件
+                CreatVersionTxt();
+
+                // 生成版本增量包
+                for (int i = -1; i < CurVersionNum; i++)
+                {
+                    CreatHotterZip(i);
+                }
+
+                // 上传ab
+                UploadAB();
+
+                // 结束
+                Building = false;
+                BuildResult(true);
+                EditorUtility.DisplayDialog("提示", "打包已完成！！", "ok");
+            }
+
             Debug.Log("处理结束：" + System.DateTime.Now.ToString());
-            EditorUtility.DisplayDialog("提示", "打包已完成！！", "ok");
-            BuildResult(true);
-            return true;
+            return result;
         }
 
         #endregion
