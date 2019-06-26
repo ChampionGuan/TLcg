@@ -263,13 +263,12 @@ namespace LCG
         {
             get
             {
-#if UNITY_ANDROID
-                return string.Format("{0}{1}/{2}/{3}/", RemoteUrlPrefix, ABHelper.ABFolderRoot, ABHelper.AndroidPlatform, ServerVersionId.Id1A2);
-#elif UNITY_IPHONE || UNITY_IOS
-                return string.Format("{0}{1}/{2}/{3}/", RemoteUrlPrefix, ABHelper.ABFolderRoot, ABHelper.IosPlatform, ServerVersionId.Id1A2);
-#else
-                return string.Format("{0}{1}/{2}/{3}/", RemoteUrlPrefix, ABHelper.ABFolderRoot, ABHelper.WinPlatform, ServerVersionId.Id1A2);
-#endif
+                if (RuntimePlatform.Android == Application.platform)
+                    return string.Format("{0}{1}/{2}/{3}/", RemoteUrlPrefix, ABHelper.ABFolderRoot, ABHelper.AndroidPlatform, ServerVersionId.Id1A2);
+                else if (RuntimePlatform.IPhonePlayer == Application.platform)
+                    return string.Format("{0}{1}/{2}/{3}/", RemoteUrlPrefix, ABHelper.ABFolderRoot, ABHelper.IosPlatform, ServerVersionId.Id1A2);
+                else
+                    return string.Format("{0}{1}/{2}/{3}/", RemoteUrlPrefix, ABHelper.ABFolderRoot, ABHelper.WinPlatform, ServerVersionId.Id1A2);
             }
         }
         public static string RemoteUrlHotter

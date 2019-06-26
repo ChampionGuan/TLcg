@@ -258,7 +258,7 @@ namespace LCG
         }
         private void FormatDownloadSpeed(long bytes)
         {
-            string speed = "";
+            string speed = "0B/s";
             long g = bytes / (1024 * 1024 * 1024);
             if (g > 1)
             {
