@@ -96,8 +96,9 @@ namespace LCG
 #elif UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX
             m_luajitExePath = m_luajitWorkingPath + "luajit";
 #endif
-            m_versionNum = new VersionNum(ABHelper.ReadVersionIdFile()[0]);
-            m_apkFolderPath = ABHelper.ReadVersionIdFile()[2];
+            Dictionary<string,string> versionInfo = ABHelper.ReadVersionIdFile();
+            m_versionNum = new VersionNum(versionInfo["ResVersion"]);
+            m_apkFolderPath = versionInfo["ApkFolderRoot"];
             XLua.Hotfix.HotfixInject();
         }
         private static void HofixInject()

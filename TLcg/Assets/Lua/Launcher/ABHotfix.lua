@@ -243,6 +243,12 @@ local function HotfixHandle(value)
         return
     end
 
+    -- apk下载的名称
+    if value.state == CSharp.EVersionState.DownloadApkName then
+        Common.LoginInfo.ApkName = value.sValue
+        return
+    end
+
     -- apk下载完成
     if value.state == CSharp.EVersionState.APKDownloadComplete then
         -- 拉起安装

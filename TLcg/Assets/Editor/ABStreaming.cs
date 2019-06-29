@@ -28,7 +28,6 @@ namespace LCG
 
         private static string[] TheVersionNum = new string[4] { "0", "0", "0", "0" };
         private static string TheRootFolderName = "tlcg";
-        private static string TheApkFolderName = "tlcg";
 
         [MenuItem("Tools/资源打包前处理")]
         static void Build()
@@ -117,10 +116,9 @@ namespace LCG
         }
         private static void ParseTheVersion()
         {
-            List<string> version = ABHelper.ReadVersionIdFile();
-            TheVersionNum = ABHelper.VersionNumSplit(version[0]);
-            TheRootFolderName = version[1];
-            TheApkFolderName = version[2];
+            Dictionary<string,string> versionInfo = ABHelper.ReadVersionIdFile();
+            TheVersionNum = ABHelper.VersionNumSplit(versionInfo["ResVersion"]);
+            TheRootFolderName = versionInfo["ABFolderRoot"];
         }
         private static void ReadFile()
         {

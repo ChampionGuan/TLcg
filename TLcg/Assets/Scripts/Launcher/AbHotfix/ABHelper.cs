@@ -27,6 +27,7 @@ namespace LCG
             CheckLocalVersionOver,
             DownloadAPKConfirm,
             DownloadConfirm,
+            DownloadApkName,
             DownloadWifi,
             DownloadSpeed,
             DownloadProgress,
@@ -333,18 +334,18 @@ namespace LCG
 
             return BuildMD5ByBytes(data);
         }
-        public static List<string> ReadVersionIdFile()
+        public static Dictionary<string, string> ReadVersionIdFile()
         {
-            List<string> list = new List<string>();
+            Dictionary<string, string> list = new Dictionary<string, string>();
             TextAsset resInfo = Resources.Load<TextAsset>("versionId");
             string[] sb = resInfo.text.Replace("\r", "").Split('\n');
             string[] sb1;
             for (int i = 0; i < sb.Length; i++)
             {
                 sb1 = sb[i].Split('=');
-                if (sb1[0] == "ResVersion" || sb1[0] == "ABFolderRoot" || sb1[0] == "ApkFolderRoot")
+                if (sb1.Length > 1)
                 {
-                    list.Add(sb1[1]);
+                    list.Add(sb1[0], sb1[1]);
                 }
             }
             if (list.Count < 3)
@@ -353,13 +354,18 @@ namespace LCG
             }
             return list;
         }
-        public static void WriteVersionIdFile(string version, string abRoot, string apkRoot)
+        public static void WriteVersionIdFile(Dictionary<string, string> list)
         {
+            if (null == list)
+            {
+                return;
+            }
             string path = Application.dataPath + "/Resources/versionId.bytes";
             StringBuilder sb = new StringBuilder();
-            sb.Append("ResVersion=" + version + "\n");
-            sb.Append("ABFolderRoot=" + abRoot + "\n");
-            sb.Append("ApkFolderRoot=" + apkRoot);
+            foreach (var v in list)
+            {
+                sb.Append(v.Key + "=" + v.Value + "\n");
+            }
             ABHelper.WriteFile(path, sb.ToString().TrimEnd());
         }
         public static string[] ReadVersionNumFileByBytes(byte[] numbytes)

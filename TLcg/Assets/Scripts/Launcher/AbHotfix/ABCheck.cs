@@ -298,15 +298,41 @@ namespace LCG
         }
         private IEnumerator ShowApkDownloadInfo(string remoteUrl, string apkName)
         {
-            Debug.Log("路径：" + remoteUrl + apkName + ".ini");
-            WWW www = new WWW(remoteUrl + apkName + ".ini");
-            yield return www;
-
-            // 下载异常处理
-            if (!string.IsNullOrEmpty(www.error))
+            // v0.0.0
+            string[] apkInfo = apkName.Split('.');
+            if (apkInfo.Length < 3)
             {
-                APKDownloadResult(false, www.error);
+                APKDownloadResult(false, "invalid remote url.");
                 yield break;
+            }
+            int v3 = int.Parse(apkInfo[2]);
+
+            // 获取
+            WWW www = null;
+            while (true)
+            {
+                Debug.Log("路径：" + remoteUrl + apkName + ".ini");
+                www = new WWW(remoteUrl + apkName + ".ini");
+                yield return www;
+
+                // 下载异常处理
+                if (!string.IsNullOrEmpty(www.error))
+                {
+                    if (v3 > 0)
+                    {
+                        apkName = string.Format("{0}.{1}.{2}", apkInfo[0], apkInfo[1], (--v3).ToString());
+                    }
+                    else
+                    {
+                        APKDownloadResult(false, www.error);
+                        yield break;
+                    }
+                }
+                else
+                {
+                    onHandleState(new ABHelper.VersionArgs(ABHelper.EVersionState.DownloadApkName, apkName));
+                    break;
+                }
             }
 
             long fileSize = long.Parse(www.text);

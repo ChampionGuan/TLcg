@@ -344,10 +344,10 @@ namespace LCG
             }
 
             // 版号信息
-            List<string> version = ABHelper.ReadVersionIdFile();
-            OriginalVersionId = new VersionNum(version[0]);
-            ABHelper.ABFolderRoot = version[1];
-            ABHelper.ApkFolderRoot = version[2];
+            Dictionary<string, string> versionInfo = ABHelper.ReadVersionIdFile();
+            OriginalVersionId = new VersionNum(versionInfo["ResVersion"]);
+            ABHelper.ABFolderRoot = versionInfo["ABFolderRoot"];
+            ABHelper.ApkFolderRoot = versionInfo["ApkFolderRoot"];
 
             // 当前版号
             CurVersionId = new VersionNum(OriginalVersionId.Id1st, OriginalVersionId.Id2nd, OriginalVersionId.Id3rd, OriginalVersionId.Id4th);

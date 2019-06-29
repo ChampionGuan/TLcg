@@ -52,8 +52,8 @@ namespace LCG
             // TheRootFolderName = TheRootFolderName.Substring(0, TheRootFolderName.LastIndexOf("/"));
             // TheRootFolderName = "ab_" + TheRootFolderName.Substring(TheRootFolderName.LastIndexOf("/") + 1) + "_full";
 
-            List<string> version = ABHelper.ReadVersionIdFile();
-            TheRootFolderName = version[1];
+            Dictionary<string, string> versionInfo = ABHelper.ReadVersionIdFile();
+            TheRootFolderName = versionInfo["ABFolderRoot"];
         }
 
         private static void FileBundleList()

@@ -35,9 +35,9 @@ namespace LCG
         private static List<string> BundleFilePath = new List<string>();
         private static List<string> BundleFileCullingPath = new List<string>(new string[] { });
 
+        private static Dictionary<string, string> TheVersionInfo;
         private static string[] TheVersionNum = new string[4] { "0", "0", "0", "0" };
         private static string TheRootFolderName = "tlcg";
-        private static string TheApkFolderName = "tlcg";
 
         [MenuItem("Tools/资源打包优化版")]
         static void Build()
@@ -146,10 +146,9 @@ namespace LCG
         }
         private static void ParseTheVersion()
         {
-            List<string> version = ABHelper.ReadVersionIdFile();
-            TheVersionNum = ABHelper.VersionNumSplit(version[0]);
-            TheRootFolderName = version[1];
-            TheApkFolderName = version[2];
+            TheVersionInfo = ABHelper.ReadVersionIdFile();
+            TheVersionNum = ABHelper.VersionNumSplit(TheVersionInfo["ResVersion"]);
+            TheRootFolderName = TheVersionInfo["ABFolderRoot"];
         }
         private static void SaveTheVersion()
         {
@@ -159,7 +158,8 @@ namespace LCG
                 Debug.LogError("资源单号错误！！！！！");
             }
             CurVersionId = ABHelper.VersionNumCombine(TheVersionNum[0], TheVersionNum[1], CurVersionNum.ToString(), TheVersionNum[3]);
-            ABHelper.WriteVersionIdFile(CurVersionId, TheRootFolderName, TheApkFolderName);
+            TheVersionInfo["ResVersion"] = CurVersionId;
+            ABHelper.WriteVersionIdFile(TheVersionInfo);
         }
         private static void BuildResult(bool r, string e = "")
         {

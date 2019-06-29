@@ -36,8 +36,9 @@ namespace LCG
         {
             parseCommand();
             if (string.IsNullOrEmpty(ABRoot)) return;
-            List<string> version = ABHelper.ReadVersionIdFile();
-            ABHelper.WriteVersionIdFile(version[0], ABRoot, version[2]);
+            Dictionary<string,string> versionInfo = ABHelper.ReadVersionIdFile();
+            versionInfo["ABFolderRoot"] = ABRoot;
+            ABHelper.WriteVersionIdFile(versionInfo);
         }
         static void parseCommand()
         {
