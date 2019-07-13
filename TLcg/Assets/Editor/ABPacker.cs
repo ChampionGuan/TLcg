@@ -891,7 +891,7 @@ namespace LCG
             }
 
             string fileUrl = fileName.Replace("/", "-").ToLower();
-            //string fileUrl = ABHelper.BuildMD5ByString(fileName);
+            // string fileUrl = ABHelper.BuildMD5ByString(fileName) + "1";
             if (!CurVersionFileUrlMd5.ContainsKey(fileUrl))
             {
                 CurVersionFileUrlMd5.Add(fileUrl, fileName);
