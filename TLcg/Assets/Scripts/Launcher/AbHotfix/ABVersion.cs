@@ -180,7 +180,7 @@ namespace LCG
                 yield break;
             }
 
-            WWW www = new WWW(VersionFilePath);
+            WWW www = Application.platform == RuntimePlatform.Android ? new WWW(VersionFilePath) : new WWW("file://" + VersionFilePath); ;
             yield return www;
             VersionInfoList = ABHelper.ReadVersionFileByBytes(www.bytes);
         }
@@ -192,7 +192,7 @@ namespace LCG
                 yield break;
             }
 
-            WWW www = new WWW(NativeFilePath);
+            WWW www = Application.platform == RuntimePlatform.Android ? new WWW(NativeFilePath) : new WWW("file://" + NativeFilePath); ;
             yield return www;
             NativeInfoList = ABHelper.ReadNativeFileByString(www.text);
         }

@@ -83,8 +83,8 @@ function PreloadManager.Initialize(over)
 end
 
 function PreloadManager.LoadComplete()
-    PreloadManager.Initialized = true
     PreloadManager.OnLoadComplete()
+    PreloadManager.Initialized = true
     UI.Destroy()
 end
 

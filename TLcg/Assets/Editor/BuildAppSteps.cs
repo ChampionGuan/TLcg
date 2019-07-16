@@ -96,7 +96,7 @@ namespace LCG
 #elif UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX
             m_luajitExePath = m_luajitWorkingPath + "luajit";
 #endif
-            Dictionary<string,string> versionInfo = ABHelper.ReadVersionIdFile();
+            Dictionary<string, string> versionInfo = ABHelper.ReadVersionIdFile();
             m_versionNum = new VersionNum(versionInfo["ResVersion"]);
             m_apkFolderPath = versionInfo["ApkFolderRoot"];
             XLua.Hotfix.HotfixInject();
@@ -235,10 +235,10 @@ namespace LCG
                         {
                             Debug.Log("开始加固签名...");
                             long start = System.DateTime.Now.Second;
-                            System.Diagnostics.Process proc = new System.Diagnostics.Process ();
+                            System.Diagnostics.Process proc = new System.Diagnostics.Process();
                             proc.StartInfo.WorkingDirectory = mtpPath;
                             proc.StartInfo.FileName = "/bin/bash";
-                            proc.StartInfo.Arguments = string.Format("{0} {1} {2} {3}", "mtp.sh", 19548, apkpath1, apkpathS);;
+                            proc.StartInfo.Arguments = string.Format("{0} {1} {2} {3}", "mtp.sh", 19548, apkpath1, apkpathS); ;
                             proc.StartInfo.UseShellExecute = false;
                             proc.StartInfo.RedirectStandardOutput = true;
                             proc.StartInfo.RedirectStandardInput = true;
@@ -279,7 +279,16 @@ namespace LCG
             }
             else if (m_buildTarget == BuildTarget.iOS)
             {
-                result = BulidTarget(m_isDebug);
+                // 移入ab
+                result = ABStreaming.BuildNativeAB(ABHelper.IosPlatform);
+                if (result)
+                {
+                    // 移出资源
+                    ABStreaming.AssetMoveout();
+                    result = BulidTarget(m_isDebug);
+                }
+                // 移入资源
+                ABStreaming.AssetMovein();
                 // TODO 打开xcode，编译ipa
             }
             else

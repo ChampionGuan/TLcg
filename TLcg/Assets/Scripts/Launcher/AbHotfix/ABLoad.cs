@@ -179,7 +179,7 @@ namespace LCG
                 {
                     if (fromNativePath)
                     {
-                        WWW www = new WWW(manifestFilePath);
+                        WWW www = Application.platform == RuntimePlatform.Android ? new WWW(manifestFilePath) : new WWW("file://" + manifestFilePath);
                         yield return www;
                         ABManifest = ABHelper.ReadManifestFileByBytes(www.bytes);
                     }
