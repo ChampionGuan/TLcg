@@ -238,7 +238,7 @@ namespace LCG
                             System.Diagnostics.Process proc = new System.Diagnostics.Process();
                             proc.StartInfo.WorkingDirectory = mtpPath;
                             proc.StartInfo.FileName = "/bin/bash";
-                            proc.StartInfo.Arguments = string.Format("{0} {1} {2} {3}", "mtp.sh", 19548, apkpath1, apkpathS); ;
+                            proc.StartInfo.Arguments = string.Format("{0} {1} {2} {3}", "mtp.sh", 19548, apkpath1, apkpathS);
                             proc.StartInfo.UseShellExecute = false;
                             proc.StartInfo.RedirectStandardOutput = true;
                             proc.StartInfo.RedirectStandardInput = true;
