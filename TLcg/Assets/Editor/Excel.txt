@@ -1,0 +1,2 @@
+ReadDir=C:\Users\guangzhua001\Desktop\config
+OutDir=C:\Users\guangzhua001\Desktop\config\json
