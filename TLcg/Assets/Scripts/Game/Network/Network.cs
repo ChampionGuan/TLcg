@@ -101,7 +101,8 @@ namespace LCG
         {
             get
             {
-                return UnityEngine.Network.player.ipAddress.ToString();
+                // return UnityEngine.Network.player.ipAddress.ToString();
+                return "";
             }
         }
 

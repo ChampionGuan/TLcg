@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System;
 using System.IO;
 using UnityEditor.Callbacks;
-using UnityEditor.iOS.Xcode;
+//using UnityEditor.iOS.Xcode;
 using System.Text;
 
 namespace LCG
@@ -341,8 +341,8 @@ namespace LCG
                     throw new Exception("未选择打包平台！！！");
                 }
                 EditorUserBuildSettings.SwitchActiveBuildTarget(m_buildTargetGroup, m_buildTarget);
-                string res = BuildPipeline.BuildPlayer(m_buildScenes, m_buildPath, m_buildTarget, m_buildOptions);
-                if (!String.IsNullOrEmpty(res))
+                UnityEditor.Build.Reporting.BuildReport res = BuildPipeline.BuildPlayer(m_buildScenes, m_buildPath, m_buildTarget, m_buildOptions);
+                if (res.summary.totalErrors > 0)
                 {
                     throw new Exception("BuildPlayer failure: " + res);
                 }
@@ -632,26 +632,26 @@ namespace LCG
         [PostProcessBuild(999)]
         public static void OnPostprocessBuild(BuildTarget buildTarget, string path)
         {
-            // 仅在iOS运行
-            if (buildTarget == BuildTarget.iOS)
-            {
-                string projectPath = path + "/Unity-iPhone.xcodeproj/project.pbxproj";
+            //// 仅在iOS运行
+            //if (buildTarget == BuildTarget.iOS)
+            //{
+            //    string projectPath = path + "/Unity-iPhone.xcodeproj/project.pbxproj";
 
-                PBXProject proj = new PBXProject();
-                proj.ReadFromFile(projectPath);
+            //    PBXProject proj = new PBXProject();
+            //    proj.ReadFromFile(projectPath);
 
-                string target = proj.TargetGuidByName("Unity-iPhone");
-                var capManager = new ProjectCapabilityManager(projectPath, m_productName + ".entitlements", PBXProject.GetUnityTargetName());
+            //    string target = proj.TargetGuidByName("Unity-iPhone");
+            //    var capManager = new ProjectCapabilityManager(projectPath, m_productName + ".entitlements", PBXProject.GetUnityTargetName());
 
-                // 设置签名
-                proj.SetTeamId(target, "YG2T7K2S55"); //自动签名 自动选择证书 TeamID
-                proj.SetBuildProperty(target, "ENABLE_BITCODE", "NO");
-                // Set a custom link flag
-                proj.AddBuildProperty(target, "OTHER_LDFLAGS", "-ObjC");
-                // proj.AddBuildProperty(target, "SystemCapabilities", "{com.apple.Push = {enabled = 1;};}");
+            //    // 设置签名
+            //    proj.SetTeamId(target, "YG2T7K2S55"); //自动签名 自动选择证书 TeamID
+            //    proj.SetBuildProperty(target, "ENABLE_BITCODE", "NO");
+            //    // Set a custom link flag
+            //    proj.AddBuildProperty(target, "OTHER_LDFLAGS", "-ObjC");
+            //    // proj.AddBuildProperty(target, "SystemCapabilities", "{com.apple.Push = {enabled = 1;};}");
 
-                proj.WriteToFile(projectPath);
-            }
+            //    proj.WriteToFile(projectPath);
+            //}
         }
         private static void ReadBuildTxt()
         {
