@@ -24,9 +24,9 @@ namespace LCG
             if (Main.Instance.Mode == Define.EMode.Launcher)
             {
                 CSharpCallLua.Instance.CustomDestroy();
-                Gameobjects.Instance.CustomDestroy();
                 ABAutofix.Instance.CustomDestroy();
                 ABCheck.Instance.CustomDestroy();
+                GameObjectPool.Reset();
                 ResourceLoader.UnloadAll();
                 StopAllCoroutines();
             }
@@ -107,7 +107,6 @@ namespace LCG
             if (Main.Instance.Mode == Define.EMode.Launcher)
             {
                 CSharpCallLua.Instance.CustomUpdate();
-                Gameobjects.Instance.CustomUpdate();
                 LuaEnv.Instance.CustomUpdate();
             }
         }
@@ -117,7 +116,6 @@ namespace LCG
             if (Main.Instance.Mode == Define.EMode.Launcher)
             {
                 CSharpCallLua.Instance.CustomFixedUpdate();
-                Gameobjects.Instance.CustomFixedUpdate();
                 ABCheck.Instance.CustomFixedUpdate();
                 LuaEnv.Instance.CustomFixedUpdate();
             }
@@ -128,7 +126,6 @@ namespace LCG
             if (Main.Instance.Mode == Define.EMode.Launcher)
             {
                 CSharpCallLua.Instance.CustomDestroy();
-                Gameobjects.Instance.CustomDestroy();
                 ABAutofix.Instance.CustomDestroy();
                 ABCheck.Instance.CustomDestroy();
                 LuaEnv.Instance.CustomDestroy();

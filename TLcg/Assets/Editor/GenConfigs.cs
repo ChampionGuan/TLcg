@@ -106,7 +106,6 @@ namespace LCG
                 typeof(SceneLoader),
                 typeof(ResourceLoader),
                 typeof(Define.EBootup),
-                typeof(Gameobjects)
 #endregion
             };
 

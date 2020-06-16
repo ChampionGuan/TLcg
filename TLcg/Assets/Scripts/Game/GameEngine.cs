@@ -21,11 +21,11 @@ namespace LCG
             if (Main.Instance.Mode == Define.EMode.Game)
             {
                 CSharpCallLua.Instance.CustomDestroy();
-                Gameobjects.Instance.CustomDestroy();
                 Network.Instance.CustomDestroy();
                 Http.Instance.CustomDestroy();
                 SceneLoader.Instance.CustomDestroy();
                 TouchHandle.Instance.CustomDestroy();
+                GameObjectPool.Reset();
                 ResourceLoader.UnloadAll();
                 StopAllCoroutines();
             }
@@ -36,7 +36,6 @@ namespace LCG
             if (Main.Instance.Mode == Define.EMode.Game)
             {
                 CSharpCallLua.Instance.CustomUpdate();
-                Gameobjects.Instance.CustomUpdate();
                 Network.Instance.CustomUpdate();
                 Http.Instance.CustomUpdate();
                 LuaEnv.Instance.CustomUpdate();
@@ -49,7 +48,6 @@ namespace LCG
             if (Main.Instance.Mode == Define.EMode.Game)
             {
                 CSharpCallLua.Instance.CustomFixedUpdate();
-                Gameobjects.Instance.CustomFixedUpdate();
                 Network.Instance.CustomFixedUpdate();
                 LuaEnv.Instance.CustomFixedUpdate();
             }
@@ -60,7 +58,6 @@ namespace LCG
             if (Main.Instance.Mode == Define.EMode.Game)
             {
                 CSharpCallLua.Instance.CustomDestroy();
-                Gameobjects.Instance.CustomDestroy();
                 Network.Instance.CustomDestroy();
                 Http.Instance.CustomDestroy();
                 SceneLoader.Instance.CustomDestroy();
