@@ -42,5 +42,9 @@ namespace LCG
                 callBack(desc, tex);
             }
         }
+        public static float GetCurrMemory()
+        {
+            return (((float)System.GC.GetTotalMemory(false)) / 1024 / 1024); // Mb
+        }
     }
 }

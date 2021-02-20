@@ -45,7 +45,7 @@ namespace LCG
         public virtual void OnInstance() { }
     }
 
-    public static class ExtensionMethod
+    public static class MethodExtensions
     {
         public static T AddComponentIfNotExist<T>(this GameObject target) where T : Component
         {
